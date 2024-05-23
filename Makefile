@@ -79,6 +79,7 @@ buildent: packr2
 	@mkdir -p bin
 	cp imports/imports.go.template imports/imports.go
 	@sed "s?)?$(MODS)@)?" go.mod  | tr '@' '\n' > goent.mod
+	@cat goent.diff | grep '^replace' >> goent.mod
 	$(GO) build $(GOFLAG) -tags ent -ldflags '${GOLDFLAGS}' -modfile goent.mod ./cmd/${APP_NAME}
 	@mv ./pier bin
 	@printf "${GREEN}Build pier ent successfully!${NC}\n"
