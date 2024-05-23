@@ -2,6 +2,7 @@ package appchain_adapter
 
 import (
 	"fmt"
+	"github.com/meshplus/pier/internal/peermgr"
 	"strings"
 
 	"github.com/hashicorp/go-plugin"
@@ -485,4 +486,8 @@ func (a *AppchainAdapter) checkIBTPInDirectMode(ibtp *pb.IBTP) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (a *AppchainAdapter) RenewPeerManager(_ peermgr.PeerManager) {
+	panic("appchain adapter not support renew peerManager")
 }

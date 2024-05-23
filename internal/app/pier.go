@@ -256,6 +256,7 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 func (pier *Pier) startPierHA() {
 	logger.Info("pier HA manager start")
 	status := false
+	firstBeMain := true
 	for {
 		select {
 		case isMain := <-pier.pierHA.IsMain():
@@ -272,11 +273,29 @@ func (pier *Pier) startPierHA() {
 						"source_receipt_counter":    meta.SourceReceiptCounter,
 					}).Infof("Pier information of service %s", serviceID)
 				}
+
+				// special check for direct && pierHA_redis && not-first-time-in
+				// single mode will never enter this logic again, so nothing to do;
+				// union mode SKIP!!!!
+				// only direct+redis_ha is related
+				// golightp2p.Network wrap libp2p.Host, Host.New wrap host.Start(),
+				// so Host does not contain Start() interface;
+				// Besides, Host.Close() has a once.Do logic, so golightp2p.Network can not restart
+				if pier.config.Mode.Type == repo.DirectMode && pier.config.HA.Mode == "redis" && !firstBeMain {
+					nodePrivKey, _ := repo.LoadNodePrivateKey(pier.config.RepoRoot)
+					peerManager, err := peermgr.New(pier.config, nodePrivKey, pier.privateKey, 1, loggers.Logger(loggers.PeerMgr))
+					if err != nil {
+						pier.logger.Errorf("renew create peerManager error: %s", err.Error())
+						panic("create peerManager error")
+					}
+					pier.exchanger.RenewPeerManager(peerManager)
+				}
 				if err := pier.exchanger.Start(); err != nil {
 					pier.logger.Errorf("exchanger start: %s", err.Error())
 					return
 				}
 				status = true
+				firstBeMain = false
 			} else {
 				if !status {
 					continue
@@ -300,6 +319,10 @@ func (pier *Pier) Stop() error {
 
 	if err := pier.exchanger.Stop(); err != nil {
 		return fmt.Errorf("exchanger stop: %w", err)
+	}
+
+	if err := pier.pierHA.Stop(); err != nil {
+		return fmt.Errorf("pierHA stop: %w", err)
 	}
 	return nil
 }

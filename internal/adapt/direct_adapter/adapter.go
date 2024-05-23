@@ -210,3 +210,7 @@ func (d *DirectAdapter) QueryInterchain(serviceID string) (*pb.Interchain, error
 	}
 	return interChain, nil
 }
+
+func (d *DirectAdapter) RenewPeerManager(pm peermgr.PeerManager) {
+	d.peerMgr = pm
+}

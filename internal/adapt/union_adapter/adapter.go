@@ -167,3 +167,7 @@ func (b *UnionAdapter) QueryInterchain(fullServiceId string) (*pb.Interchain, er
 	interchain, err := b.router.QueryInterchain(bxhId, fullServiceId)
 	return interchain, err
 }
+
+func (b *UnionAdapter) RenewPeerManager(pm peermgr.PeerManager) {
+	panic("union adapter not support renew peerManager")
+}

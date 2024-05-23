@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/meshplus/pier/internal/peermgr"
 	"strconv"
 	"strings"
 	"time"
@@ -699,4 +700,8 @@ func (b *BxhAdapter) getIBTPByID(id string, isReq bool) (*pb.IBTP, error) {
 	retIBTP.Proof = proof
 
 	return retIBTP, nil
+}
+
+func (b *BxhAdapter) RenewPeerManager(_ peermgr.PeerManager) {
+	panic("bxh adapter not support renew peerManager")
 }

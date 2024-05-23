@@ -3,6 +3,7 @@ package exchanger
 import (
 	"context"
 	"fmt"
+	"github.com/meshplus/pier/internal/peermgr"
 	"strings"
 	"time"
 
@@ -484,3 +485,7 @@ func (ex *Exchanger) Stop() error {
 //		ex.sendIBTPTimer.Add(tc)
 //	}
 //}
+
+func (ex *Exchanger) RenewPeerManager(pm peermgr.PeerManager) {
+	ex.srcAdapt.RenewPeerManager(pm)
+}

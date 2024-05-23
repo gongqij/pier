@@ -1,6 +1,9 @@
 package adapt
 
-import "github.com/meshplus/bitxhub-model/pb"
+import (
+	"github.com/meshplus/bitxhub-model/pb"
+	"github.com/meshplus/pier/internal/peermgr"
+)
 
 //go:generate mockgen -destination mock_adapt/mock_adapt.go -package mock_adapt -source interface.go
 type Adapt interface {
@@ -35,4 +38,7 @@ type Adapt interface {
 	// SendUpdatedMeta send validators change or block header change to bitXHub on relay mode
 	// 中继模式发送给appchain，bxh，直连模式发送给DirectAdapt，appchain，union模式发送给unionAdapt
 	SendUpdatedMeta(byte []byte) error
+
+	// RenewPeerManager used within: direct mode + pierHA started + redis mode pierHA
+	RenewPeerManager(pm peermgr.PeerManager)
 }

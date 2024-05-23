@@ -46,7 +46,7 @@ func (m *RedisPierMng) Start() error {
 
 func (m *RedisPierMng) Stop() error {
 	m.cancel()
-	return nil
+	return m.RedisCli.Close()
 }
 
 func (m *RedisPierMng) IsMain() <-chan bool {
@@ -92,6 +92,7 @@ func (m *RedisPierMng) compete() {
 func (m *RedisPierMng) startMain() {
 	ticker := time.NewTicker(m.Renew)
 	go func() {
+		defer ticker.Stop()
 		m.isMain <- true
 		fmt.Printf("[instance-%s] start in main mode\n", m.ID)
 		for {
@@ -138,6 +139,7 @@ func (m *RedisPierMng) startMain() {
 func (m *RedisPierMng) startAux() {
 	ticker := time.NewTicker(m.Expire)
 	go func() {
+		defer ticker.Stop()
 		m.isMain <- false
 		fmt.Printf("[instance-%s] start in aux mode\n", m.ID)
 		for {

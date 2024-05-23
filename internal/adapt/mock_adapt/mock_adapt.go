@@ -9,6 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	pb "github.com/meshplus/bitxhub-model/pb"
+	peermgr "github.com/meshplus/pier/internal/peermgr"
 )
 
 // MockAdapt is a mock of Adapt interface.
@@ -133,6 +134,18 @@ func (m *MockAdapt) QueryInterchain(serviceID string) (*pb.Interchain, error) {
 func (mr *MockAdaptMockRecorder) QueryInterchain(serviceID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryInterchain", reflect.TypeOf((*MockAdapt)(nil).QueryInterchain), serviceID)
+}
+
+// RenewPeerManager mocks base method.
+func (m *MockAdapt) RenewPeerManager(pm peermgr.PeerManager) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RenewPeerManager", pm)
+}
+
+// RenewPeerManager indicates an expected call of RenewPeerManager.
+func (mr *MockAdaptMockRecorder) RenewPeerManager(pm interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenewPeerManager", reflect.TypeOf((*MockAdapt)(nil).RenewPeerManager), pm)
 }
 
 // SendIBTP mocks base method.
