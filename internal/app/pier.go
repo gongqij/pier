@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/meshplus/pier/pkg/redisha"
 	"path/filepath"
 	"strings"
 
@@ -151,7 +152,14 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 			return nil, fmt.Errorf("exchanger create: %w", err)
 		}
 
-		pierHA = single.New(nil, config.Appchain.ID)
+		switch config.HA.Mode {
+		case "single":
+			pierHA = single.New(nil, config.Appchain.ID)
+		case "redis":
+			pierHA = redisha.New(config.Redis, config.Appchain.ID)
+		default:
+			return nil, fmt.Errorf("unsupported ha mode %s, should be `single` or `redis`", config.HA.Mode)
+		}
 		loggers.Logger(loggers.Direct).Infof("create direct pier instance finished")
 	case repo.RelayMode:
 		client, err := newBitXHubClient(logger, privateKey, config)

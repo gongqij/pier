@@ -10,10 +10,12 @@ require (
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/fatih/color v1.9.0
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gobuffalo/packd v1.0.1
 	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/golang/mock v1.6.0
 	github.com/google/btree v1.0.0
+	github.com/google/uuid v1.1.5
 	github.com/hashicorp/go-hclog v0.0.0-20180709165350-ff2cf002a8dd
 	github.com/hashicorp/go-plugin v1.3.0
 	github.com/ipfs/go-cid v0.0.7
