@@ -15,7 +15,11 @@ goent.sum
 
 testdata/
 !internal/checker/testdata
-/mockpier/main/config11/
-/mockpier/main/config12/
-/mockpier/main/config21/
-/mockpier/main/config22/
+/mockpier/main/config11/mockpier
+/mockpier/main/config11/logs
+/mockpier/main/config12/mockpier
+/mockpier/main/config12/logs
+/mockpier/main/config21/mockpier
+/mockpier/main/config21/logs
+/mockpier/main/config22/mockpier
+/mockpier/main/config22/logs
