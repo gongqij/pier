@@ -108,11 +108,21 @@ func GetNetworkPeers(networkConfig *NetworkConfig) (map[string]*peer2.AddrInfo, 
 			return nil, err
 		}
 		for i := 1; i < len(node.Hosts); i++ {
+			//multiaddr, err := ma.NewMultiaddr(fmt.Sprintf("%s%s", node.Hosts[i], node.Pid))
+			//if err != nil {
+			//	return nil, fmt.Errorf("new Multiaddr error:%w", err)
+			//}
+			//addrInfo.Addrs = append(addrInfo.Addrs, multiaddr)
+
 			multiaddr, err := ma.NewMultiaddr(fmt.Sprintf("%s%s", node.Hosts[i], node.Pid))
 			if err != nil {
 				return nil, fmt.Errorf("new Multiaddr error:%w", err)
 			}
-			addrInfo.Addrs = append(addrInfo.Addrs, multiaddr)
+			tmpAddrInfo, err := peer2.AddrInfoFromP2pAddr(multiaddr)
+			if err != nil {
+				return nil, err
+			}
+			addrInfo.Addrs = append(addrInfo.Addrs, tmpAddrInfo.Addrs...)
 		}
 
 		peers[node.Pid] = addrInfo
