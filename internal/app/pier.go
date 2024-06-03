@@ -306,8 +306,8 @@ func (pier *Pier) startPierHA() {
 				if !status {
 					continue
 				}
-				if err := pier.Stop(); err != nil {
-					pier.logger.Errorf("pier stop: %w", err)
+				if err := pier.StopExchanger(); err != nil {
+					pier.logger.Errorf("pier stop exchanger: %w", err)
 					return
 				}
 				status = false
@@ -329,6 +329,13 @@ func (pier *Pier) Stop() error {
 
 	if err := pier.pierHA.Stop(); err != nil {
 		return fmt.Errorf("pierHA stop: %w", err)
+	}
+	return nil
+}
+
+func (pier *Pier) StopExchanger() error {
+	if err := pier.exchanger.Stop(); err != nil {
+		return fmt.Errorf("exchanger stop: %w", err)
 	}
 	return nil
 }
