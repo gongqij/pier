@@ -129,11 +129,19 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 
 	switch config.Mode.Type {
 	case repo.DirectMode:
-		peerManager, err = peermgr.New(config, nodePrivKey, privateKey, 1, loggers.Logger(loggers.PeerMgr))
-		if err != nil {
-			return nil, fmt.Errorf("peerMgr create: %w", err)
+		var cryptor txcrypto.Cryptor
+		// in ha=redis mode, peerManager should be re-new at each time when startHA called
+		if config.HA.Mode != "redis" {
+			peerManager, err = peermgr.New(config, nodePrivKey, privateKey, 1, loggers.Logger(loggers.PeerMgr))
+			if err != nil {
+				return nil, fmt.Errorf("peerMgr create: %w", err)
+			}
+			// todo: DirectCryptor cannot be used by direct+redis mode
+			cryptor, err = txcrypto.NewDirectCryptor(peerManager, privateKey, loggers.Logger(loggers.Cryptor))
+			if err != nil {
+				return nil, fmt.Errorf("crypto create: %w", err)
+			}
 		}
-		cryptor, err := txcrypto.NewDirectCryptor(peerManager, privateKey, loggers.Logger(loggers.Cryptor))
 		appchainAdapter, err := appchain_adapter.NewAppchainAdapter(repo.DirectMode, config, loggers.Logger(loggers.Appchain), cryptor)
 		if err != nil {
 			return nil, fmt.Errorf("new appchain adapter: %w", err)
@@ -256,7 +264,6 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 func (pier *Pier) startPierHA() {
 	logger.Info("pier HA manager start")
 	status := false
-	firstBeMain := true
 	for {
 		select {
 		case isMain := <-pier.pierHA.IsMain():
@@ -281,7 +288,7 @@ func (pier *Pier) startPierHA() {
 				// golightp2p.Network wrap libp2p.Host, Host.New wrap host.Start(),
 				// so Host does not contain Start() interface;
 				// Besides, Host.Close() has a once.Do logic, so golightp2p.Network can not restart
-				if pier.config.Mode.Type == repo.DirectMode && pier.config.HA.Mode == "redis" && !firstBeMain {
+				if pier.config.Mode.Type == repo.DirectMode && pier.config.HA.Mode == "redis" {
 					nodePrivKey, _ := repo.LoadNodePrivateKey(pier.config.RepoRoot)
 					peerManager, err := peermgr.New(pier.config, nodePrivKey, pier.privateKey, 1, loggers.Logger(loggers.PeerMgr))
 					if err != nil {
@@ -295,7 +302,6 @@ func (pier *Pier) startPierHA() {
 					return
 				}
 				status = true
-				firstBeMain = false
 			} else {
 				if !status {
 					continue
