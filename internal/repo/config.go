@@ -123,11 +123,15 @@ type Redis struct {
 	// redis default contains 0-15 buckets(databases)
 	Database int `toml:"database" json:"database"`
 	// LockPrefix will concat with appchainID(pierID) as lock name
-	LockPrefix string `toml:"lock_prefix" json:"lock_prefix"`
-	// LeaseRenewal used for main instance check and renew current lock, with unit(seconds)
-	LeaseRenewal int64 `toml:"lease_renewal" json:"lease_renewal"`
-	// LeaseRenewal used as expire time when setting lock, with unit(seconds)
-	LeaseTimeout int64 `toml:"lease_timeout" json:"lease_timeout"`
+	MasterLockPrefix string `toml:"master_lock_prefix" json:"master_lock_prefix"`
+	// SendLockPrefix will concat with appchainID(pierID) as lock name
+	SendLockPrefix string `toml:"send_lock_prefix" json:"send_lock_prefix"`
+	// MasterLeaseRenewal used for main instance check and renew current lock, with unit(seconds)
+	MasterLeaseRenewal int64 `toml:"master_lease_renewal" json:"master_lease_renewal"`
+	// MasterLeaseTimeout used as expire time when setting lock, with unit(seconds)
+	MasterLeaseTimeout int64 `toml:"master_lease_timeout" json:"master_lease_timeout"`
+	// SendLeaseTimeout used for main instance operate http send lock
+	SendLeaseTimeout int64 `toml:"send_lease_timeout" json:"send_lease_timeout"`
 }
 
 // DefaultConfig returns config with default value
@@ -196,12 +200,14 @@ func DefaultConfig() *Config {
 			EnableTSS: false,
 		},
 		Redis: Redis{
-			Address:      "127.0.0.1:6379",
-			Password:     "",
-			Database:     1,
-			LockPrefix:   "pier_redis_lock",
-			LeaseRenewal: int64(5),
-			LeaseTimeout: int64(10),
+			Address:            "127.0.0.1:6379",
+			Password:           "",
+			Database:           1,
+			MasterLockPrefix:   "lock_master",
+			SendLockPrefix:     "lock_send",
+			MasterLeaseRenewal: int64(5),
+			MasterLeaseTimeout: int64(10),
+			SendLeaseTimeout:   int64(3),
 		},
 	}
 }

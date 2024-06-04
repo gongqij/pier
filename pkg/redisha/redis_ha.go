@@ -29,10 +29,8 @@ import (
 type RedisPierMng struct {
 	isMain    chan bool
 	ID        string
-	LockName  string
+	conf      repo.Redis
 	RedisCliW *rediscli.WrapperImpl
-	Expire    time.Duration
-	Renew     time.Duration
 	log       logrus.FieldLogger
 	ctx       context.Context
 	cancel    context.CancelFunc
@@ -59,19 +57,19 @@ func (m *RedisPierMng) GetRedisCli() rediscli.Wrapper {
 func New(conf repo.Redis, pierID string) *RedisPierMng {
 	ctx, cancel := context.WithCancel(context.Background())
 	obj := &RedisPierMng{
-		isMain:   make(chan bool),
-		ID:       uuid.New().String(),
-		LockName: strings.Join([]string{conf.LockPrefix, pierID}, "_"),
-		Expire:   time.Duration(conf.LeaseTimeout * int64(time.Second)),
-		Renew:    time.Duration(conf.LeaseRenewal * int64(time.Second)),
-		log:      loggers.Logger(loggers.App),
-		ctx:      ctx,
-		cancel:   cancel,
+		isMain: make(chan bool),
+		ID:     uuid.New().String(),
+		conf:   conf,
+		log:    loggers.Logger(loggers.App),
+		ctx:    ctx,
+		cancel: cancel,
 	}
 	obj.RedisCliW = rediscli.NewWrapperImpl(
-		obj.LockName,
+		strings.Join([]string{conf.SendLockPrefix, pierID}, "_"),
+		strings.Join([]string{conf.MasterLockPrefix, pierID}, "_"),
 		obj.ID,
-		obj.Expire,
+		int(obj.conf.MasterLeaseTimeout),
+		int(obj.conf.SendLeaseTimeout),
 		obj.log,
 		func() *redis.Client {
 			return redis.NewClient(&redis.Options{
@@ -79,13 +77,14 @@ func New(conf repo.Redis, pierID string) *RedisPierMng {
 				Password: conf.Password,
 				DB:       conf.Database,
 			})
-		})
+		},
+	)
 	return obj
 }
 
 func (m *RedisPierMng) compete() {
 	time.Sleep(time.Duration(int64(time.Millisecond) * rand.Int63n(100)))
-	locked := m.RedisCliW.Lock()
+	locked := m.RedisCliW.MasterLock()
 	if locked {
 		m.startMain()
 	} else {
@@ -94,7 +93,7 @@ func (m *RedisPierMng) compete() {
 }
 
 func (m *RedisPierMng) startMain() {
-	ticker := time.NewTicker(m.Renew)
+	ticker := time.NewTicker(time.Duration(m.conf.MasterLeaseRenewal * int64(time.Second)))
 	go func() {
 		defer ticker.Stop()
 		m.isMain <- true
@@ -102,14 +101,13 @@ func (m *RedisPierMng) startMain() {
 		for {
 			select {
 			case <-ticker.C:
-				needStartAux := m.RedisCliW.ReExpire() != nil
-				if needStartAux {
+				if !m.RedisCliW.ReNewMaster() {
 					m.log.Infof("[instance-%s] quit main mode", m.ID)
 					m.startAux()
 					return
 				}
 			case <-m.ctx.Done():
-				_ = m.RedisCliW.Unlock()
+				_ = m.RedisCliW.MasterUnlock()
 				return
 			}
 		}
@@ -117,7 +115,7 @@ func (m *RedisPierMng) startMain() {
 }
 
 func (m *RedisPierMng) startAux() {
-	ticker := time.NewTicker(m.Expire)
+	ticker := time.NewTicker(time.Duration(m.conf.MasterLeaseTimeout * int64(time.Second)))
 	go func() {
 		defer ticker.Stop()
 		m.isMain <- false
@@ -125,7 +123,7 @@ func (m *RedisPierMng) startAux() {
 		for {
 			select {
 			case <-ticker.C:
-				locked := m.RedisCliW.Lock()
+				locked := m.RedisCliW.MasterLock()
 				if !locked {
 					m.log.Infof("[instance-%s] in aux mode, try lock failed", m.ID)
 					continue
@@ -133,7 +131,7 @@ func (m *RedisPierMng) startAux() {
 				m.startMain()
 				return
 			case <-m.ctx.Done():
-				_ = m.RedisCliW.Unlock()
+				_ = m.RedisCliW.MasterUnlock()
 				return
 			}
 		}

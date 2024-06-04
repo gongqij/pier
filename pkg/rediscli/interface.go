@@ -3,7 +3,8 @@ package rediscli
 import "errors"
 
 type Wrapper interface {
-	HeldLock() bool
+	SendLock() bool
+	SendUnlock() bool
 }
 
 var ErrClosed = errors.New("wrapper closed")

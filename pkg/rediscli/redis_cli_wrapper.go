@@ -2,21 +2,26 @@ package rediscli
 
 import (
 	"context"
-	"errors"
-	"sync"
-	"time"
-
 	"github.com/Rican7/retry"
 	"github.com/Rican7/retry/strategy"
 	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
+	"sync"
+)
+
+const (
+	sendLockVal = "placeholder"
 )
 
 type WrapperImpl struct {
-	lockName string
-	lockVal  string
-	expire   time.Duration
-	log      logrus.FieldLogger
+	sendLockName string
+	sendLockVal  string
+	sendExpire   int
+
+	masterLockName string
+	masterLockVal  string
+	masterExpire   int
+	log            logrus.FieldLogger
 
 	cli *redis.Client
 
@@ -28,22 +33,27 @@ type WrapperImpl struct {
 }
 
 func NewWrapperImpl(
-	lockName string,
-	lockVal string,
-	expire time.Duration,
+	sendLockName string,
+	masterLockName string,
+	masterLockVal string,
+	masterExpire int,
+	sendExpire int,
 	log logrus.FieldLogger,
 	newCliFunc func() *redis.Client) *WrapperImpl {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &WrapperImpl{
-		lockName:  lockName,
-		lockVal:   lockVal,
-		expire:    expire,
-		log:       log,
-		cli:       newCliFunc(),
-		closeLock: &sync.RWMutex{},
-		ctx:       ctx,
-		cancel:    cancel,
-		closed:    false,
+		sendLockName:   sendLockName,
+		sendLockVal:    sendLockVal,
+		sendExpire:     sendExpire,
+		masterLockName: masterLockName,
+		masterLockVal:  masterLockVal,
+		masterExpire:   masterExpire,
+		log:            log,
+		cli:            newCliFunc(),
+		closeLock:      &sync.RWMutex{},
+		ctx:            ctx,
+		cancel:         cancel,
+		closed:         false,
 	}
 }
 
@@ -55,130 +65,234 @@ func (w *WrapperImpl) Close() error {
 	return w.cli.Close()
 }
 
-func (w *WrapperImpl) Lock() bool {
+func (w *WrapperImpl) MasterLock() bool {
+	w.closeLock.RLock()
+	defer w.closeLock.RUnlock()
+	if w.closed {
+		w.log.Error(ErrClosed.Error())
+		return false
+	}
+	var locked bool
+	err := retry.Retry(func(attempt uint) error {
+		var lerr error
+		locked, lerr = w.masterLock()
+		if lerr != nil {
+			return lerr
+		}
+		return nil
+	}, strategy.Limit(5))
+	if err != nil {
+		w.log.Errorf("[RedisCliObj] try masterLock failed with error: %s, retry 5 times still failed", err.Error())
+	}
+	return locked
+}
+
+func (w *WrapperImpl) MasterUnlock() bool {
+	w.closeLock.RLock()
+	defer w.closeLock.RUnlock()
+	if w.closed {
+		w.log.Error(ErrClosed.Error())
+		return false
+	}
+	var unlocked bool
+	err := retry.Retry(func(attempt uint) error {
+		var lerr error
+		unlocked, lerr = w.masterUnlock()
+		if lerr != nil {
+			return lerr
+		}
+		return nil
+	}, strategy.Limit(5))
+	if err != nil {
+		w.log.Errorf("[RedisCliObj] try masterUnlock failed with error: %s, retry 5 times still failed", err.Error())
+	}
+	return unlocked
+}
+
+func (w *WrapperImpl) SendLock() bool {
 	w.closeLock.RLock()
 	defer w.closeLock.RUnlock()
 	if w.closed {
 		return false
 	}
 	var locked bool
-	err := retry.Retry(func(attempt uint) error {
-		var lerr error
-		locked, lerr = w.lock()
-		if lerr != nil {
-			w.log.Infof("set key[%s] val[%s] compete lock error: %s", w.lockName, w.lockVal, lerr.Error())
-			return lerr
-		}
-		return nil
-	}, strategy.Limit(5))
+	err := retry.Retry(
+		func(attempt uint) error {
+			var lerr error
+			locked, lerr = w.sendLock()
+			if lerr != nil {
+				return lerr
+			}
+			return nil
+		},
+		strategy.Limit(3),
+	)
 	if err != nil {
-		w.log.Errorf("[RedisCliObj] try lock failed with error: %s, spin retry till success", err.Error())
+		w.log.Errorf("[RedisCliObj] try SendLock failed with error: %s, retry 3 times still failed", err.Error())
 	}
 	return locked
 }
 
-func (w *WrapperImpl) Unlock() error {
+func (w *WrapperImpl) SendUnlock() bool {
 	w.closeLock.RLock()
 	defer w.closeLock.RUnlock()
 	if w.closed {
-		return ErrClosed
-	}
-	err := retry.Retry(func(attempt uint) error {
-		return w.unlock()
-	}, strategy.Limit(5))
-	if err != nil {
-		w.log.Errorf("[RedisCliObj] try lock failed with error: %s, spin retry till success", err.Error())
-	}
-	return err
-}
-
-func (w *WrapperImpl) HeldLock() bool {
-	w.closeLock.RLock()
-	defer w.closeLock.RUnlock()
-	if w.closed {
+		w.log.Error(ErrClosed.Error())
 		return false
 	}
-	var held bool
-	val, err := w.get()
-	if err == nil && val == w.lockVal {
-		held = true
-	}
+	var unlocked bool
+	err := retry.Retry(func(attempt uint) error {
+		var lerr error
+		unlocked, lerr = w.sendUnlock()
+		if lerr != nil {
+			return lerr
+		}
+		return nil
+	}, strategy.Limit(3))
 	if err != nil {
-		logrus.Warningf("[RedisCliObj] get lock failed with error: %s", err.Error())
+		w.log.Errorf("[RedisCliObj] try sendUnlock failed with error: %s, retry 3 times still failed", err.Error())
 	}
-	return held
+	return unlocked
 }
 
-func (w *WrapperImpl) ReExpire() error {
+func (w *WrapperImpl) ReNewMaster() bool {
 	w.closeLock.RLock()
 	defer w.closeLock.RUnlock()
 	if w.closed {
-		return ErrClosed
+		w.log.Error(ErrClosed.Error())
+		return false
 	}
-	err := retry.Retry(
-		func(attempt uint) error {
-			return w.reExpire()
-		},
-		strategy.Limit(5),
-	)
+	var success bool
+	err := retry.Retry(func(attempt uint) error {
+		var eerr error
+		success, eerr = w.reNewMaster()
+		if eerr != nil {
+			return eerr
+		}
+		return nil
+	}, strategy.Limit(5))
 	if err != nil {
-		w.log.Warnf("retry set expire for key[%s] value[%s] finished with error: %s\n",
-			w.lockName, w.lockVal, err.Error())
+		w.log.Errorf("[RedisCliObj] try renewMaster failed with error: %s, retry 5 times still failed", err.Error())
 	}
-	return err
+	return success
 }
 
 // ==================== inner function ====================
 
-func (w *WrapperImpl) lock() (bool, error) {
-	return w.cli.SetNX(w.ctx, w.lockName, w.lockVal, w.expire).Result()
-}
-
-func (w *WrapperImpl) unlock() error {
-	script := redis.NewScript(checkAndDelete)
-	res, err := script.Run(w.ctx, w.cli, []string{w.lockName}, w.lockVal).Int64()
+func (w *WrapperImpl) sendLock() (bool, error) {
+	script := redis.NewScript(lockSend)
+	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName, w.sendLockName}, w.masterLockVal, w.sendLockVal, w.sendExpire).Int64()
 	if err != nil {
-		w.log.Errorf("unlock with key[%s] value [%s] error: %s", w.lockName, w.lockVal, err.Error())
-		return err
+		w.log.Errorf("sendLock with key[%s] value [%s] error: %s", w.sendLockName, w.sendLockVal, err.Error())
+		return false, err
 	}
 	if res != 1 {
-		w.log.Errorf("unlock with key[%s] value [%s] error: %s", w.lockName, w.lockVal, err.Error())
-		return errors.New("can not unlock because del result not is one")
+		w.log.Infof("sendUnlock with key[%s] value [%s] error: %d", w.sendLockName, w.sendLockVal, res)
+		return false, nil
 	}
-	return nil
+	return true, nil
 }
 
-func (w *WrapperImpl) get() (string, error) {
-	return w.cli.Get(w.ctx, w.lockName).Result()
-}
-
-func (w *WrapperImpl) reExpire() error {
-	script := redis.NewScript(checkAndExpire)
-	res, err := script.Run(w.ctx, w.cli, []string{w.lockName}, w.lockVal, int(w.expire.Seconds())).Int64()
+func (w *WrapperImpl) sendUnlock() (bool, error) {
+	script := redis.NewScript(unlockSend)
+	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName, w.sendLockName}, w.masterLockVal).Int64()
 	if err != nil {
-		w.log.Errorf("re-expire with key[%s] value [%s] error: %s", w.lockName, w.lockVal, err.Error())
-		return err
+		w.log.Errorf("masterUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		return false, err
 	}
 	if res != 1 {
-		w.log.Errorf("re-expire with key[%s] value [%s] error: %s", w.lockName, w.lockVal, err.Error())
-		return errors.New("can not re-expire because re-expire result not is one")
+		w.log.Infof("masterUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		return false, nil
 	}
-	return nil
+	return true, nil
+}
+
+func (w *WrapperImpl) masterLock() (bool, error) {
+	script := redis.NewScript(lockMaster)
+	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName, w.sendLockName}, w.masterLockVal, w.masterExpire).Int64()
+	if err != nil {
+		w.log.Errorf("[RedisCliObj] masterLock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		return false, err
+	}
+	if res != 1 {
+		w.log.Infof("[RedisCliObj] masterLock with key[%s] value [%s] has result %d", w.masterLockName, w.masterLockVal, res)
+		return false, nil
+	}
+	return true, nil
+}
+
+func (w *WrapperImpl) masterUnlock() (bool, error) {
+	script := redis.NewScript(unlockMaster)
+	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName}, w.masterLockVal).Int64()
+	if err != nil {
+		w.log.Errorf("[RedisCliObj] masterUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		return false, err
+	}
+	if res != 1 {
+		w.log.Infof("[RedisCliObj] masterUnlock with key[%s] value [%s] with result: %d", w.masterLockName, w.masterLockVal, res)
+		return false, nil
+	}
+	return true, nil
+}
+
+func (w *WrapperImpl) reNewMaster() (bool, error) {
+	script := redis.NewScript(expireMaster)
+	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName}, w.masterLockVal, w.masterExpire).Int64()
+	if err != nil {
+		w.log.Errorf("re-masterExpire with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		return false, err
+	}
+	if res != 1 {
+		w.log.Infof("re-masterExpire with key[%s] value [%s] result: %d", w.masterLockName, w.masterLockVal, res)
+		return false, nil
+	}
+	return true, nil
 }
 
 const (
-	checkAndDelete = `
-		if(redis.call('get',KEYS[1])==ARGV[1]) then
-		return redis.call('del',KEYS[1])
+	lockSend = `
+		if(redis.call('get',KEYS[1])==ARGV[1] and redis.call('exists',KEYS[2])==0) then
+			local result = redis.call('SET', KEYS[2], ARGV[2], 'NX', 'EX', tonumber(ARGV[3]))
+			if result then
+				return 1
+			else
+				return 0
+			end
 		else
-		return 0
+			return 2
 		end
 	`
-	checkAndExpire = `
+	unlockSend = `
 		if(redis.call('get',KEYS[1])==ARGV[1]) then
-		return redis.call('expire', KEYS[1], tonumber(ARGV[2]))
+			return redis.call('DEL',KEYS[2])
 		else
-		return 0
+			return 2
+		end
+	`
+	lockMaster = `
+		if(redis.call('exists',KEYS[1])==0 and redis.call('exists',KEYS[2])==0) then
+			local result = redis.call('SET', KEYS[1], ARGV[1], 'NX', 'EX', tonumber(ARGV[2]))
+			if result then
+				return 1
+			else
+				return 0
+			end
+		else
+			return 2
+		end
+	`
+	unlockMaster = `
+		if(redis.call('get',KEYS[1])==ARGV[1]) then
+			return redis.call('DEL',KEYS[1])
+		else
+			return 2
+		end
+	`
+	expireMaster = `
+		if(redis.call('get',KEYS[1])==ARGV[1]) then
+			return redis.call('EXPIRE', KEYS[1], tonumber(ARGV[2]))
+		else
+			return 2
 		end
 	`
 )

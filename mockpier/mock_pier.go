@@ -120,7 +120,6 @@ func (mp *MockPier) startPierHA() {
 					}
 				}
 				status = true
-				//firstBeMain = false
 			} else {
 				if !status {
 					continue
