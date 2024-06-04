@@ -24,6 +24,7 @@ syncer = "info"
 direct_adapter = "info"
 union_adapter = "info"
 appchain_adapter = "info"
+proxy = "info"
 
 [mode]
 type = "direct" # relay, direct or union
@@ -59,7 +60,7 @@ config = "fabric"
 enable_tss = false
 
 [redis]
-address = "127.0.0.1:6379"
+address = "10.10.97.4:6379"
 password = ""
 database = 1
 master_lock_prefix = "lock_master"
@@ -67,3 +68,6 @@ send_lock_prefix = "lock_send"
 master_lease_renewal = 5
 master_lease_timeout = 10
 send_lease_timeout = 3
+
+[proxy]
+enable = true # for more proxy related configuration, see proxy.toml

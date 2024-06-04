@@ -1,0 +1,23 @@
+[[tcp_reverse_proxys]]
+    listen = 7001         # 反向代理监听端口
+    app_id = "hyperchain" # 预留
+    server = "172.22.67.82:50012" # 被代理服务的 IP 和 Port，通常为最终目标节点的地址
+
+[http]
+    listen = 12001
+    http2_enable = true
+    [http.request]
+        max_content_length = 10485760 # 10*1024*1024
+        timeout = "60s"
+        allow_origins = ["*"]
+    [http.remote]
+        address = ["ip1:port1", "ip2:port2", "ip3:port3"]
+        reconnect_time = "1s"
+
+[security]
+    [security.tls]
+        enable = true
+        tlsCAPath = "config/tlscerts/tlsca.ca"
+        tlsCertPath = "config/tlscerts/tls_peer1.cert"
+        tlsPrivPath = "config/tlscerts/tls_peer1.priv"
+        tlsDomain = "hyperchain.cn"

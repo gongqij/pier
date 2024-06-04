@@ -24,6 +24,7 @@ syncer = "info"
 direct_adapter = "info"
 union_adapter = "info"
 appchain_adapter = "info"
+proxy = "info"
 
 [mode]
 type = "relay" # relay, direct or union
@@ -57,3 +58,6 @@ config = "fabric"
 
 [tss]
 enable_tss = false
+
+[proxy]
+enable = true # for more proxy related configuration, see proxy.toml

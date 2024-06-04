@@ -18,15 +18,16 @@ type Repo struct {
 // Config represents the necessary config data for starting pier
 type Config struct {
 	RepoRoot string
-	Title    string   `toml:"title" json:"title"`
-	Port     Port     `toml:"port" json:"port"`
-	Mode     Mode     `toml:"mode" json:"mode"`
-	Log      Log      `toml:"log" json:"log"`
-	Appchain Appchain `toml:"appchain" json:"appchain"`
-	Security Security `toml:"security" json:"security"`
-	HA       HA       `toml:"ha" json:"ha"`
-	TSS      *TSS     `toml:"tss" json:"tss"`
-	Redis    Redis    `toml:"redis" json:"redis"`
+	Title    string      `toml:"title" json:"title"`
+	Port     Port        `toml:"port" json:"port"`
+	Mode     Mode        `toml:"mode" json:"mode"`
+	Log      Log         `toml:"log" json:"log"`
+	Appchain Appchain    `toml:"appchain" json:"appchain"`
+	Security Security    `toml:"security" json:"security"`
+	HA       HA          `toml:"ha" json:"ha"`
+	TSS      *TSS        `toml:"tss" json:"tss"`
+	Redis    Redis       `toml:"redis" json:"redis"`
+	Proxy    ProxyConfig `toml:"proxy" json:"proxy"`
 }
 
 // Security are certs used to setup connection with tls
@@ -108,6 +109,7 @@ type LogModule struct {
 	Direct      string `mapstructure:"direct_adapter" toml:"direct_adapter" json:"direct_adapter"`
 	Union       string `toml:"union_adapter" json:"union_adapter"`
 	Cryptor     string `toml:"cryptor" json:"cryptor"`
+	Proxy       string `toml:"proxy" json:"proxy"`
 }
 
 // Appchain are configs about appchain
@@ -132,6 +134,10 @@ type Redis struct {
 	MasterLeaseTimeout int64 `toml:"master_lease_timeout" json:"master_lease_timeout"`
 	// SendLeaseTimeout used for main instance operate http send lock
 	SendLeaseTimeout int64 `toml:"send_lease_timeout" json:"send_lease_timeout"`
+}
+
+type ProxyConfig struct {
+	Enable bool `toml:"enable" json:"enable"`
 }
 
 // DefaultConfig returns config with default value
@@ -208,6 +214,9 @@ func DefaultConfig() *Config {
 			MasterLeaseRenewal: int64(5),
 			MasterLeaseTimeout: int64(10),
 			SendLeaseTimeout:   int64(3),
+		},
+		Proxy: ProxyConfig{
+			Enable: false,
 		},
 	}
 }

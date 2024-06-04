@@ -9,7 +9,9 @@ import (
 	network "github.com/meshplus/go-lightp2p"
 	"github.com/meshplus/pier/internal/loggers"
 	"github.com/meshplus/pier/internal/peermgr"
+	"github.com/meshplus/pier/internal/proxy"
 	"github.com/meshplus/pier/internal/repo"
+	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/meshplus/pier/pkg/redisha"
 	"github.com/sirupsen/logrus"
 	"path/filepath"
@@ -20,8 +22,11 @@ type MockPier struct {
 	nodePriv crypto.PrivateKey
 	pm       peermgr.PeerManager
 	pierHA   agency.PierHA
+	redisCli rediscli.Wrapper
 	log      logrus.FieldLogger
 	config   *repo.Config
+	repoRoot string
+	proxy    proxy.Proxy
 }
 
 func NewMockPier(repoRoot string) (*MockPier, error) {
@@ -47,12 +52,16 @@ func NewMockPier(repoRoot string) (*MockPier, error) {
 	}
 	loggers.InitializeLogger(config)
 
+	rpm := redisha.New(config.Redis, config.Appchain.ID)
 	mockPier := &MockPier{
 		nodePriv: nodePrivKey,
-		pierHA:   redisha.New(config.Redis, config.Appchain.ID),
+		pierHA:   rpm,
+		redisCli: rpm.GetRedisCli(),
 		log:      loggers.Logger(loggers.App),
 		config:   config,
+		repoRoot: repoRoot,
 	}
+
 	return mockPier, nil
 }
 
@@ -89,6 +98,22 @@ func (mp *MockPier) startPierHA() {
 				if status {
 					continue
 				}
+
+				if mp.config.Proxy.Enable {
+					// initialize proxy component
+					px, nerr := proxy.NewProxy(filepath.Join(mp.repoRoot, repo.ProxyConfigName), mp.redisCli, loggers.Logger(loggers.Proxy))
+					if nerr != nil {
+						mp.log.Errorf("failed to init proxy, err: %s", nerr.Error())
+						panic("failed to init proxy")
+					}
+					mp.proxy = px
+					// start up proxy component
+					if serr := mp.proxy.Start(); serr != nil {
+						mp.log.Errorf("start up proxy error: %s", serr.Error())
+						panic("failed to start proxy")
+					}
+				}
+
 				// special check for direct && pierHA_redis && not-first-time-in
 				// single mode will never enter this logic again, so nothing to do;
 				// union mode SKIP!!!!
@@ -127,9 +152,15 @@ func (mp *MockPier) startPierHA() {
 				if mp.pm != nil {
 					err := mp.pm.Stop()
 					if err != nil {
-						mp.log.Warn("stop peerManager error: %s", err.Error())
+						mp.log.Warnf("stop peerManager error: %s", err.Error())
 					}
 				}
+				if mp.proxy != nil {
+					if err := mp.proxy.Stop(); err != nil {
+						mp.log.Errorf("stop proxy error: %v", err)
+					}
+				}
+
 				status = false
 			}
 		}

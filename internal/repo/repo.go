@@ -36,6 +36,8 @@ const (
 
 	NetworkName = "network.toml"
 
+	ProxyConfigName = "proxy.toml"
+
 	// config path
 	ConfigPath = "../../config"
 
