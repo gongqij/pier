@@ -251,17 +251,33 @@ func (w *WrapperImpl) reNewMaster() (bool, error) {
 
 const (
 	lockSend = `
-		if(redis.call('get',KEYS[1])==ARGV[1] and redis.call('exists',KEYS[2])==0) then
-			local result = redis.call('SET', KEYS[2], ARGV[2], 'NX', 'EX', tonumber(ARGV[3]))
-			if result then
-				return 1
+		if(redis.call('get',KEYS[1])==ARGV[1]) then
+			if(redis.call('exists',KEYS[2])==0) then
+				local result = redis.call('SET', KEYS[2], ARGV[2], 'NX', 'EX', tonumber(ARGV[3]))
+				if result then
+					return 1
+				else
+					return 0
+				end
 			else
-				return 0
+				return 2
 			end
-		else
-			return 2
+		else 
+			return 3
 		end
 	`
+	//lockSend = `
+	//	if(redis.call('get',KEYS[1])==ARGV[1] and redis.call('exists',KEYS[2])==0) then
+	//		local result = redis.call('SET', KEYS[2], ARGV[2], 'NX', 'EX', tonumber(ARGV[3]))
+	//		if result then
+	//			return 1
+	//		else
+	//			return 0
+	//		end
+	//	else
+	//		return 2
+	//	end
+	//`
 	unlockSend = `
 		if(redis.call('get',KEYS[1])==ARGV[1]) then
 			return redis.call('DEL',KEYS[2])
@@ -270,17 +286,33 @@ const (
 		end
 	`
 	lockMaster = `
-		if(redis.call('exists',KEYS[1])==0 and redis.call('exists',KEYS[2])==0) then
-			local result = redis.call('SET', KEYS[1], ARGV[1], 'NX', 'EX', tonumber(ARGV[2]))
-			if result then
-				return 1
+		if(redis.call('exists',KEYS[1])==0) then
+			if(redis.call('exists',KEYS[2])==0) then
+				local result = redis.call('SET', KEYS[1], ARGV[1], 'NX', 'EX', tonumber(ARGV[2]))
+				if result then
+					return 1
+				else
+					return 0
+				end
 			else
-				return 0
+				return 2
 			end
 		else
-			return 2
+			return 3
 		end
 	`
+	//lockMaster = `
+	//	if(redis.call('exists',KEYS[1])==0 and redis.call('exists',KEYS[2])==0) then
+	//		local result = redis.call('SET', KEYS[1], ARGV[1], 'NX', 'EX', tonumber(ARGV[2]))
+	//		if result then
+	//			return 1
+	//		else
+	//			return 0
+	//		end
+	//	else
+	//		return 2
+	//	end
+	//`
 	unlockMaster = `
 		if(redis.call('get',KEYS[1])==ARGV[1]) then
 			return redis.call('DEL',KEYS[1])

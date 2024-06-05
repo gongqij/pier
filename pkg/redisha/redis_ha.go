@@ -103,6 +103,7 @@ func (m *RedisPierMng) startMain() {
 			case <-ticker.C:
 				if !m.RedisCliW.ReNewMaster() {
 					m.log.Infof("[instance-%s] quit main mode", m.ID)
+					_ = m.RedisCliW.MasterUnlock()
 					m.startAux()
 					return
 				}
