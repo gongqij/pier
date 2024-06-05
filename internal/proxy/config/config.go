@@ -17,8 +17,11 @@ type ProxyConfig struct {
 	HTTPMaxContentLength int64
 	HTTPRequestTimeout   time.Duration
 	HTTPAllowOrigins     []string
-	HTTPRemoteAddress    []string
-	HTTPReconnectTime    time.Duration
+
+	RemoteReconnectTime time.Duration
+	RemoteAddress       []string
+	RemoteHttpPort      []int
+	RemoteTcpPort       []int
 
 	SecurityTLSEnable   bool
 	SecurityTLSCAPath   string
@@ -29,7 +32,6 @@ type ProxyConfig struct {
 
 type ReverseProxyConfig struct {
 	Listen int64
-	Server string
 	AppId  string
 }
 
@@ -55,7 +57,6 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		}
 		var (
 			listen int64
-			server string
 			appId  string
 		)
 		for key, value := range proxyConfig {
@@ -68,15 +69,6 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 					return nil, fmt.Errorf("invalid port range for key tcp_reverse_proxys.server, err: %s", cerr.Error())
 				}
 			}
-			if key == tcpReverseProxysServerKey {
-				server, ok = value.(string)
-				if !ok {
-					return nil, fmt.Errorf("invalid type for key tcp_reverse_proxys.server")
-				}
-				if _, _, cerr := checkAddress(server); cerr != nil {
-					return nil, fmt.Errorf("invalid address format for key tcp_reverse_proxys.server, err: %s", cerr.Error())
-				}
-			}
 			if key == tcpReverseProxysAppIdKey {
 				appId, ok = value.(string)
 				if !ok {
@@ -86,7 +78,6 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		}
 		reverseProxys[listen] = ReverseProxyConfig{
 			Listen: listen,
-			Server: server,
 			AppId:  appId,
 		}
 	}
@@ -103,17 +94,18 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		return nil, fmt.Errorf("parse request timeout error: %s", derr.Error())
 	}
 	httpMaxContentLength := vip.GetInt64(httpRequestMaxContentLength)
-	httpRemoteAddressStrSlice := vip.GetStringSlice(httpRemoteAddress)
-	if len(httpRemoteAddressStrSlice) == 0 {
-		return nil, fmt.Errorf("http.remote.address can't be empty")
+	remoteReconnectTimeStr := vip.GetString(remoteReconnectTime)
+	remoteAddressStrSlice := vip.GetStringSlice(remoteAddress)
+	remoteHttpPortIntSlice := vip.GetIntSlice(remoteHttpPort)
+	remoteTcpPortIntSlice := vip.GetIntSlice(remoteTcpPort)
+	if len(remoteAddressStrSlice) == 0 || len(remoteHttpPortIntSlice) == 0 || len(remoteTcpPortIntSlice) == 0 {
+		return nil, fmt.Errorf("http.remote.address, http.remote.http_port, http.remote.tcp_port can't be empty")
 	}
-	for _, addr := range httpRemoteAddressStrSlice {
-		if _, _, cerr := checkAddress(addr); cerr != nil {
-			return nil, fmt.Errorf("invalid address format for key http.remote.address")
-		}
+	if (len(remoteAddressStrSlice) != len(remoteHttpPortIntSlice)) || (len(remoteAddressStrSlice) != len(remoteTcpPortIntSlice)) {
+		return nil, fmt.Errorf("the length of array must be same for http.remote.address, http.remote.http_port, http.remote.tcp_port")
 	}
-	httpReconnectTimeStr := vip.GetString(httpRemoteReconnectTime)
-	reconectTime, derr := time.ParseDuration(httpReconnectTimeStr)
+
+	reconectTime, derr := time.ParseDuration(remoteReconnectTimeStr)
 	if derr != nil {
 		return nil, fmt.Errorf("parse reconnect time error: %s", derr.Error())
 	}
@@ -131,8 +123,10 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		HTTPMaxContentLength: httpMaxContentLength,
 		HTTPRequestTimeout:   duration,
 		HTTPAllowOrigins:     httpAllowOriginsStrSlice,
-		HTTPRemoteAddress:    httpRemoteAddressStrSlice,
-		HTTPReconnectTime:    reconectTime,
+		RemoteAddress:        remoteAddressStrSlice,
+		RemoteTcpPort:        remoteTcpPortIntSlice,
+		RemoteHttpPort:       remoteHttpPortIntSlice,
+		RemoteReconnectTime:  reconectTime,
 		SecurityTLSEnable:    securityTlsEnable,
 		SecurityTLSCAPath:    securityTlsCAPathStr,
 		SecurityTLSCertPath:  securityTlsCertPathStr,

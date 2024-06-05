@@ -1,4 +1,4 @@
-package tcp
+package common
 
 const (
 	TcpProxyTypeConnect    = "connect request"

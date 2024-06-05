@@ -43,9 +43,13 @@ func New(redisCli rediscli.Wrapper, send chan *common.Data, recv chan *common.Da
 	mux := &http.ServeMux{}
 	mux.Handle("/", handler)
 
-	nodes := make([]*node, len(conf.HTTPRemoteAddress))
-	for i, v := range conf.HTTPRemoteAddress {
-		nodes[i] = newNode(v, conf.SecurityTLSEnable, i)
+	nodes := make([]*node, len(conf.RemoteAddress))
+	for i, ip := range conf.RemoteAddress {
+		n, nerr := newNode(ip, conf.RemoteHttpPort[i], conf.RemoteTcpPort[i], conf.SecurityTLSEnable, i)
+		if nerr != nil {
+			return nil, nerr
+		}
+		nodes[i] = n
 	}
 
 	return &Http{
@@ -59,6 +63,7 @@ func New(redisCli rediscli.Wrapper, send chan *common.Data, recv chan *common.Da
 		nodes:     nodes,
 		send:      send,
 		recv:      recv,
+		stopped:   make(chan struct{}),
 		conf:      conf,
 		log:       log,
 	}, nil

@@ -2,7 +2,9 @@ package http
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"sort"
 	"time"
@@ -11,29 +13,62 @@ import (
 )
 
 type node struct {
-	url       string
-	alive     bool
-	confIndex int // 在配置文件里的索引位置
+	ip       string
+	httpPort int
+	tcpPort  int
+
+	httpUrl    string // join ip and httpPort
+	tcpAddress string // join ip and tcpPort
+	alive      bool
+
+	confIndex int // 地址在配置文件里的索引位置
 }
 
-// newNode creates an instance of node, the format of url is ip:port.
-func newNode(url string, isHttps bool, confIndex int) *node {
+// newNode creates an instance of node.
+func newNode(ip string, httpPort, tcpPort int, isHttps bool, confIndex int) (*node, error) {
 	var scheme string
-
 	if isHttps {
 		scheme = "https://"
 	} else {
 		scheme = "http://"
 	}
 
+	httpAddress, jerr := joinIPAndPort(ip, httpPort)
+	if jerr != nil {
+		return nil, fmt.Errorf("invalid address format, err: %v", jerr.Error())
+	}
+	tcpAddress, jerr := joinIPAndPort(ip, tcpPort)
+	if jerr != nil {
+		return nil, fmt.Errorf("invalid address format, err: %v", jerr.Error())
+	}
+
 	return &node{
-		url:       scheme + url,
-		alive:     true,
-		confIndex: confIndex,
+		ip:         ip,
+		httpPort:   httpPort,
+		tcpPort:    tcpPort,
+		httpUrl:    fmt.Sprintf("%s%s", scheme, httpAddress),
+		tcpAddress: tcpAddress,
+		alive:      true,
+		confIndex:  confIndex,
+	}, nil
+}
+
+func joinIPAndPort(ip string, port int) (string, error) {
+	parsedIP := net.ParseIP(ip)
+	if parsedIP == nil {
+		return "", fmt.Errorf("invalid IP address: %s", ip)
+	}
+
+	// 检查 IP 地址是 IPv4 还是 IPv6
+	if parsedIP.To4() != nil {
+		// IPv4
+		return fmt.Sprintf("%s:%d", ip, port), nil
+	} else {
+		// IPv6
+		return fmt.Sprintf("[%s]:%d", ip, port), nil
 	}
 }
 
-// the returned result:
 func (h *Http) selectNodeUrl() (index int, url string, err error) {
 	var tempNodes []*node
 	for _, v := range h.nodes {
@@ -49,20 +84,19 @@ func (h *Http) selectNodeUrl() (index int, url string, err error) {
 	})
 
 	if tempNodes[0].alive {
-		return tempNodes[0].confIndex, tempNodes[0].url, nil
+		return tempNodes[0].confIndex, tempNodes[0].httpUrl, nil
 	}
 
 	return 0, "", errors.New("all nodes are bad, please check it")
 }
 
 func (h *Http) reconnectNode(confIndex int) {
-	//todo 可能存在goroutine泄露，需要改一下，每个url只有一个reconnectNode gorroutine
 	defer h.wg.Done()
 
-	timer := time.NewTimer(h.conf.HTTPReconnectTime)
+	timer := time.NewTimer(h.conf.RemoteReconnectTime)
 	defer timer.Stop()
 
-	url := h.nodes[confIndex].url
+	url := h.nodes[confIndex].httpUrl
 	data := newJsonData(1, httpReconnectMsg, httpReconnectMsg, []byte("ping"))
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -83,7 +117,7 @@ func (h *Http) reconnectNode(confIndex int) {
 			if err != nil {
 				//todo 日志级别可能有点高
 				h.log.Error(err)
-				timer.Reset(h.conf.HTTPReconnectTime)
+				timer.Reset(h.conf.RemoteReconnectTime)
 				break
 			}
 
@@ -98,7 +132,7 @@ func (h *Http) reconnectNode(confIndex int) {
 			response.Body.Close()
 			h.log.Debug("node " + url + " Reconnect failed, will try later")
 
-			timer.Reset(h.conf.HTTPReconnectTime)
+			timer.Reset(h.conf.RemoteReconnectTime)
 		}
 	}
 }

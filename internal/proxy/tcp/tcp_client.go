@@ -73,7 +73,7 @@ func (tCli *TcpClient) handleConnectRequest(data *common.Data) {
 
 	// 2. 给对面代理发送ACK
 	tCli.writeHttpCh <- &common.Data{
-		Typ:     TcpProxyTypeConnectACK,
+		Typ:     common.TcpProxyTypeConnectACK,
 		Uuid:    connUuid,
 		Content: []byte{1},
 	}
@@ -99,7 +99,7 @@ func (tCli *TcpClient) readloop(conn net.Conn, connUuid string) {
 			}
 
 			tCli.writeHttpCh <- &common.Data{
-				Typ:     TcpProxyTypeForward,
+				Typ:     common.TcpProxyTypeForward,
 				Uuid:    connUuid,
 				Content: buffer[:n],
 			}

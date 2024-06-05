@@ -9,9 +9,8 @@ import (
 )
 
 type TcpServer struct {
-	port               int64  // 监听的端口
-	reverseProxyServer string // 反向代理服务的 ip+port
-	listener           net.Listener
+	port     int64 // 监听的端口
+	listener net.Listener
 
 	writeHttpCh   chan *common.Data
 	newConnFunc   newConn
@@ -22,15 +21,14 @@ type TcpServer struct {
 	logger  logrus.FieldLogger
 }
 
-func NewTcpServer(port int64, reverseProxyServer string, logger logrus.FieldLogger, newConnFunc newConn, closeConnFunc closeConn) (*TcpServer, error) {
+func NewTcpServer(port int64, logger logrus.FieldLogger, newConnFunc newConn, closeConnFunc closeConn) (*TcpServer, error) {
 	return &TcpServer{
-		port:               port,
-		reverseProxyServer: reverseProxyServer,
-		writeHttpCh:        make(chan *common.Data),
-		stopped:            make(chan struct{}),
-		logger:             logger,
-		newConnFunc:        newConnFunc,
-		closeConnFunc:      closeConnFunc,
+		port:          port,
+		writeHttpCh:   make(chan *common.Data),
+		stopped:       make(chan struct{}),
+		logger:        logger,
+		newConnFunc:   newConnFunc,
+		closeConnFunc: closeConnFunc,
 	}, nil
 }
 
@@ -85,13 +83,10 @@ func (srv *TcpServer) acceptConn() {
 
 			srv.logger.Infof("[Server] Received Inbound connection, uuid: %s", connUuid)
 
-			srv.logger.Infof("[Server] prepare to connect target address: %s", srv.reverseProxyServer)
-
-			// 3. 向目标代理发送消息让其去连接目标节点(通过http发送)
+			// 3. 向目标代理发送消息让其去连接目标节点(通过http发送)，消息里的地址信息由http模块赋值
 			data := &common.Data{
-				Typ:     TcpProxyTypeConnect,
-				Uuid:    connUuid,
-				Content: []byte(srv.reverseProxyServer),
+				Typ:  common.TcpProxyTypeConnect,
+				Uuid: connUuid,
 			}
 			srv.writeHttpCh <- data
 
@@ -122,7 +117,7 @@ func (srv *TcpServer) readloop(conn net.Conn, connUuid string) {
 			}
 
 			srv.writeHttpCh <- &common.Data{
-				Typ:     TcpProxyTypeForward,
+				Typ:     common.TcpProxyTypeForward,
 				Uuid:    connUuid,
 				Content: buffer[:n],
 			}

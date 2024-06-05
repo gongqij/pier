@@ -1,7 +1,12 @@
 [[tcp_reverse_proxys]]
     listen = 7001         # 反向代理监听端口
     app_id = "hyperchain" # 预留
-    server = "127.0.0.1:4323" # 被代理服务的 IP 和 Port，通常为最终目标节点的地址
+
+[remote]
+    reconnect_time = "1s" # 本 proxy 与对面 proxy 重连的时间间隔
+    address = ["127.0.0.1"] # 对面多个 proxy 的 IP 地址
+    http_port = [12002]           # 对面多个 proxy 监听的 http 端口
+    tcp_port = [4323]               # 对面多个 proxy 对应的 pier 的 p2p 端口
 
 [http]
     listen = 12001
@@ -10,9 +15,6 @@
         max_content_length = 10485760 # 10*1024*1024
         timeout = "60s"
         allow_origins = ["*"]
-    [http.remote]
-        address = ["127.0.0.1:12002"]
-        reconnect_time = "1s"
 
 [security]
     [security.tls]

@@ -1,7 +1,6 @@
 package tcp
 
 import (
-	"fmt"
 	"github.com/meshplus/pier/internal/proxy/common"
 	"github.com/meshplus/pier/internal/proxy/config"
 	"github.com/sirupsen/logrus"
@@ -42,12 +41,8 @@ func New(send chan *common.Data, recv chan *common.Data, conf *config.ProxyConfi
 		tSrv:    make([]*TcpServer, 0),
 	}
 
-	for listen, reverseConfig := range conf.ReverseProxys {
-		if reverseConfig.Server == "" {
-			return nil, fmt.Errorf("you should set reverse proxy config for tcp port %v", listen)
-		}
-
-		tSrv, err := NewTcpServer(listen, reverseConfig.Server, log, connMgr.newConn, connMgr.closeConn)
+	for listen, _ := range conf.ReverseProxys {
+		tSrv, err := NewTcpServer(listen, log, connMgr.newConn, connMgr.closeConn)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +135,7 @@ func (t *Tcp) sendHttpLoop() {
 		case 1:
 			// connMgr.getNotifyCloseCh received
 			t.send <- &common.Data{
-				Typ:  TcpProxyTypeDisconnect,
+				Typ:  common.TcpProxyTypeDisconnect,
 				Uuid: recv.String(),
 			}
 		case 2:
@@ -155,14 +150,14 @@ func (t *Tcp) sendHttpLoop() {
 
 func (t *Tcp) handleDataFromHttp(data *common.Data) {
 	switch data.Typ {
-	case TcpProxyTypeConnect:
+	case common.TcpProxyTypeConnect:
 		t.tCli.handleConnectRequest(data)
-	case TcpProxyTypeDisconnect:
+	case common.TcpProxyTypeDisconnect:
 		t.log.Infof("receive TcpProxyTypeDisconnect from remote conn uuid %s", data.Uuid)
 		t.connMgr.closeConn(data.Uuid)
-	case TcpProxyTypeConnectACK, TcpProxyTypeForward:
-		if data.Typ == TcpProxyTypeConnectACK {
-			t.log.Info("[Server] receive connect ACK from remote conn uuid: %s", data.Uuid)
+	case common.TcpProxyTypeConnectACK, common.TcpProxyTypeForward:
+		if data.Typ == common.TcpProxyTypeConnectACK {
+			t.log.Infof("[Server] receive connect ACK from remote conn uuid: %s", data.Uuid)
 			break
 		} else {
 			t.log.Infof("receive forwarded data from remote conn uuid %s", data.Uuid)

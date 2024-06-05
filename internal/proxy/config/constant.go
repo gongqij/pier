@@ -3,7 +3,6 @@ package config
 const (
 	tcpReverseProxys          = "tcp_reverse_proxys"
 	tcpReverseProxysListenKey = "listen"
-	tcpReverseProxysServerKey = "server"
 	tcpReverseProxysAppIdKey  = "app_id"
 
 	httpListen                  = "http.listen"
@@ -11,8 +10,11 @@ const (
 	httpRequestMaxContentLength = "http.request.max_content_length"
 	httpRequestTimeout          = "http.request.timeout"
 	httpRequestAllowOrigins     = "http.request.allow_origins"
-	httpRemoteAddress           = "http.remote.address"
-	httpRemoteReconnectTime     = "http.remote.reconnect_time"
+
+	remoteReconnectTime = "remote.reconnect_time"
+	remoteAddress       = "remote.address"
+	remoteHttpPort      = "remote.http_port"
+	remoteTcpPort       = "remote.tcp_port"
 
 	securityTLSEnable   = "security.tls.enable"
 	securityTlsCAPath   = "security.tls.tlsCAPath"
