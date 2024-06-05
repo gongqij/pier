@@ -201,7 +201,7 @@ func (w *WrapperImpl) sendUnlock() (bool, error) {
 		return false, err
 	}
 	if res != 1 {
-		w.log.Infof("[RedisCliObj] sendUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		w.log.Infof("[RedisCliObj] sendUnlock with key[%s] value [%s] error: %v", w.masterLockName, w.masterLockVal, res)
 		return false, nil
 	}
 	return true, nil

@@ -60,8 +60,8 @@ config = "fabric"
 enable_tss = false
 
 [redis]
-address = "172.22.67.36:6379"
-password = "123456"
+address = "10.10.69.5:6379"
+password = ""
 database = 15
 master_lock_prefix = "lock_master"
 send_lock_prefix = "lock_send"

@@ -76,9 +76,9 @@ func (h *Http) selectNodeUrl() (index int, url string, err error) {
 	}
 	sort.SliceStable(tempNodes, func(i, j int) bool {
 		if tempNodes[i].alive && !tempNodes[j].alive {
-			return tempNodes[i].alive
+			return true
 		} else if !tempNodes[i].alive && tempNodes[j].alive {
-			return tempNodes[j].alive
+			return false
 		}
 		return false
 	})
@@ -103,6 +103,8 @@ func (h *Http) reconnectNode(confIndex int) {
 		h.log.Error(err)
 	}
 
+	h.log.Info("start to reconnect node " + url)
+
 	for {
 		select {
 		case <-h.stopped:
@@ -115,8 +117,7 @@ func (h *Http) reconnectNode(confIndex int) {
 
 			response, err := h.httpCli.Do(req)
 			if err != nil {
-				//todo 日志级别可能有点高
-				h.log.Error(err)
+				h.log.Debug(err)
 				timer.Reset(h.conf.RemoteReconnectTime)
 				break
 			}
