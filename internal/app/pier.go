@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/meshplus/pier/internal/proxy"
+	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/meshplus/pier/pkg/redisha"
 	"path/filepath"
 	"strings"
@@ -47,6 +49,9 @@ type Pier struct {
 	serviceMeta map[string]*pb.Interchain
 	config      *repo.Config
 	logger      logrus.FieldLogger
+
+	redisCli rediscli.Wrapper
+	proxy    proxy.Proxy
 }
 
 func NewUnionPier(repoRoot string, config *repo.Config) (*Pier, error) {
@@ -113,6 +118,7 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 	var (
 		ex          exchanger.IExchanger
 		pierHA      agency.PierHA
+		redisCli    rediscli.Wrapper = &rediscli.MockWrapperImpl{}
 		peerManager peermgr.PeerManager
 	)
 
@@ -164,7 +170,9 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 		case "single":
 			pierHA = single.New(nil, config.Appchain.ID)
 		case "redis":
-			pierHA = redisha.New(config.Redis, config.Appchain.ID)
+			redisHA := redisha.New(config.Redis, config.Appchain.ID)
+			redisCli = redisHA.GetRedisCli()
+			pierHA = redisHA
 		default:
 			return nil, fmt.Errorf("unsupported ha mode %s, should be `single` or `redis`", config.HA.Mode)
 		}
@@ -258,6 +266,7 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 		ctx:        ctx,
 		cancel:     cancel,
 		config:     config,
+		redisCli:   redisCli,
 	}, nil
 }
 
@@ -279,6 +288,21 @@ func (pier *Pier) startPierHA() {
 						"source_interchain_counter": meta.SourceInterchainCounter,
 						"source_receipt_counter":    meta.SourceReceiptCounter,
 					}).Infof("Pier information of service %s", serviceID)
+				}
+
+				if pier.config.Mode.Type == repo.DirectMode && pier.config.Proxy.Enable {
+					// initialize proxy component
+					px, nerr := proxy.NewProxy(filepath.Join(pier.config.RepoRoot, repo.ProxyConfigName), pier.redisCli, loggers.Logger(loggers.Proxy))
+					if nerr != nil {
+						pier.logger.Errorf("failed to init proxy, err: %s", nerr.Error())
+						panic("failed to init proxy")
+					}
+					pier.proxy = px
+					// start up proxy component
+					if serr := pier.proxy.Start(); serr != nil {
+						pier.logger.Errorf("start up proxy error: %s", serr.Error())
+						panic("failed to start proxy")
+					}
 				}
 
 				// special check for direct && pierHA_redis && not-first-time-in
@@ -310,6 +334,11 @@ func (pier *Pier) startPierHA() {
 					pier.logger.Errorf("pier stop exchanger: %w", err)
 					return
 				}
+				if pier.proxy != nil {
+					if err := pier.proxy.Stop(); err != nil {
+						pier.logger.Errorf("stop proxy error: %v", err)
+					}
+				}
 				status = false
 			}
 		case <-pier.ctx.Done():
@@ -326,6 +355,8 @@ func (pier *Pier) Stop() error {
 	if err := pier.exchanger.Stop(); err != nil {
 		return fmt.Errorf("exchanger stop: %w", err)
 	}
+
+	// todo: proxy stop
 
 	if err := pier.pierHA.Stop(); err != nil {
 		return fmt.Errorf("pierHA stop: %w", err)

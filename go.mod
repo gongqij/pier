@@ -53,13 +53,11 @@ replace github.com/binance-chain/tss-lib => github.com/dawn-to-dusk/tss-lib v1.3
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.33.0
 
-replace (
-	github.com/ultramesh/crypto-gm => git.hyperchain.cn/ultramesh/crypto-gm.git v0.2.18
-	github.com/ultramesh/crypto-standard => git.hyperchain.cn/ultramesh/crypto-standard.git v0.2.4
-	github.com/ultramesh/fancylogger => git.hyperchain.cn/ultramesh/fancylogger.git v0.1.3
-	github.com/ultramesh/flato-common => git.hyperchain.cn/ultramesh/flato-common.git v0.2.46-0.20220408031420-7fe84146a5f0
-	github.com/ultramesh/flato-db-interface => git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29
-	github.com/ultramesh/flato-msp => git.hyperchain.cn/ultramesh/flato-msp.git v0.2.10
-	github.com/ultramesh/flato-msp-cert => git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31
-	github.com/ultramesh/flato-statedb => git.hyperchain.cn/ultramesh/flato-statedb.git v0.2.16
-)
+replace github.com/ultramesh/crypto-gm => git.hyperchain.cn/ultramesh/crypto-gm.git v0.2.18
+replace github.com/ultramesh/crypto-standard => git.hyperchain.cn/ultramesh/crypto-standard.git v0.2.4
+replace github.com/ultramesh/fancylogger => git.hyperchain.cn/ultramesh/fancylogger.git v0.1.3
+replace github.com/ultramesh/flato-common => git.hyperchain.cn/ultramesh/flato-common.git v0.2.46-0.20220408031420-7fe84146a5f0
+replace github.com/ultramesh/flato-db-interface => git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29
+replace github.com/ultramesh/flato-msp => git.hyperchain.cn/ultramesh/flato-msp.git v0.2.10
+replace github.com/ultramesh/flato-msp-cert => git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31
+replace github.com/ultramesh/flato-statedb => git.hyperchain.cn/ultramesh/flato-statedb.git v0.2.16

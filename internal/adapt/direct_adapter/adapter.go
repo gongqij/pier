@@ -115,9 +115,11 @@ func (d *DirectAdapter) Start() error {
 }
 
 func (d *DirectAdapter) Stop() error {
-	err := d.peerMgr.Stop()
-	if err != nil {
-		return err
+	if d.peerMgr != nil {
+		err := d.peerMgr.Stop()
+		if err != nil {
+			return err
+		}
 	}
 
 	close(d.ibtpC)
