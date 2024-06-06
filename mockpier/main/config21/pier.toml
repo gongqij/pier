@@ -60,7 +60,7 @@ config = "fabric"
 enable_tss = false
 
 [redis]
-address = "10.10.69.5:6379"
+address = "10.10.97.125:6379"
 password = ""
 database = 15
 master_lock_prefix = "lock_master"

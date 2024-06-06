@@ -21,7 +21,7 @@ type TcpClient struct {
 
 func NewTcpClient(logger logrus.FieldLogger, newConnWithUuidFunc newConnWithUuid, closeConnFunc closeConn) (*TcpClient, error) {
 	return &TcpClient{
-		writeHttpCh:         make(chan *common.Data),
+		writeHttpCh:         make(chan *common.Data, 1),
 		stopped:             make(chan struct{}),
 		logger:              logger,
 		newConnWithUuidFunc: newConnWithUuidFunc,

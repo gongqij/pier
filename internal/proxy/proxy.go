@@ -8,7 +8,6 @@ import (
 	"github.com/meshplus/pier/internal/proxy/tcp"
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/sirupsen/logrus"
-	"sync"
 )
 
 type Proxy interface {
@@ -33,8 +32,8 @@ func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, log logrus.FieldLog
 		return nil, fmt.Errorf("failed to load config %s, err: %s", cfgFilePath, lerr.Error())
 	}
 
-	sendCh := make(chan *common.Data)
-	recvCh := make(chan *common.Data)
+	sendCh := make(chan *common.Data, 1)
+	recvCh := make(chan *common.Data, 1)
 
 	mtcp, nerr := tcp.New(recvCh, sendCh, conf, log)
 	if nerr != nil {
@@ -71,32 +70,19 @@ func (p ProxyImpl) Start() error {
 }
 
 func (p ProxyImpl) Stop() error {
-
-	drainWG := &sync.WaitGroup{}
-
 	err := p.myHTTP.Stop()
 	if err != nil {
 		return err
 	}
 
-	p.log.Infof("proxy.http stopped, start a drain goroutine for http.recv channel")
-	drainWG.Add(1)
-	go func() {
-		defer drainWG.Done()
-		for range p.recvCh {
-		}
-	}()
+	p.log.Infof("proxy.http stopped successfully")
 
 	err = p.myTCP.Stop()
 	if err != nil {
 		return err
 	}
 
-	p.log.Infof("proxy.tcp stopped, start to close sendCh and recvCh")
-	close(p.sendCh)
-	close(p.recvCh)
-	drainWG.Wait()
-	p.log.Infof("proxy stop finish!")
+	p.log.Infof("proxy.tcp stopped successfully")
 
 	return nil
 }

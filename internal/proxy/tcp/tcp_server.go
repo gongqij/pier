@@ -24,7 +24,7 @@ type TcpServer struct {
 func NewTcpServer(port int64, logger logrus.FieldLogger, newConnFunc newConn, closeConnFunc closeConn) (*TcpServer, error) {
 	return &TcpServer{
 		port:          port,
-		writeHttpCh:   make(chan *common.Data),
+		writeHttpCh:   make(chan *common.Data, 1),
 		stopped:       make(chan struct{}),
 		logger:        logger,
 		newConnFunc:   newConnFunc,

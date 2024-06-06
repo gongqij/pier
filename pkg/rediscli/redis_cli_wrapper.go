@@ -183,7 +183,7 @@ func (w *WrapperImpl) sendLock() (bool, error) {
 	script := redis.NewScript(lockSend)
 	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName, w.sendLockName}, w.masterLockVal, w.sendLockVal, w.sendExpire).Int64()
 	if err != nil {
-		w.log.Errorf("[RedisCliObj] sendLock with key[%s] value [%s] error: %s", w.sendLockName, w.sendLockVal, err.Error())
+		w.log.Debugf("[RedisCliObj] sendLock with key[%s] value [%s] error: %s", w.sendLockName, w.sendLockVal, err.Error())
 		return false, err
 	}
 	if res != 1 {
@@ -197,7 +197,7 @@ func (w *WrapperImpl) sendUnlock() (bool, error) {
 	script := redis.NewScript(unlockSend)
 	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName, w.sendLockName}, w.masterLockVal).Int64()
 	if err != nil {
-		w.log.Errorf("[RedisCliObj] sendUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		w.log.Debugf("[RedisCliObj] sendUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
 		return false, err
 	}
 	if res != 1 {
@@ -211,7 +211,7 @@ func (w *WrapperImpl) masterLock() (bool, error) {
 	script := redis.NewScript(lockMaster)
 	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName, w.sendLockName}, w.masterLockVal, w.masterExpire).Int64()
 	if err != nil {
-		w.log.Errorf("[RedisCliObj] masterLock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		w.log.Debugf("[RedisCliObj] masterLock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
 		return false, err
 	}
 	if res != 1 {
@@ -225,7 +225,7 @@ func (w *WrapperImpl) masterUnlock() (bool, error) {
 	script := redis.NewScript(unlockMaster)
 	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName}, w.masterLockVal).Int64()
 	if err != nil {
-		w.log.Errorf("[RedisCliObj] masterUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		w.log.Debugf("[RedisCliObj] masterUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
 		return false, err
 	}
 	if res != 1 {
@@ -239,7 +239,7 @@ func (w *WrapperImpl) reNewMaster() (bool, error) {
 	script := redis.NewScript(expireMaster)
 	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName}, w.masterLockVal, w.masterExpire).Int64()
 	if err != nil {
-		w.log.Errorf("re-masterExpire with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
+		w.log.Debugf("re-masterExpire with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
 		return false, err
 	}
 	if res != 1 {
