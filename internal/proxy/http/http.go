@@ -18,6 +18,8 @@ import (
 
 const maxRequestId = math.MaxUint16
 
+const uri = "/pier/proxy"
+
 type Http struct {
 	send chan *common.Data // 向 tcp 层发送数据
 	recv chan *common.Data // 接收来自 tcp 层的数据
@@ -41,7 +43,7 @@ func New(redisCli rediscli.Wrapper, send chan *common.Data, recv chan *common.Da
 		return nil, err
 	}
 	mux := &http.ServeMux{}
-	mux.Handle("/", handler)
+	mux.Handle(uri, handler)
 
 	nodes := make([]*node, len(conf.RemoteAddress))
 	for i, ip := range conf.RemoteAddress {

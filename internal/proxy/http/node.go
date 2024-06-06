@@ -46,7 +46,7 @@ func newNode(ip string, httpPort, tcpPort int, isHttps bool, confIndex int) (*no
 		ip:         ip,
 		httpPort:   httpPort,
 		tcpPort:    tcpPort,
-		httpUrl:    fmt.Sprintf("%s%s", scheme, httpAddress),
+		httpUrl:    fmt.Sprintf("%s%s%s", scheme, httpAddress, uri),
 		tcpAddress: tcpAddress,
 		alive:      true,
 		confIndex:  confIndex,
