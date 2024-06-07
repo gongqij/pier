@@ -237,27 +237,35 @@ func (a *AppchainAdapter) GetServiceIDList() ([]string, error) {
 func (a *AppchainAdapter) QueryInterchain(serviceID string) (*pb.Interchain, error) {
 	outMeta, err := a.client.GetOutMeta()
 	if err != nil {
+		a.logger.Errorf("GetOutMeta error: %s", err.Error())
 		return nil, err
 	}
 	callbackMeta, err := a.client.GetCallbackMeta()
 	if err != nil {
+		a.logger.Errorf("GetCallbackMeta error: %s", err.Error())
 		return nil, err
 	}
 	inMeta, err := a.client.GetInMeta()
 	if err != nil {
+		a.logger.Errorf("GetInMeta error: %s", err.Error())
 		return nil, err
 	}
 	// check if the service is in the dest chain
 	if repo.DirectMode == a.mode {
+		a.logger.Infof("plugin QueryInterchain param: %s", serviceID)
 		services, err := a.client.GetServices()
 		if err != nil {
+			a.logger.Errorf("plugin GetServices error: %s", err.Error())
 			return nil, err
 		}
+		a.logger.Errorf("plugin GetServices success, with result: %v", services)
 		for _, value := range services {
 			if strings.EqualFold(serviceID, value) {
+				a.logger.Infof("plugin QueryInterchain enter findSelfInterchain for %s", serviceID)
 				return findSelfInterchain(serviceID, outMeta, callbackMeta, inMeta)
 			}
 		}
+		a.logger.Infof("plugin QueryInterchain enter findRemoteInterchain for %s", serviceID)
 		return findRemoteInterchain(serviceID, outMeta, callbackMeta, inMeta)
 	}
 	return findSelfInterchain(serviceID, outMeta, callbackMeta, inMeta)

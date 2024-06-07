@@ -8,7 +8,7 @@ pprof = 44555
 level = "info"
 dir = "logs"
 filename = "pier.log"
-report_caller = false
+report_caller = true
 [log.module]
 api_server = "info"
 appchain_mgr = "info"
@@ -27,7 +27,7 @@ appchain_adapter = "info"
 proxy = "info"
 
 [mode]
-type = "relay" # relay, direct or union
+type = "direct" # relay, direct or union
 [mode.relay]
 addrs = ["localhost:60011", "localhost:60012", "localhost:60013", "localhost:60014"]
 timeout_limit = "1s"
@@ -49,7 +49,7 @@ tlsca = "certs/agency.cert"
 common_name = "BitXHub"
 
 [HA]
-mode = "single"
+mode = "redis"
 
 [appchain]
 id = "fabappchain"
@@ -59,5 +59,15 @@ config = "fabric"
 [tss]
 enable_tss = false
 
+[redis]
+address = "10.10.97.125:6379"
+password = ""
+database = 15
+master_lock_prefix = "lock_master"
+send_lock_prefix = "lock_send"
+master_lease_renewal = 5
+master_lease_timeout = 10
+send_lease_timeout = 3
+
 [proxy]
-enable = true # for more proxy related configuration, see proxy.toml
+enable = false # for more proxy related configuration, see proxy.toml

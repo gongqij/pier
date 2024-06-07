@@ -125,9 +125,10 @@ func (d *DirectAdapter) handleSendIBTPMessage(stream network.Stream, msg *pb.Mes
 
 func (d *DirectAdapter) handleGetInterchainMessage(stream network.Stream, msg *pb.Message) {
 	serviceID := string(peermgr.DataToPayload(msg).Data)
+	d.logger.Infof("receive query interchain for %s from directAdapter", serviceID)
 	interChain, err := d.appchainadapt.QueryInterchain(serviceID)
 	if err != nil {
-		d.logger.Error(err)
+		d.logger.Errorf("query interchain for %s from appchain error: %s", serviceID, err)
 		return
 	}
 	data, err := interChain.Marshal()
@@ -137,7 +138,7 @@ func (d *DirectAdapter) handleGetInterchainMessage(stream network.Stream, msg *p
 
 	retMsg := peermgr.Message(pb.Message_ACK, true, data)
 	if err := d.peerMgr.AsyncSendWithStream(stream, retMsg); err != nil {
-		d.logger.Error(err)
+		d.logger.Errorf("[handleGetInterchainMessage] async send ACK back with same stream", err)
 		return
 	}
 }
