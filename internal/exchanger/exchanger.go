@@ -487,5 +487,5 @@ func (ex *Exchanger) Stop() error {
 //}
 
 func (ex *Exchanger) RenewPeerManager(pm peermgr.PeerManager) {
-	ex.srcAdapt.RenewPeerManager(pm)
+	ex.destAdapt.RenewPeerManager(pm)
 }
