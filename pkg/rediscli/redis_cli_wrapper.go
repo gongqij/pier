@@ -223,7 +223,7 @@ func (w *WrapperImpl) masterLock() (bool, error) {
 
 func (w *WrapperImpl) masterUnlock() (bool, error) {
 	script := redis.NewScript(unlockMaster)
-	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName}, w.masterLockVal).Int64()
+	res, err := script.Run(w.ctx, w.cli, []string{w.masterLockName, w.sendLockName}, w.masterLockVal).Int64()
 	if err != nil {
 		w.log.Debugf("[RedisCliObj] masterUnlock with key[%s] value [%s] error: %s", w.masterLockName, w.masterLockVal, err.Error())
 		return false, err
@@ -314,10 +314,14 @@ const (
 	//	end
 	//`
 	unlockMaster = `
-		if(redis.call('get',KEYS[1])==ARGV[1]) then
-			return redis.call('DEL',KEYS[1])
+		if(redis.call('exists',KEYS[2])==0) then
+			if(redis.call('get',KEYS[1])==ARGV[1]) then
+				return redis.call('DEL',KEYS[1])
+			else
+				return 2
+			end
 		else
-			return 2
+			return 3
 		end
 	`
 	expireMaster = `

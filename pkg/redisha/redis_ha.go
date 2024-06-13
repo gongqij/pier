@@ -34,6 +34,8 @@ type RedisPierMng struct {
 	log       logrus.FieldLogger
 	ctx       context.Context
 	cancel    context.CancelFunc
+
+	relMasterSignal chan interface{}
 }
 
 func (m *RedisPierMng) Start() error {
@@ -54,6 +56,10 @@ func (m *RedisPierMng) GetRedisCli() rediscli.Wrapper {
 	return m.RedisCliW
 }
 
+func (m *RedisPierMng) ReleaseMain() {
+	m.relMasterSignal <- struct{}{}
+}
+
 func New(conf repo.Redis, pierID string) *RedisPierMng {
 	ctx, cancel := context.WithCancel(context.Background())
 	obj := &RedisPierMng{
@@ -63,6 +69,8 @@ func New(conf repo.Redis, pierID string) *RedisPierMng {
 		log:    loggers.Logger(loggers.App),
 		ctx:    ctx,
 		cancel: cancel,
+
+		relMasterSignal: make(chan interface{}, 1),
 	}
 	obj.RedisCliW = rediscli.NewWrapperImpl(
 		strings.Join([]string{conf.SendLockPrefix, pierID}, "_"),
@@ -107,6 +115,11 @@ func (m *RedisPierMng) startMain() {
 					m.startAux()
 					return
 				}
+			case <-m.relMasterSignal:
+				m.log.Infof("[instance-%s] found http connection error, quit main mode", m.ID)
+				_ = m.RedisCliW.MasterUnlock()
+				m.startAux()
+				return
 			case <-m.ctx.Done():
 				_ = m.RedisCliW.MasterUnlock()
 				return
@@ -116,23 +129,27 @@ func (m *RedisPierMng) startMain() {
 }
 
 func (m *RedisPierMng) startAux() {
-	ticker := time.NewTicker(time.Duration(m.conf.MasterLeaseTimeout * int64(time.Second)))
 	go func() {
-		defer ticker.Stop()
+		var timer *time.Timer
 		m.isMain <- false
 		m.log.Infof("[instance-%s] start in aux mode", m.ID)
 		for {
+			randDuration := m.conf.MasterLeaseTimeout*1000 - rand.Int63n(1000)
+			timer = time.NewTimer(time.Duration(randDuration * int64(time.Millisecond)))
 			select {
-			case <-ticker.C:
+			case <-timer.C:
 				locked := m.RedisCliW.MasterLock()
 				if !locked {
 					m.log.Infof("[instance-%s] in aux mode, try lock failed", m.ID)
+					timer.Stop()
 					continue
 				}
 				m.startMain()
+				timer.Stop()
 				return
 			case <-m.ctx.Done():
 				_ = m.RedisCliW.MasterUnlock()
+				timer.Stop()
 				return
 			}
 		}

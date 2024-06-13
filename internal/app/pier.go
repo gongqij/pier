@@ -6,6 +6,7 @@ import (
 	"github.com/meshplus/pier/internal/proxy"
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/meshplus/pier/pkg/redisha"
+	"github.com/meshplus/pier/pkg/redisha/signal"
 	"path/filepath"
 	"strings"
 
@@ -51,6 +52,7 @@ type Pier struct {
 	logger      logrus.FieldLogger
 
 	redisCli rediscli.Wrapper
+	quitMain signal.QuitMainSignal
 	proxy    proxy.Proxy
 }
 
@@ -118,7 +120,8 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 	var (
 		ex          exchanger.IExchanger
 		pierHA      agency.PierHA
-		redisCli    rediscli.Wrapper = &rediscli.MockWrapperImpl{}
+		redisCli    rediscli.Wrapper      = &rediscli.MockWrapperImpl{}
+		quitMain    signal.QuitMainSignal = &signal.MockQuitMainSignal{}
 		peerManager peermgr.PeerManager
 	)
 
@@ -173,6 +176,7 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 			redisHA := redisha.New(config.Redis, config.Appchain.ID)
 			redisCli = redisHA.GetRedisCli()
 			pierHA = redisHA
+			quitMain = redisHA
 		default:
 			return nil, fmt.Errorf("unsupported ha mode %s, should be `single` or `redis`", config.HA.Mode)
 		}
@@ -267,6 +271,7 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 		cancel:     cancel,
 		config:     config,
 		redisCli:   redisCli,
+		quitMain:   quitMain,
 	}, nil
 }
 
