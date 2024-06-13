@@ -8,7 +8,7 @@ pprof = 44555
 level = "info"
 dir = "logs"
 filename = "pier.log"
-report_caller = false
+report_caller = true
 [log.module]
 api_server = "info"
 appchain_mgr = "info"

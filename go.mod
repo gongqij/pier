@@ -61,10 +61,10 @@ replace github.com/ultramesh/fancylogger => git.hyperchain.cn/ultramesh/fancylog
 
 replace github.com/ultramesh/flato-common => git.hyperchain.cn/ultramesh/flato-common.git v0.2.46-0.20220408031420-7fe84146a5f0
 
-replace github.com/ultramesh/flato-db-interface => git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29
+replace github.com/ultramesh/flato-db-interface => git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29-1
 
 replace github.com/ultramesh/flato-msp => git.hyperchain.cn/ultramesh/flato-msp.git v0.2.10
 
-replace github.com/ultramesh/flato-msp-cert => git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31
+replace github.com/ultramesh/flato-msp-cert => git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31-3
 
 replace github.com/ultramesh/flato-statedb => git.hyperchain.cn/ultramesh/flato-statedb.git v0.2.16

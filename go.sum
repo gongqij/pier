@@ -46,14 +46,12 @@ git.hyperchain.cn/ultramesh/crypto-standard.git v0.2.4 h1:tNzkYkq85WAs2y780qjZHa
 git.hyperchain.cn/ultramesh/crypto-standard.git v0.2.4/go.mod h1:6K5BOzw//0flqilWnslmeNVjZ16XbMFHcvg0jd07wtU=
 git.hyperchain.cn/ultramesh/flato-common.git v0.2.46-0.20220408031420-7fe84146a5f0 h1:geho5DN/shCxKQicnOsYxfpzFUVG2KoKPGkeTskogls=
 git.hyperchain.cn/ultramesh/flato-common.git v0.2.46-0.20220408031420-7fe84146a5f0/go.mod h1:NhjpqN2jCWFvj6bR90VdNcmBEYp6Q2b1I4nOP4uBxAw=
-git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29 h1:0HrvnnWg9B6UkHdXal5Hb3kjTRijy/dRxpHhx+Cr5N4=
-git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29/go.mod h1:WtncqbOlHxz90VsCoJMlbzbfmK8HgFF0gJnc5cLiXo8=
-git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31 h1:EfIRA1yAhXIABZeiQi4HIjO1+BGWQa6U2xXfFSC+wxM=
-git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31/go.mod h1:Vm3ahWZM689qVh70s83W+KE1ka5QpQYeZlMqIWEwD5M=
+git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29-1 h1:KAen8aRRyCNKpFoE1fwHrTMswBPoFjWpvjoE57lUr1Q=
+git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29-1/go.mod h1:WtncqbOlHxz90VsCoJMlbzbfmK8HgFF0gJnc5cLiXo8=
+git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31-3 h1:aXFGqPyfkC9O5+6ETH8Xz1m+YpvPm3P2ysmwiNs2eok=
+git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31-3/go.mod h1:2LoYzw6TK2s0VIIThNh1jgAl1M0qSNoxEIcVbp1j5XQ=
 git.hyperchain.cn/ultramesh/flato-msp.git v0.2.10 h1:pYrnGPtI6XmlnS1EbjOGdEtbILyRIu6dBo+s+KwCER0=
 git.hyperchain.cn/ultramesh/flato-msp.git v0.2.10/go.mod h1:i35rhAC2y+HW1IY734QxAW1D4xk7W9Y3VSBOcL+RTkE=
-git.hyperchain.cn/ultramesh/flato-statedb.git v0.2.16 h1:Y3GVPepnfgbNwBl9Q6x5GLGuWUfqro0XbJok6pRvTvU=
-git.hyperchain.cn/ultramesh/flato-statedb.git v0.2.16/go.mod h1:vynRm9ZSrpQo14O+N3ncIFyYBeugAhK7yJJK4ueQOfA=
 github.com/AndreasBriese/bbloom v0.0.0-20180913140656-343706a395b7/go.mod h1:bOvUY6CB00SOBii9/FifXqc0awNKxLFCL/+pkDPuyl8=
 github.com/AndreasBriese/bbloom v0.0.0-20190306092124-e2d15f34fcf9/go.mod h1:bOvUY6CB00SOBii9/FifXqc0awNKxLFCL/+pkDPuyl8=
 github.com/Azure/azure-pipeline-go v0.2.1/go.mod h1:UGSo8XybXnIGZ3epmeBw7Jdz+HiUVpqIlpz/HKHylF4=
@@ -144,7 +142,6 @@ github.com/btcsuite/snappy-go v0.0.0-20151229074030-0bdef8d06723/go.mod h1:8woku
 github.com/btcsuite/snappy-go v1.0.0/go.mod h1:8woku9dyThutzjeg+3xrA5iCpBRH8XEEg3lh6TiUghc=
 github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792/go.mod h1:ghJtEyQwv5/p4Mg4C0fgbePVuGr935/5ddU9Z3TmDRY=
 github.com/btcsuite/winsvc v1.0.0/go.mod h1:jsenWakMcC0zFBFurPLEAyrnc/teJEM1O46fmI40EZs=
-github.com/bytecodealliance/wasmtime-go v0.34.0 h1:PaWS0DUusaXaU3aNoSYjag6WmuxjyPYBHgkrC4EXips=
 github.com/bytecodealliance/wasmtime-go v0.34.0/go.mod h1:q320gUxqyI8yB+ZqRuaJOEnGkAnHh6WtJjMaT2CW4wI=
 github.com/bytecodealliance/wasmtime-go v0.37.0 h1:eNP2Snp5UFMuGuunRPxwVETJ/WpC8LhWonZAklXJfjk=
 github.com/bytecodealliance/wasmtime-go v0.37.0/go.mod h1:q320gUxqyI8yB+ZqRuaJOEnGkAnHh6WtJjMaT2CW4wI=
