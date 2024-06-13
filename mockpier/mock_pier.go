@@ -13,6 +13,7 @@ import (
 	"github.com/meshplus/pier/internal/repo"
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/meshplus/pier/pkg/redisha"
+	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
 	"path/filepath"
 	"time"
@@ -27,6 +28,7 @@ type MockPier struct {
 	config   *repo.Config
 	repoRoot string
 	proxy    proxy.Proxy
+	quitMain signal.QuitMainSignal
 }
 
 func NewMockPier(repoRoot string) (*MockPier, error) {
@@ -60,6 +62,7 @@ func NewMockPier(repoRoot string) (*MockPier, error) {
 		log:      loggers.Logger(loggers.App),
 		config:   config,
 		repoRoot: repoRoot,
+		quitMain: rpm,
 	}
 
 	return mockPier, nil
@@ -101,7 +104,7 @@ func (mp *MockPier) startPierHA() {
 
 				if mp.config.Proxy.Enable {
 					// initialize proxy component
-					px, nerr := proxy.NewProxy(filepath.Join(mp.repoRoot, repo.ProxyConfigName), mp.redisCli, loggers.Logger(loggers.Proxy))
+					px, nerr := proxy.NewProxy(filepath.Join(mp.repoRoot, repo.ProxyConfigName), mp.redisCli, mp.quitMain, loggers.Logger(loggers.Proxy))
 					if nerr != nil {
 						mp.log.Errorf("failed to init proxy, err: %s", nerr.Error())
 						panic("failed to init proxy")

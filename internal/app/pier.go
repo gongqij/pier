@@ -297,7 +297,7 @@ func (pier *Pier) startPierHA() {
 
 				if pier.config.Mode.Type == repo.DirectMode && pier.config.Proxy.Enable {
 					// initialize proxy component
-					px, nerr := proxy.NewProxy(filepath.Join(pier.config.RepoRoot, repo.ProxyConfigName), pier.redisCli, loggers.Logger(loggers.Proxy))
+					px, nerr := proxy.NewProxy(filepath.Join(pier.config.RepoRoot, repo.ProxyConfigName), pier.redisCli, pier.quitMain, loggers.Logger(loggers.Proxy))
 					if nerr != nil {
 						pier.logger.Errorf("failed to init proxy, err: %s", nerr.Error())
 						panic("failed to init proxy")

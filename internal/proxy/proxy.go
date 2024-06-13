@@ -7,6 +7,7 @@ import (
 	"github.com/meshplus/pier/internal/proxy/http"
 	"github.com/meshplus/pier/internal/proxy/tcp"
 	"github.com/meshplus/pier/pkg/rediscli"
+	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,7 +27,7 @@ type ProxyImpl struct {
 	recvCh chan *common.Data
 }
 
-func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, log logrus.FieldLogger) (Proxy, error) {
+func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.QuitMainSignal, log logrus.FieldLogger) (Proxy, error) {
 	conf, lerr := config.LoadProxyConfig(cfgFilePath)
 	if lerr != nil {
 		return nil, fmt.Errorf("failed to load config %s, err: %s", cfgFilePath, lerr.Error())
@@ -39,7 +40,7 @@ func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, log logrus.FieldLog
 	if nerr != nil {
 		return nil, fmt.Errorf("failed to init tcp component, err: %s", nerr.Error())
 	}
-	mhttp, err := http.New(redisCli, sendCh, recvCh, conf, log)
+	mhttp, err := http.New(redisCli, quitMain, sendCh, recvCh, conf, log)
 	if err != nil {
 		return nil, err
 	}
