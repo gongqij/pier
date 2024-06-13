@@ -14,6 +14,9 @@ type ProxyConfig struct {
 
 	HTTPPort             int64
 	HTTP2Enable          bool
+	HTTPCancelTimeout    time.Duration
+	HTTPRetryDuration    time.Duration
+	HTTPAllFailedLimit   int
 	HTTPMaxContentLength int64
 	HTTPRequestTimeout   time.Duration
 	HTTPAllowOrigins     []string
@@ -87,6 +90,17 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		return nil, fmt.Errorf("invalid port range for key http.listen, err: %s", cerr.Error())
 	}
 	http2Enable := vip.GetBool(httpHttp2Enable)
+	httpCancelTimeoutStr := vip.GetString(httpCancelTimeout)
+	hct, derr := time.ParseDuration(httpCancelTimeoutStr)
+	if derr != nil {
+		return nil, fmt.Errorf("parse http cancel timeout error: %s", derr.Error())
+	}
+	httpRetryDurationStr := vip.GetString(httpRetryDuration)
+	hrd, derr := time.ParseDuration(httpRetryDurationStr)
+	if derr != nil {
+		return nil, fmt.Errorf("parse http retry duration error: %s", derr.Error())
+	}
+	hafl := vip.GetInt(httpAllFailedLimit)
 	httpAllowOriginsStrSlice := vip.GetStringSlice(httpRequestAllowOrigins)
 	httpRequestTimeoutStr := vip.GetString(httpRequestTimeout)
 	duration, derr := time.ParseDuration(httpRequestTimeoutStr)
@@ -120,6 +134,9 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		ReverseProxys:        reverseProxys,
 		HTTPPort:             httpListenPort,
 		HTTP2Enable:          http2Enable,
+		HTTPCancelTimeout:    hct,
+		HTTPRetryDuration:    hrd,
+		HTTPAllFailedLimit:   hafl,
 		HTTPMaxContentLength: httpMaxContentLength,
 		HTTPRequestTimeout:   duration,
 		HTTPAllowOrigins:     httpAllowOriginsStrSlice,

@@ -153,10 +153,19 @@ func (h *Http) readTcpLoop() {
 func (h *Http) switchSignalLoop() {
 	defer h.wg.Done()
 
-	dur := 10 * time.Second           // 整个goroutine多久循环一次
-	requestTimeout := 5 * time.Second // 单个http请求的超时时间
-	allBadCountLimit := 30            // 所有http地址都失败的最大次数
-	allBadCount := 0                  // 统计所有http地址都失败的次数
+	dur := h.conf.HTTPRetryDuration // 整个goroutine多久循环一次
+	if dur == 0 {
+		dur = 10 * time.Second
+	}
+	requestTimeout := h.conf.HTTPCancelTimeout // 单个http请求的超时时间
+	if requestTimeout == 0 {
+		requestTimeout = 5 * time.Second
+	}
+	allBadCountLimit := h.conf.HTTPAllFailedLimit // 所有http地址都失败的最大次数
+	if allBadCountLimit == 0 {
+		allBadCountLimit = 30
+	}
+	allBadCount := 0 // 统计所有http地址都失败的次数
 
 	timer := time.NewTimer(dur)
 	defer timer.Stop()

@@ -11,6 +11,9 @@
 [http]
     listen = 12002
     http2_enable = true
+    cancel_timeout = "5s"  # 仅用于pier信号切换goroutine，表示一个http请求从连接建立到读取response body的超时时间，到达超时时间会关闭请求
+    retry_duration = "10s" # 仅用于pier信号切换goroutine，表示多久去遍历一次所有的对端http端口，向他们发送心跳检测
+    all_failed_limit = 30  # 仅用于pier信号切换goroutine，表示每次遍历所有的对端http端口请求都发送失败了的次数上限，达到上限后会触发一次pier切换
     [http.request]
         max_content_length = 10485760 # 10*1024*1024
         timeout = "60s"
