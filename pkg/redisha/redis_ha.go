@@ -6,6 +6,7 @@ import (
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/sirupsen/logrus"
 	"math/rand"
+	"net"
 	"strings"
 	"time"
 
@@ -80,11 +81,25 @@ func New(conf repo.Redis, pierID string) *RedisPierMng {
 		int(obj.conf.SendLeaseTimeout),
 		obj.log,
 		func() *redis.Client {
-			return redis.NewClient(&redis.Options{
+			opt := &redis.Options{
 				Addr:     conf.Address,
 				Password: conf.Password,
 				DB:       conf.Database,
-			})
+			}
+			if conf.SelfPort > 0 {
+				opt.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+					dialer := &net.Dialer{
+						Timeout:   5 * time.Second,
+						KeepAlive: 5 * time.Minute,
+						LocalAddr: &net.TCPAddr{
+							IP:   net.ParseIP("0.0.0.0"),
+							Port: conf.SelfPort,
+						},
+					}
+					return dialer.DialContext(ctx, network, addr)
+				}
+			}
+			return redis.NewClient(opt)
 		},
 	)
 	return obj

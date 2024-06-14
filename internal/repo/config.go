@@ -125,15 +125,16 @@ type Redis struct {
 	// redis default contains 0-15 buckets(databases)
 	Database int `toml:"database" json:"database"`
 	// LockPrefix will concat with appchainID(pierID) as lock name
-	MasterLockPrefix string `toml:"master_lock_prefix" json:"master_lock_prefix"`
+	MasterLockPrefix string `mapstructure:"master_lock_prefix" toml:"master_lock_prefix" json:"master_lock_prefix"`
 	// SendLockPrefix will concat with appchainID(pierID) as lock name
-	SendLockPrefix string `toml:"send_lock_prefix" json:"send_lock_prefix"`
+	SendLockPrefix string `mapstructure:"send_lock_prefix" toml:"send_lock_prefix" json:"send_lock_prefix"`
 	// MasterLeaseRenewal used for main instance check and renew current lock, with unit(seconds)
-	MasterLeaseRenewal int64 `toml:"master_lease_renewal" json:"master_lease_renewal"`
+	MasterLeaseRenewal int64 `mapstructure:"master_lease_renewal" toml:"master_lease_renewal" json:"master_lease_renewal"`
 	// MasterLeaseTimeout used as expire time when setting lock, with unit(seconds)
-	MasterLeaseTimeout int64 `toml:"master_lease_timeout" json:"master_lease_timeout"`
+	MasterLeaseTimeout int64 `mapstructure:"master_lease_timeout" toml:"master_lease_timeout" json:"master_lease_timeout"`
 	// SendLeaseTimeout used for main instance operate http send lock
-	SendLeaseTimeout int64 `toml:"send_lease_timeout" json:"send_lease_timeout"`
+	SendLeaseTimeout int64 `mapstructure:"send_lease_timeout" toml:"send_lease_timeout" json:"send_lease_timeout"`
+	SelfPort         int   `mapstructure:"self_port" toml:"self_port" json:"self_port"`
 }
 
 type ProxyConfig struct {
@@ -213,7 +214,8 @@ func DefaultConfig() *Config {
 			SendLockPrefix:     "lock_send",
 			MasterLeaseRenewal: int64(5),
 			MasterLeaseTimeout: int64(10),
-			SendLeaseTimeout:   int64(3),
+			SendLeaseTimeout:   int64(2),
+			SelfPort:           50111,
 		},
 		Proxy: ProxyConfig{
 			Enable: false,
