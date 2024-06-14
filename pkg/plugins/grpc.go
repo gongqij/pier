@@ -53,6 +53,11 @@ func (s *GRPCServer) GetIBTPCh(_ *pb.Empty, conn pb.AppchainPlugin_GetIBTPChServ
 			if err := retry.Retry(func(attempt uint) error {
 				if err := conn.Send(ibtp); err != nil {
 					logger.Error("plugin send ibtp err", "error", err)
+					select {
+					case <-ctx.Done():
+						return nil
+					default:
+					}
 					return err
 				}
 				return nil
@@ -302,59 +307,85 @@ func (g *GRPCClient) GetUpdateMeta() chan *pb.UpdateMeta {
 	go func() {
 		defer close(metaQ)
 		for {
-			var (
-				meta *pb.UpdateMeta
-				err  error
-			)
-			if err := retry.Retry(func(attempt uint) error {
-				meta, err = conn.Recv()
-				if err != nil {
-					logger.Error("Plugin grpc client recv meta", "error", err)
-					// End the stream
-					return err
+			meta, rerr := conn.Recv()
+			if rerr != nil {
+				logger.Error("Plugin grpc client recv meta", "error", err)
+				select {
+				case <-g.doneContext.Done():
+					logger.Info("Plugin grpc client handle UpdateMeta stream goroutine quit")
+					return
+				default:
 				}
-				return nil
-			}, strategy.Wait(1*time.Second)); err != nil {
-				logger.Error("Execution of client recv failed", "error", err)
-			}
-
-			select {
-			case <-g.doneContext.Done():
-				return
-			case metaQ <- meta:
+			} else {
+				metaQ <- meta
 			}
 		}
 	}()
+	//var (
+	//	meta *pb.UpdateMeta
+	//	err  error
+	//)
+	//if err := retry.Retry(func(attempt uint) error {
+	//	meta, err = conn.Recv()
+	//	if err != nil {
+	//		logger.Error("Plugin grpc client recv meta", "error", err)
+	//		// End the stream
+	//		return err
+	//	}
+	//	return nil
+	//}, strategy.Wait(1*time.Second)); err != nil {
+	//	logger.Error("Execution of client recv failed", "error", err)
+	//}
+	//
+	//select {
+	//case <-g.doneContext.Done():
+	//	return
+	//case metaQ <- meta:
+	//}
 
 	return metaQ
 }
 
 func (g *GRPCClient) handleIBTPStream(conn pb.AppchainPlugin_GetIBTPChClient, ibtpQ chan *pb.IBTP) {
 	defer close(ibtpQ)
-
 	for {
-		var (
-			ibtp *pb.IBTP
-			err  error
-		)
-		if err := retry.Retry(func(attempt uint) error {
-			ibtp, err = conn.Recv()
-			if err != nil {
-				logger.Error("Plugin grpc client recv ibtp", "error", err)
-				// End the stream
-				return err
+		ibtp, err := conn.Recv()
+		if err != nil {
+			logger.Error("Plugin grpc client recv ibtp", "error", err)
+			select {
+			case <-g.doneContext.Done():
+				logger.Info("Plugin grpc client handle IBTP stream goroutine quit")
+				return
+			default:
 			}
-			return nil
-		}, strategy.Wait(1*time.Second)); err != nil {
-			logger.Error("Execution of client recv failed", "error", err)
-		}
-
-		select {
-		case <-g.doneContext.Done():
-			return
-		case ibtpQ <- ibtp:
+		} else {
+			ibtpQ <- ibtp
 		}
 	}
+
+	//for {
+	//	var (
+	//		ibtp *pb.IBTP
+	//		err  error
+	//	)
+	//	if err := retry.Retry(func(attempt uint) error {
+	//		ibtp, err = conn.Recv()
+	//		if err != nil {
+	//			logger.Error("Plugin grpc client recv ibtp", "error", err)
+	//			// End the stream
+	//			return err
+	//		}
+	//		return nil
+	//	}, strategy.Wait(1*time.Second)); err != nil {
+	//		logger.Error("Execution of client recv failed", "error", err)
+	//	}
+	//
+	//	select {
+	//	case <-g.doneContext.Done():
+	//		return
+	//	case ibtpQ <- ibtp:
+	//	}
+	//}
 }
 
 func (g *GRPCClient) handleOffChainDataReqStream(conn pb.AppchainPlugin_GetOffChainDataReqClient, dataReq chan *pb.GetDataRequest) {

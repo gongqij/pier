@@ -105,21 +105,48 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 	// handle dest -> src
 	for _, interchain := range destServiceMeta {
 		for k, count := range interchain.SourceInterchainCounter {
-			destCount := srcServiceMeta[interchain.ID].SourceInterchainCounter[k]
+			var srcCount uint64
+			if _, ok := srcServiceMeta[interchain.ID]; !ok {
+				srcServiceMeta[interchain.ID] = &pb.Interchain{
+					InterchainCounter:       make(map[string]uint64, 0),
+					ReceiptCounter:          make(map[string]uint64, 0),
+					SourceInterchainCounter: make(map[string]uint64, 0),
+					SourceReceiptCounter:    make(map[string]uint64, 0),
+				}
+			} else {
+				srcCount, ok = srcServiceMeta[interchain.ID].SourceInterchainCounter[k]
+				if !ok {
+					srcCount = 0
+				}
+			}
 
+			// srcCount means the count of Interchain from k to interchain.ID
 			// handle unsentIBTP : query IBTP -> sendIBTP
-			if destCount < count {
-				ex.handleMissingIBTPByServicePair(destCount+1, count, ex.destAdapt, ex.srcAdapt, k, interchain.ID, true)
+			if srcCount < count {
+				ex.handleMissingIBTPByServicePair(srcCount+1, count, ex.destAdapt, ex.srcAdapt, k, interchain.ID, true)
 				srcServiceMeta[interchain.ID].SourceInterchainCounter[k] = count
 			}
 		}
 
 		for k, count := range interchain.ReceiptCounter {
-			destCount := srcServiceMeta[interchain.ID].ReceiptCounter[k]
+			var srcCount uint64
+			if _, ok := srcServiceMeta[interchain.ID]; !ok {
+				srcServiceMeta[interchain.ID] = &pb.Interchain{
+					InterchainCounter:       make(map[string]uint64, 0),
+					ReceiptCounter:          make(map[string]uint64, 0),
+					SourceInterchainCounter: make(map[string]uint64, 0),
+					SourceReceiptCounter:    make(map[string]uint64, 0),
+				}
+			} else {
+				srcCount = srcServiceMeta[interchain.ID].ReceiptCounter[k]
+				if !ok {
+					srcCount = 0
+				}
+			}
 
 			// handle unsentIBTP : query IBTP -> sendIBTP
-			if destCount < count {
-				ex.handleMissingIBTPByServicePair(destCount+1, count, ex.destAdapt, ex.srcAdapt, interchain.ID, k, false)
+			if srcCount < count {
+				ex.handleMissingIBTPByServicePair(srcCount+1, count, ex.destAdapt, ex.srcAdapt, interchain.ID, k, false)
 				srcServiceMeta[interchain.ID].ReceiptCounter[k] = count
 			}
 		}
