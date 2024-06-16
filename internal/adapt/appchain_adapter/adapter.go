@@ -66,6 +66,7 @@ func (a *AppchainAdapter) Start() error {
 	}
 
 	go func() {
+		// gw: a.client.GetIBTPCh()这玩意退出以后，ibtpC会被close，这里的goroutine也就可以退出了
 		ibtpC := a.client.GetIBTPCh()
 		if ibtpC != nil {
 			for ibtp := range ibtpC {

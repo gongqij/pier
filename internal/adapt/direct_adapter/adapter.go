@@ -37,6 +37,7 @@ type DirectAdapter struct {
 	ctx             context.Context
 	cancel          context.CancelFunc
 	gopool          *pool
+	wg              *sync.WaitGroup
 }
 
 func (d *DirectAdapter) ID() string {
@@ -58,7 +59,6 @@ func (d *DirectAdapter) GetServiceIDList() ([]string, error) {
 func New(peerMgr peermgr.PeerManager, appchainAdapt adapt.Adapt, logger logrus.FieldLogger) (*DirectAdapter, error) {
 
 	appchainID := appchainAdapt.ID()
-	ctx, cancel := context.WithCancel(context.Background())
 	da := &DirectAdapter{
 		logger:        logger,
 		peerMgr:       peerMgr,
@@ -67,14 +67,14 @@ func New(peerMgr peermgr.PeerManager, appchainAdapt adapt.Adapt, logger logrus.F
 		ibtpC:         make(chan *pb.IBTP, maxChSize),
 		appchainID:    appchainID,
 		gopool:        NewGoPool(runtime.GOMAXPROCS(runtime.NumCPU())),
-		ctx:           ctx,
-		cancel:        cancel,
+		wg:            &sync.WaitGroup{},
 	}
 
 	return da, nil
 }
 
 func (d *DirectAdapter) Start() error {
+	d.ctx, d.cancel = context.WithCancel(context.Background())
 	if d.ibtpC == nil {
 		d.ibtpC = make(chan *pb.IBTP, maxChSize)
 	}
@@ -115,12 +115,19 @@ func (d *DirectAdapter) Start() error {
 }
 
 func (d *DirectAdapter) Stop() error {
+	d.logger.Infof("DirectAdapter stop")
 	if d.peerMgr != nil {
 		err := d.peerMgr.Stop()
 		if err != nil {
+			d.logger.Infof("DirectAdapter stop peerManager error: %s", err.Error())
 			return err
 		}
 	}
+
+	d.cancel()
+	d.logger.Infof("DirectAdapter.wg start to wait")
+	d.wg.Wait()
+	d.logger.Infof("DirectAdapter.wg finish wait")
 
 	close(d.ibtpC)
 	d.ibtpC = nil

@@ -23,7 +23,11 @@ func (ex *Exchanger) handleMissingIBTPByServicePair(begin, end uint64, fromAdapt
 			"index":        begin,
 			"isReq":        isReq,
 		}).Info("handle missing event from:" + adaptName)
-		ibtp := ex.queryIBTP(fromAdapt, fmt.Sprintf("%s-%s-%d", srcService, targetService, begin), isReq)
+		ibtp, qerr := ex.queryIBTP(fromAdapt, fmt.Sprintf("%s-%s-%d", srcService, targetService, begin), isReq)
+		if qerr != nil {
+			ex.logger.Errorf("exchanger stoppped, directly return")
+			return
+		}
 		//transaction timeout rollback in direct mode
 		if strings.EqualFold(ex.mode, repo.DirectMode) {
 			if isRollback := ex.isIBTPRollbackForDirect(ibtp); isRollback {
@@ -42,7 +46,18 @@ func (ex *Exchanger) sendIBTP(srcAdapt, destAdapt adapt.Adapt, ibtp *pb.IBTP) {
 			ex.logger.Warnf("send IBTP %s to Adapt %s: %s", ibtp.ID(), adaptName, err.Error())
 			if err, ok := err.(*adapt.SendIbtpError); ok {
 				if err.NeedRetry() {
-					ibtp = ex.queryIBTP(srcAdapt, ibtp.ID(), ibtp.Category() == pb.IBTP_REQUEST)
+					select {
+					case <-ex.ctx.Done():
+						ex.logger.Warningf("exchanger stopped, directly quit retry")
+						return nil
+					default:
+					}
+					var qerr error
+					ibtp, qerr = ex.queryIBTP(srcAdapt, ibtp.ID(), ibtp.Category() == pb.IBTP_REQUEST)
+					if qerr != nil {
+						ex.logger.Warningf("exchanger stopped, break sendIBTP retry framework")
+						return nil
+					}
 					return fmt.Errorf("retry sending ibtp")
 				}
 			}
@@ -75,7 +90,11 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 					}
 					if txStatus == 2 { // transaction status is begin_rollback
 						// notify dst chain rollback
-						ibtp := ex.queryIBTP(ex.srcAdapt, IBTPid, true)
+						ibtp, qerr := ex.queryIBTP(ex.srcAdapt, IBTPid, true)
+						if qerr != nil {
+							ex.logger.Errorf("exchanger stopped, interrupt recover")
+							return
+						}
 						ibtp.Type = pb.IBTP_RECEIPT_ROLLBACK
 						ex.sendIBTPForDirect(ex.srcAdapt, ex.destAdapt, ibtp, ex.isIBTPBelongSrc(ibtp), true)
 					}
@@ -161,7 +180,11 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 				ex.logger.Infof("check txStatus for service pair %s-%s from %d to %d for rollback", serviceID, k, receiptCounter+1, interchainCounter)
 				for i := receiptCounter + 1; i <= interchainCounter; i++ {
 					id := fmt.Sprintf("%s-%s-%d", serviceID, k, i)
-					ibtp := ex.queryIBTP(ex.destAdapt, id, true)
+					ibtp, qerr := ex.queryIBTP(ex.destAdapt, id, true)
+					if qerr != nil {
+						ex.logger.Errorf("exchanger stopped, interrupt recover")
+						return
+					}
 					bxhProof := &pb.BxhProof{}
 					if err := bxhProof.Unmarshal(ibtp.Proof); err != nil {
 						ex.logger.Panicf("fail to unmarshal proof %s for ibtp %s", hexutil.Encode(ibtp.Proof), ibtp.ID())

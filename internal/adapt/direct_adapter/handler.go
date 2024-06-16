@@ -62,65 +62,67 @@ func NewPool() *Pool {
 }
 
 func (d *DirectAdapter) handleSendIBTPMessage(stream network.Stream, msg *pb.Message) {
-	d.gopool.Add()
-	go func() {
-		ibtp := &pb.IBTP{}
-		if err := ibtp.Unmarshal(peermgr.DataToPayload(msg).Data); err != nil {
-			d.logger.Errorf("Unmarshal ibtp: %s", err.Error())
-			return
-		}
-		servicePair := ibtp.From + ibtp.To + ibtp.Category().String()
-		act, loaded := d.ibtps.LoadOrStore(servicePair, NewPool())
-		pool := act.(*Pool)
+	//d.gopool.Add()
+	//go func() {
+	ibtp := &pb.IBTP{}
+	if err := ibtp.Unmarshal(peermgr.DataToPayload(msg).Data); err != nil {
+		d.logger.Errorf("Unmarshal ibtp: %s", err.Error())
+		return
+	}
+	servicePair := ibtp.From + ibtp.To + ibtp.Category().String()
+	act, loaded := d.ibtps.LoadOrStore(servicePair, NewPool())
+	pool := act.(*Pool)
 
-		if !loaded {
-			go func(pool *Pool, ibtp *pb.IBTP) {
-				defer func() {
-					if e := recover(); e != nil {
-						d.logger.Error(fmt.Errorf("%v", e))
-					}
-				}()
-				d.ibtpC <- ibtp
-				index := ibtp.Index
-				ticker := time.NewTicker(time.Second)
-				defer ticker.Stop()
-				for {
-					select {
-					case <-ticker.C:
-						pool.lock.Lock()
-						if item := pool.ibtps.Min(); item != nil {
-							if item.(*MyTree).index < index+1 {
-								pool.ibtps.DeleteMin()
-							}
-
-							if item.(*MyTree).index == index+1 {
-								d.ibtpC <- item.(*MyTree).ibtp
-								pool.ibtps.DeleteMin()
-								index++
-								pool.time = time.Now()
-							}
-
-							// By default, the index will be equalized after 5 seconds
-							if time.Now().Sub(pool.time).Seconds() > 5.0 {
-								d.ibtpC <- item.(*MyTree).ibtp
-								pool.ibtps.DeleteMin()
-								index = item.(*MyTree).index
-								pool.time = time.Now()
-							}
-						}
-						pool.lock.Unlock()
-					case <-d.ctx.Done():
-						return
-					}
+	if !loaded {
+		d.wg.Add(1)
+		go func(pool *Pool, ibtp *pb.IBTP) {
+			defer d.wg.Done()
+			defer func() {
+				if e := recover(); e != nil {
+					d.logger.Error(fmt.Errorf("%v", e))
 				}
-			}(pool, ibtp)
-		} else {
-			pool.lock.Lock()
-			pool.ibtps.ReplaceOrInsert(&MyTree{ibtp: ibtp, index: ibtp.Index})
-			pool.lock.Unlock()
-		}
-		d.gopool.Done()
-	}()
+			}()
+			d.ibtpC <- ibtp
+			index := ibtp.Index
+			ticker := time.NewTicker(time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					pool.lock.Lock()
+					if item := pool.ibtps.Min(); item != nil {
+						if item.(*MyTree).index < index+1 {
+							pool.ibtps.DeleteMin()
+						}
+
+						if item.(*MyTree).index == index+1 {
+							d.ibtpC <- item.(*MyTree).ibtp
+							pool.ibtps.DeleteMin()
+							index++
+							pool.time = time.Now()
+						}
+
+						// By default, the index will be equalized after 5 seconds
+						if time.Now().Sub(pool.time).Seconds() > 5.0 {
+							d.ibtpC <- item.(*MyTree).ibtp
+							pool.ibtps.DeleteMin()
+							index = item.(*MyTree).index
+							pool.time = time.Now()
+						}
+					}
+					pool.lock.Unlock()
+				case <-d.ctx.Done():
+					return
+				}
+			}
+		}(pool, ibtp)
+	} else {
+		pool.lock.Lock()
+		pool.ibtps.ReplaceOrInsert(&MyTree{ibtp: ibtp, index: ibtp.Index})
+		pool.lock.Unlock()
+	}
+	//d.gopool.Done()
+	//}()
 }
 
 func (d *DirectAdapter) handleGetInterchainMessage(stream network.Stream, msg *pb.Message) {

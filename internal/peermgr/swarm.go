@@ -44,6 +44,7 @@ type Swarm struct {
 	lock   sync.RWMutex
 	ctx    context.Context
 	cancel context.CancelFunc
+	wg     *sync.WaitGroup
 }
 
 // Peers maps remote peer's pierID to addrInfo, pierID indicate the appchainID for remote pier request from appchain
@@ -99,8 +100,6 @@ func New(config *repo.Config, nodePrivKey crypto.PrivateKey, privKey crypto.Priv
 		providers = defaultProvidersNum
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-
 	logger.Infof("New swarm with localID: %s, protocolIDs: %v, localAddrInfo: %s", config.Appchain.ID, protocolIDs, localAddrInfo.String())
 
 	return &Swarm{
@@ -111,12 +110,12 @@ func New(config *repo.Config, nodePrivKey crypto.PrivateKey, privKey crypto.Priv
 		privKey:       privKey,
 		localAddrInfo: localAddrInfo,
 		localPierId:   config.Appchain.ID,
-		ctx:           ctx,
-		cancel:        cancel,
+		wg:            &sync.WaitGroup{},
 	}, nil
 }
 
 func (swarm *Swarm) Start() error {
+	swarm.ctx, swarm.cancel = context.WithCancel(context.Background())
 	swarm.p2p.SetMessageHandler(swarm.handleMessage)
 
 	if err := swarm.p2p.Start(); err != nil {
@@ -124,11 +123,11 @@ func (swarm *Swarm) Start() error {
 	}
 
 	//need to connect one other pier at least
-	wg := &sync.WaitGroup{}
-	wg.Add(len(swarm.peers))
+	swarm.wg.Add(len(swarm.peers))
 
 	for id, addr := range swarm.peers {
 		go func(id string, addr *peer.AddrInfo) {
+			defer swarm.wg.Done()
 			if err := retry.Retry(func(attempt uint) error {
 				if err := swarm.p2p.Connect(*addr); err != nil {
 					if attempt != 0 && attempt%5 == 0 {
@@ -136,6 +135,13 @@ func (swarm *Swarm) Start() error {
 							"node":  id,
 							"error": err,
 						}).Error("Connect failed")
+					}
+					// gw: 这条goroutine能退出的唯一条件是：“建立连接成功”，但这很显然会存在泄漏风险，尝试用ctx拦截一下吧
+					select {
+					case <-swarm.ctx.Done():
+						swarm.logger.Warningf("connect meet error, but outer called swam.Stop, quit retry")
+						return nil
+					default:
 					}
 					return err
 				}
@@ -146,6 +152,13 @@ func (swarm *Swarm) Start() error {
 						"node":  id,
 						"error": err,
 					}).Error("Get remote address failed")
+					// gw: 原因同上，改法可以再商量
+					select {
+					case <-swarm.ctx.Done():
+						swarm.logger.Warningf("getRemotePierID meet error, but outer called swam.Stop, quit retry")
+						return nil
+					default:
+					}
 					return err
 				}
 
@@ -156,34 +169,40 @@ func (swarm *Swarm) Start() error {
 
 				swarm.connectedPeers.Store(pierId, addr)
 
-				swarm.lock.RLock()
-				defer swarm.lock.RUnlock()
-				for _, handler := range swarm.connectHandlers {
-					go func(connectHandler func(string), address string) {
-						connectHandler(address)
-					}(handler, pierId)
-				}
-				wg.Done()
+				// swarm的connectHandlers一定是空的，上层模块没有注册过
+				//swarm.lock.RLock()
+				//defer swarm.lock.RUnlock()
+				//for _, handler := range swarm.connectHandlers {
+				//	go func(connectHandler func(string), address string) {
+				//		connectHandler(address)
+				//	}(handler, pierId)
+				//}
 				return nil
-			},
-				strategy.Wait(1*time.Second),
+			}, strategy.Wait(1*time.Second),
 			); err != nil {
 				swarm.logger.Error(err)
 			}
 		}(id, addr)
 	}
 
-	wg.Wait()
+	swarm.wg.Wait()
+	swarm.logger.Infof("swarm start success")
 
 	return nil
 }
 
 func (swarm *Swarm) Stop() error {
+	swarm.logger.Infof("swarm begin to stop")
 	if err := swarm.p2p.Stop(); err != nil {
-		return err
+		swarm.logger.Errorf("libp2p stop error: %s", err.Error())
+		panic(err)
 	}
 
 	swarm.cancel()
+	// gw: 这里wait也不是不行
+	swarm.logger.Infof("swarm.wg begin to wait")
+	swarm.wg.Wait()
+	swarm.logger.Infof("swarm.wg finish wait")
 
 	return nil
 }

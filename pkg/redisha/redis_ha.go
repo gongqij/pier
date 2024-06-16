@@ -87,6 +87,7 @@ func New(conf repo.Redis, pierID string) *RedisPierMng {
 				DB:       conf.Database,
 			}
 			if conf.SelfPort > 0 {
+				// todo: 仅测试
 				opt.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
 					dialer := &net.Dialer{
 						Timeout:   5 * time.Second,
@@ -98,6 +99,7 @@ func New(conf repo.Redis, pierID string) *RedisPierMng {
 					}
 					return dialer.DialContext(ctx, network, addr)
 				}
+				opt.PoolSize = 1
 			}
 			return redis.NewClient(opt)
 		},

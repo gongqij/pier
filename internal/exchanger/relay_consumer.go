@@ -27,9 +27,20 @@ func (ex *Exchanger) listenIBTPFromSrcAdaptForRelay(servicePair string) {
 					// if err occurs, try to get new ibtp and resend
 					if err, ok := err.(*adapt.SendIbtpError); ok {
 						if err.NeedRetry() {
+							select {
+							case <-ex.ctx.Done():
+								ex.logger.Warningf("exchanger stopped, directly quit retry")
+								return nil
+							default:
+							}
 							ex.logger.Errorf("send IBTP to Adapt:%s", ex.destAdaptName, "error", err.Error())
 							// query to new ibtp
-							ibtp = ex.queryIBTP(ex.srcAdapt, ibtp.ID(), ex.isIBTPBelongSrc(ibtp))
+							var qerr error
+							ibtp, qerr = ex.queryIBTP(ex.srcAdapt, ibtp.ID(), ex.isIBTPBelongSrc(ibtp))
+							if qerr != nil {
+								ex.logger.Warningf("exchanger stopped, break destAdapt.SendIBTP retry framework")
+								return nil
+							}
 							return fmt.Errorf("retry sending ibtp")
 						}
 					}
@@ -58,9 +69,20 @@ func (ex *Exchanger) listenIBTPFromDestAdaptForRelay(servicePair string) {
 					// if err occurs, try to get new ibtp and resend
 					if err, ok := err.(*adapt.SendIbtpError); ok {
 						if err.NeedRetry() {
+							select {
+							case <-ex.ctx.Done():
+								ex.logger.Warningf("exchanger stopped, directly quit retry")
+								return nil
+							default:
+							}
 							ex.logger.Errorf("send IBTP to Adapt:%s", ex.srcAdaptName, "error", err.Error())
 							// query to new ibtp
-							ibtp = ex.queryIBTP(ex.destAdapt, ibtp.ID(), !ex.isIBTPBelongSrc(ibtp))
+							var qerr error
+							ibtp, qerr = ex.queryIBTP(ex.destAdapt, ibtp.ID(), !ex.isIBTPBelongSrc(ibtp))
+							if qerr != nil {
+								ex.logger.Warningf("exchanger stopped, break srcAdapt.SendIBTP retry framework")
+								return nil
+							}
 							return fmt.Errorf("retry sending ibtp")
 						}
 					}

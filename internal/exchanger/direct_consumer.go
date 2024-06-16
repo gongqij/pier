@@ -13,6 +13,7 @@ import (
 )
 
 func (ex *Exchanger) listenIBTPFromDestAdaptForDirect(servicePair string) {
+	defer ex.wg.Done()
 	for {
 		select {
 		case <-ex.ctx.Done():
@@ -64,6 +65,7 @@ func (ex *Exchanger) listenIBTPFromDestAdaptForDirect(servicePair string) {
 }
 
 func (ex *Exchanger) listenIBTPFromSrcAdaptForDirect(servicePair string) {
+	defer ex.wg.Done()
 	for {
 		select {
 		case <-ex.ctx.Done():
@@ -113,12 +115,13 @@ func (ex *Exchanger) isIBTPRollbackForDirect(ibtp *pb.IBTP) bool {
 	startTimeStamp, timeoutPeriod, txStatus, err := ex.srcAdapt.(*appchain_adapter.AppchainAdapter).GetDirectTransactionMeta(ibtp.ID())
 	if err != nil {
 		ex.logger.Errorf("get transaction meta with %s", ibtp.ID(), "error", err.Error())
-	}
-	ex.logger.Infof("[isIBTPRollbackForDirect] ibtp.Type: %s, startTimeStamp: %d, timeoutPeriod: %d, "+
-		"txStatus: %v, for IBTP [%s], time.Now().Unix(): %d", ibtp.Type.String(), startTimeStamp, timeoutPeriod,
-		txStatus, ibtp.ID(), time.Now().Unix())
-	if uint64(time.Now().Unix()) > startTimeStamp {
-		return uint64(time.Now().Unix())-startTimeStamp > timeoutPeriod
+	} else {
+		ex.logger.Infof("[isIBTPRollbackForDirect] ibtp.Type: %s, startTimeStamp: %d, timeoutPeriod: %d, "+
+			"txStatus: %v, for IBTP [%s], time.Now().Unix(): %d", ibtp.Type.String(), startTimeStamp, timeoutPeriod,
+			txStatus, ibtp.ID(), time.Now().Unix())
+		if uint64(time.Now().Unix()) > startTimeStamp {
+			return uint64(time.Now().Unix())-startTimeStamp > timeoutPeriod
+		}
 	}
 	return false
 }
@@ -144,9 +147,20 @@ func (ex *Exchanger) sendIBTPForDirect(fromAdapt, toAdapt adapt.Adapt, ibtp *pb.
 			// if err occurs, try to get new ibtp and resend
 			if err, ok := err.(*adapt.SendIbtpError); ok {
 				if err.NeedRetry() {
+					select {
+					case <-ex.ctx.Done():
+						ex.logger.Warningf("exchanger stopped, directly quit retry")
+						return nil
+					default:
+					}
 					ex.logger.Errorf("send IBTP to Adapt:%s", ex.destAdaptName, "error", err.Error())
 					// query to new ibtp
-					ibtp = ex.queryIBTP(fromAdapt, ibtp.ID(), isReq)
+					var qerr error
+					ibtp, qerr = ex.queryIBTP(fromAdapt, ibtp.ID(), isReq)
+					if qerr != nil {
+						ex.logger.Warningf("exchanger stopped, break SendIBTP retry framework")
+						return nil
+					}
 					// set ibtp rollback
 					if isRollback {
 						ibtp.Type = pb.IBTP_RECEIPT_ROLLBACK
