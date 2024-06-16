@@ -41,10 +41,12 @@ type Swarm struct {
 	localAddrInfo   peer.AddrInfo
 	localPierId     string
 
-	lock   sync.RWMutex
-	ctx    context.Context
-	cancel context.CancelFunc
-	wg     *sync.WaitGroup
+	lock      sync.RWMutex
+	ctx       context.Context
+	cancel    context.CancelFunc
+	wg        *sync.WaitGroup
+	started   bool
+	startLock *sync.Mutex
 }
 
 // Peers maps remote peer's pierID to addrInfo, pierID indicate the appchainID for remote pier request from appchain
@@ -111,10 +113,17 @@ func New(config *repo.Config, nodePrivKey crypto.PrivateKey, privKey crypto.Priv
 		localAddrInfo: localAddrInfo,
 		localPierId:   config.Appchain.ID,
 		wg:            &sync.WaitGroup{},
+		startLock:     &sync.Mutex{},
 	}, nil
 }
 
 func (swarm *Swarm) Start() error {
+	swarm.startLock.Lock()
+	defer swarm.startLock.Unlock()
+	if swarm.started {
+		return nil
+	}
+	swarm.started = true
 	swarm.ctx, swarm.cancel = context.WithCancel(context.Background())
 	swarm.p2p.SetMessageHandler(swarm.handleMessage)
 
@@ -192,6 +201,12 @@ func (swarm *Swarm) Start() error {
 }
 
 func (swarm *Swarm) Stop() error {
+	swarm.startLock.Lock()
+	defer swarm.startLock.Unlock()
+	if !swarm.started {
+		return nil
+	}
+	swarm.started = false
 	swarm.logger.Infof("swarm begin to stop")
 	if err := swarm.p2p.Stop(); err != nil {
 		swarm.logger.Errorf("libp2p stop error: %s", err.Error())

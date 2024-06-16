@@ -42,6 +42,8 @@ type Exchanger struct {
 	ctx             context.Context
 	cancel          context.CancelFunc
 	wg              *sync.WaitGroup
+	started         bool
+	startLock       *sync.Mutex
 }
 
 func New(typ, srcChainId, srcBxhId string, opts ...Option) (*Exchanger, error) {
@@ -59,6 +61,7 @@ func New(typ, srcChainId, srcBxhId string, opts ...Option) (*Exchanger, error) {
 		destIBTPMap:     make(map[string]chan *pb.IBTP),
 		mode:            typ,
 		wg:              &sync.WaitGroup{},
+		startLock:       &sync.Mutex{},
 	}
 	return exchanger, nil
 }
@@ -78,6 +81,12 @@ func (ex *Exchanger) checkService(appServiceList, bxhServiceList []string) error
 }
 
 func (ex *Exchanger) Start() error {
+	ex.startLock.Lock()
+	defer ex.startLock.Unlock()
+	if ex.started {
+		return nil
+	}
+	ex.started = true
 	// init meta info
 	var (
 		serviceList []string
@@ -506,6 +515,12 @@ func (ex *Exchanger) queryIBTP(adapt adapt.Adapt, ibtpID string, isReq bool) (*p
 }
 
 func (ex *Exchanger) Stop() error {
+	ex.startLock.Lock()
+	defer ex.startLock.Unlock()
+	if !ex.started {
+		return nil
+	}
+	ex.started = false
 
 	if err := ex.srcAdapt.Stop(); err != nil {
 		return fmt.Errorf("srcAdapt stop: %w", err)

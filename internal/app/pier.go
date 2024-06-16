@@ -9,6 +9,7 @@ import (
 	"github.com/meshplus/pier/pkg/redisha/signal"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/meshplus/bitxhub-core/agency"
@@ -277,6 +278,7 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 
 func (pier *Pier) startPierHA() {
 	logger.Info("pier HA manager start")
+	wg := &sync.WaitGroup{}
 	status := false
 	for {
 		select {
@@ -295,55 +297,70 @@ func (pier *Pier) startPierHA() {
 					}).Infof("Pier information of service %s", serviceID)
 				}
 
-				if pier.config.Mode.Type == repo.DirectMode && pier.config.Proxy.Enable {
-					// initialize proxy component
-					px, nerr := proxy.NewProxy(filepath.Join(pier.config.RepoRoot, repo.ProxyConfigName), pier.redisCli, pier.quitMain, loggers.Logger(loggers.Proxy))
-					if nerr != nil {
-						pier.logger.Errorf("failed to init proxy, err: %s", nerr.Error())
-						panic("failed to init proxy")
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					if pier.config.Mode.Type == repo.DirectMode && pier.config.Proxy.Enable {
+						// initialize proxy component
+						px, nerr := proxy.NewProxy(filepath.Join(pier.config.RepoRoot, repo.ProxyConfigName), pier.redisCli, pier.quitMain, loggers.Logger(loggers.Proxy))
+						if nerr != nil {
+							pier.logger.Errorf("failed to init proxy, err: %s", nerr.Error())
+							panic("failed to init proxy")
+						}
+						pier.proxy = px
+						// start up proxy component
+						if serr := pier.proxy.Start(); serr != nil {
+							pier.logger.Errorf("start up proxy error: %s", serr.Error())
+							panic("failed to start proxy")
+						}
 					}
-					pier.proxy = px
-					// start up proxy component
-					if serr := pier.proxy.Start(); serr != nil {
-						pier.logger.Errorf("start up proxy error: %s", serr.Error())
-						panic("failed to start proxy")
-					}
-				}
 
-				// special check for direct && pierHA_redis && not-first-time-in
-				// single mode will never enter this logic again, so nothing to do;
-				// union mode SKIP!!!!
-				// only direct+redis_ha is related
-				// golightp2p.Network wrap libp2p.Host, Host.New wrap host.Start(),
-				// so Host does not contain Start() interface;
-				// Besides, Host.Close() has a once.Do logic, so golightp2p.Network can not restart
-				if pier.config.Mode.Type == repo.DirectMode && pier.config.HA.Mode == "redis" {
-					nodePrivKey, _ := repo.LoadNodePrivateKey(pier.config.RepoRoot)
-					peerManager, err := peermgr.New(pier.config, nodePrivKey, pier.privateKey, 1, loggers.Logger(loggers.PeerMgr))
-					if err != nil {
-						pier.logger.Errorf("renew create peerManager error: %s", err.Error())
-						panic("create peerManager error")
+					// special check for direct && pierHA_redis && not-first-time-in
+					// single mode will never enter this logic again, so nothing to do;
+					// union mode SKIP!!!!
+					// only direct+redis_ha is related
+					// golightp2p.Network wrap libp2p.Host, Host.New wrap host.Start(),
+					// so Host does not contain Start() interface;
+					// Besides, Host.Close() has a once.Do logic, so golightp2p.Network can not restart
+					if pier.config.Mode.Type == repo.DirectMode && pier.config.HA.Mode == "redis" {
+						nodePrivKey, _ := repo.LoadNodePrivateKey(pier.config.RepoRoot)
+						peerManager, err := peermgr.New(pier.config, nodePrivKey, pier.privateKey, 1, loggers.Logger(loggers.PeerMgr))
+						if err != nil {
+							pier.logger.Errorf("renew create peerManager error: %s", err.Error())
+							panic("create peerManager error")
+						}
+						pier.exchanger.RenewPeerManager(peerManager)
 					}
-					pier.exchanger.RenewPeerManager(peerManager)
-				}
-				if err := pier.exchanger.Start(); err != nil {
-					pier.logger.Errorf("exchanger start: %s", err.Error())
-					return
-				}
+					if err := pier.exchanger.Start(); err != nil {
+						pier.logger.Errorf("exchanger start: %s", err.Error())
+						// todo: how to handle error?
+						return
+					}
+				}()
 				status = true
 			} else {
 				if !status {
 					continue
 				}
-				if err := pier.StopExchanger(); err != nil {
-					pier.logger.Errorf("pier stop exchanger: %w", err)
-					return
-				}
-				if pier.proxy != nil {
-					if err := pier.proxy.Stop(); err != nil {
-						pier.logger.Errorf("stop proxy error: %v", err)
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					if err := pier.StopExchanger(); err != nil {
+						pier.logger.Errorf("pier stop exchanger: %w", err)
+						return
 					}
-				}
+					if pier.proxy != nil {
+						if err := pier.proxy.Stop(); err != nil {
+							pier.logger.Errorf("stop proxy error: %v", err)
+						}
+					}
+				}()
+				// gw：原来的逻辑不行，是因为同一侧的两个pier，可能都能从isMain这个channel收到true（这件事是redis抢锁控制的），
+				// 但是如果对端的pier没有启动的话，那么这边的pier连stop的机会都没有；
+				// 现在的逻辑是：pier的Start函数go起来调用，无论执行到哪里，如果出现了Stop，那么Stop函数负责打断Start函数的goroutine，
+				// 并且确保由本函数启动的goroutine全部都停下来了；这样Start就不会一直阻塞了，至少有被Stop打断的机会；
+				// 最后，status的赋值和修改应该在本函数内同步完成；
+				wg.Wait()
 				status = false
 			}
 		case <-pier.ctx.Done():

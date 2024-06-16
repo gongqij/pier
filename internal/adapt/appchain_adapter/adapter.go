@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/meshplus/pier/internal/peermgr"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/meshplus/bitxhub-model/pb"
@@ -35,16 +36,20 @@ type AppchainAdapter struct {
 
 	appchainID string
 	bitxhubID  string
+
+	started   bool
+	startLock *sync.Mutex
 }
 
 const IBTP_CH_SIZE = 1024
 
 func NewAppchainAdapter(mode string, config *repo.Config, logger logrus.FieldLogger, crypto txcrypto.Cryptor) (adapt.Adapt, error) {
 	adapter := &AppchainAdapter{
-		mode:    mode,
-		config:  config,
-		cryptor: crypto,
-		logger:  logger,
+		mode:      mode,
+		config:    config,
+		cryptor:   crypto,
+		logger:    logger,
+		startLock: &sync.Mutex{},
 	}
 
 	if err := adapter.init(); err != nil {
@@ -55,6 +60,12 @@ func NewAppchainAdapter(mode string, config *repo.Config, logger logrus.FieldLog
 }
 
 func (a *AppchainAdapter) Start() error {
+	a.startLock.Lock()
+	defer a.startLock.Unlock()
+	if a.started {
+		return nil
+	}
+	a.started = true
 	if a.client == nil || a.pluginClient == nil {
 		if err := a.init(); err != nil {
 			return err
@@ -100,6 +111,12 @@ func (a *AppchainAdapter) Start() error {
 }
 
 func (a *AppchainAdapter) Stop() error {
+	a.startLock.Lock()
+	defer a.startLock.Unlock()
+	if !a.started {
+		return nil
+	}
+	a.started = false
 	if err := a.client.Stop(); err != nil {
 		return err
 	}
