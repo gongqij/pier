@@ -133,6 +133,8 @@ func (b *UnionAdapter) Stop() error {
 	return nil
 }
 
+func (b *UnionAdapter) Clear() {}
+
 func (b *UnionAdapter) SendIBTP(ibtp *pb.IBTP) error {
 	entry := b.logger.WithFields(logrus.Fields{
 		"type": ibtp.Type,

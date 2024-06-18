@@ -433,12 +433,18 @@ func (g *GRPCClient) SubmitIBTP(from string, index uint64, serviceID string, ibt
 		if err != nil {
 			logger.Error("submit ibtp to plugin server",
 				"err", err.Error())
+			select {
+			case <-g.doneContext.Done():
+				logger.Info("Plugin grpc client stopped, quit SubmitIBTP retry framework")
+				return nil
+			default:
+			}
 			return err
 		}
 		return nil
 	}, strategy.Wait(1*time.Second))
 
-	return response, nil
+	return response, err
 }
 
 func (g *GRPCClient) SubmitReceipt(to string, index uint64, serviceID string, ibtpType pb.IBTP_Type, result *pb.Result, proof *pb.BxhProof) (*pb.SubmitIBTPResponse, error) {
@@ -456,12 +462,18 @@ func (g *GRPCClient) SubmitReceipt(to string, index uint64, serviceID string, ib
 		if err != nil {
 			logger.Error("submit ibtp receipt to plugin server",
 				"err", err.Error())
+			select {
+			case <-g.doneContext.Done():
+				logger.Info("Plugin grpc client stopped, quit SubmitReceipt retry framework")
+				return nil
+			default:
+			}
 			return err
 		}
 		return nil
 	}, strategy.Wait(1*time.Second))
 
-	return response, nil
+	return response, err
 }
 
 func (g *GRPCClient) GetOutMessage(servicePair string, idx uint64) (*pb.IBTP, error) {

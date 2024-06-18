@@ -151,6 +151,8 @@ func (d *DirectAdapter) Stop() error {
 	return nil
 }
 
+func (d *DirectAdapter) Clear() {}
+
 func (d *DirectAdapter) Name() string {
 	return fmt.Sprintf("direct:%s", d.appchainID)
 }

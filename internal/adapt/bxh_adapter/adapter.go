@@ -101,6 +101,8 @@ func (b *BxhAdapter) Stop() error {
 	return nil
 }
 
+func (b *BxhAdapter) Clear() {}
+
 func (b *BxhAdapter) ID() string {
 	return fmt.Sprintf("%d", b.bxhID)
 }

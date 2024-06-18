@@ -122,10 +122,13 @@ func (a *AppchainAdapter) Stop() error {
 	}
 
 	a.pluginClient.Kill()
-	a.client = nil
-	a.pluginClient = nil
 	a.logger.Info("appchain adapter stopped")
 	return nil
+}
+
+func (a *AppchainAdapter) Clear() {
+	a.client = nil
+	a.pluginClient = nil
 }
 
 func (a *AppchainAdapter) ID() string {

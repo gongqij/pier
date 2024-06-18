@@ -531,6 +531,8 @@ func (ex *Exchanger) Stop() error {
 
 	ex.cancel()
 	ex.wg.Wait()
+	ex.srcAdapt.Clear()
+	ex.destAdapt.Clear()
 	ex.srcServiceMeta = make(map[string]*pb.Interchain)
 	ex.destServiceMeta = make(map[string]*pb.Interchain)
 	ex.srcIBTPMap = make(map[string]chan *pb.IBTP)

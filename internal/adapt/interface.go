@@ -11,6 +11,8 @@ type Adapt interface {
 	Start() error
 	// Stop stops adapt
 	Stop() error
+	// Clear will release adapter resources(set some fields to nil), currently only for AppchainAdapter
+	Clear()
 	// Name get adapt name
 	Name() string
 	// ID   get adapt ID
