@@ -79,6 +79,7 @@ func (ex *Exchanger) listenIBTPFromSrcAdaptForDirect(servicePair string) {
 			ex.logger.WithFields(logrus.Fields{"index": ibtp.Index, "type": ibtp.Type, "ibtp_id": ibtp.ID()}).Info("Receive ibtp from :", ex.srcAdaptName)
 			index := ex.getCurrentIndexFromSrc(ibtp)
 			if index >= ibtp.Index {
+				// todo: why?????????
 				if ibtp.Type == pb.IBTP_RECEIPT_ROLLBACK_END {
 					ex.sendIBTPForDirect(ex.srcAdapt, ex.destAdapt, ibtp, ex.isIBTPBelongSrc(ibtp), false)
 				} else {
