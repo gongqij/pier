@@ -37,6 +37,7 @@ type RedisPierMng struct {
 	cancel    context.CancelFunc
 
 	relMasterSignal chan interface{}
+	errch           chan error
 }
 
 func (m *RedisPierMng) Start() error {
@@ -61,7 +62,7 @@ func (m *RedisPierMng) ReleaseMain() {
 	m.relMasterSignal <- struct{}{}
 }
 
-func New(conf repo.Redis, pierID string) *RedisPierMng {
+func New(conf repo.Redis, pierID string, errch chan error) *RedisPierMng {
 	ctx, cancel := context.WithCancel(context.Background())
 	obj := &RedisPierMng{
 		isMain: make(chan bool),
@@ -70,6 +71,7 @@ func New(conf repo.Redis, pierID string) *RedisPierMng {
 		log:    loggers.Logger(loggers.App),
 		ctx:    ctx,
 		cancel: cancel,
+		errch:  errch,
 
 		relMasterSignal: make(chan interface{}, 1),
 	}
@@ -139,6 +141,11 @@ func (m *RedisPierMng) startMain() {
 				return
 			case <-m.ctx.Done():
 				_ = m.RedisCliW.MasterUnlock()
+				return
+			case err := <-m.errch:
+				m.log.Infof("[instance-%s] found system start error, quit main mode, err: %v", m.ID, err)
+				_ = m.RedisCliW.MasterUnlock()
+				m.startAux()
 				return
 			}
 		}

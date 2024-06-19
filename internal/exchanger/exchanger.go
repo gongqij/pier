@@ -7,6 +7,7 @@ import (
 	"github.com/meshplus/pier/internal/peermgr"
 	"strings"
 	"sync"
+	atomic2 "sync/atomic"
 	"time"
 
 	"github.com/Rican7/retry"
@@ -42,11 +43,15 @@ type Exchanger struct {
 	ctx             context.Context
 	cancel          context.CancelFunc
 	wg              *sync.WaitGroup
-	started         bool
-	startLock       *sync.Mutex
+
+	// 外面传进来，负责接收Start过程中的error，外面会尝试做stop，但stop可以做防重入
+	errCh chan error
+
+	// 0 -> started, 1-> stopped
+	stopped uint64
 }
 
-func New(typ, srcChainId, srcBxhId string, opts ...Option) (*Exchanger, error) {
+func New(typ, srcChainId, srcBxhId string, errCh chan error, opts ...Option) (*Exchanger, error) {
 	config := GenerateConfig(opts...)
 
 	exchanger := &Exchanger{
@@ -61,9 +66,18 @@ func New(typ, srcChainId, srcBxhId string, opts ...Option) (*Exchanger, error) {
 		destIBTPMap:     make(map[string]chan *pb.IBTP),
 		mode:            typ,
 		wg:              &sync.WaitGroup{},
-		startLock:       &sync.Mutex{},
+
+		errCh:   errCh,
+		stopped: 1,
 	}
 	return exchanger, nil
+}
+
+func (ex *Exchanger) pushErr(err error) {
+	select {
+	case ex.errCh <- err:
+	default:
+	}
 }
 
 func (ex *Exchanger) checkService(appServiceList, bxhServiceList []string) error {
@@ -81,12 +95,6 @@ func (ex *Exchanger) checkService(appServiceList, bxhServiceList []string) error
 }
 
 func (ex *Exchanger) Start() error {
-	ex.startLock.Lock()
-	defer ex.startLock.Unlock()
-	if ex.started {
-		return nil
-	}
-	ex.started = true
 	// init meta info
 	var (
 		serviceList []string
@@ -94,6 +102,7 @@ func (ex *Exchanger) Start() error {
 	)
 	// gw: 首先，既然是stop里面做cancel，那么ctx和cancel至少得是在start里面创建的
 	ex.ctx, ex.cancel = context.WithCancel(context.Background())
+	atomic2.CompareAndSwapUint64(&ex.stopped, 1, 0)
 
 	// start get ibtp to channel
 	if err := ex.srcAdapt.Start(); err != nil {
@@ -106,92 +115,104 @@ func (ex *Exchanger) Start() error {
 		return err
 	}
 
-	ex.srcAdaptName = ex.srcAdapt.Name()
-	ex.destAdaptName = ex.destAdapt.Name()
-
-	if err := retry.Retry(func(attempt uint) error {
-		if serviceList, err = ex.srcAdapt.GetServiceIDList(); err != nil {
-			ex.logger.Errorf("get serviceIdList from srcAdapt", "error", err.Error())
-			select {
-			case <-ex.ctx.Done():
-				ex.logger.Warningf("exchanger stopped, directly quit retry")
-				return nil
-			default:
-			}
-			return err
-		}
-		return nil
-	}, strategy.Wait(3*time.Second)); err != nil {
-		return fmt.Errorf("retry error to get serviceIdList from srcAdapt: %w", err)
-	}
-
-	for _, serviceId := range serviceList {
-		ex.srcServiceMeta[serviceId], err = ex.srcAdapt.QueryInterchain(serviceId)
-		if err != nil {
-			return fmt.Errorf("queryInterchain from srcAdapt: %w", err)
-		}
+	ex.wg.Add(1)
+	go func() {
+		defer ex.wg.Done()
+		ex.srcAdaptName = ex.srcAdapt.Name()
+		ex.destAdaptName = ex.destAdapt.Name()
 
 		if err := retry.Retry(func(attempt uint) error {
-			if ex.destServiceMeta[serviceId], err = ex.destAdapt.QueryInterchain(serviceId); err != nil {
-				// maybe peerMgr err cause QueryInterchain err, so retry it
-				ex.logger.Errorf("queryInterchain from destAdapt: %w", err)
+			if serviceList, err = ex.srcAdapt.GetServiceIDList(); err != nil {
+				ex.logger.Errorf("get serviceIdList from srcAdapt", "error", err.Error())
 				select {
 				case <-ex.ctx.Done():
 					ex.logger.Warningf("exchanger stopped, directly quit retry")
 					return nil
 				default:
 				}
-			}
-			return err
-		}, strategy.Backoff(backoff.Fibonacci(1*time.Second))); err != nil {
-			ex.logger.Errorf("retry err with queryInterchain: %w", err)
-		}
-		ex.logger.Infof("-----ex.srcServiceMeta[%s]: %v", serviceId, ex.srcServiceMeta[serviceId])
-		ex.logger.Infof("-----ex.srcServiceMeta[%s]: %v", serviceId, ex.destServiceMeta[serviceId])
-	}
-
-	if repo.RelayMode == ex.mode {
-		bxhServiceList := make([]string, 0)
-		if err = retry.Retry(func(attempt uint) error {
-			bxhServiceList, err = ex.destAdapt.GetServiceIDList()
-			if err != nil {
-				ex.logger.Errorf("bxhAdapter GetServiceIDList err:%s", err)
 				return err
 			}
 			return nil
-		}, strategy.Wait(2*time.Second)); err != nil {
-			return err
+		}, strategy.Wait(3*time.Second)); err != nil {
+			ex.logger.Errorf("retry error to get serviceIdList from srcAdapt: %w", err)
+			ex.pushErr(err)
+			return
 		}
 
-		err = ex.checkService(serviceList, bxhServiceList)
-		if err != nil {
-			panic(err)
+		for _, serviceId := range serviceList {
+			ex.srcServiceMeta[serviceId], err = ex.srcAdapt.QueryInterchain(serviceId)
+			if err != nil {
+				ex.logger.Errorf("queryInterchain from srcAdapt: %w", err)
+				ex.pushErr(err)
+				return
+			}
+
+			if err := retry.Retry(func(attempt uint) error {
+				if ex.destServiceMeta[serviceId], err = ex.destAdapt.QueryInterchain(serviceId); err != nil {
+					// maybe peerMgr err cause QueryInterchain err, so retry it
+					ex.logger.Errorf("queryInterchain from destAdapt: %w", err)
+					select {
+					case <-ex.ctx.Done():
+						ex.logger.Warningf("exchanger stopped, directly quit retry")
+						return nil
+					default:
+					}
+				}
+				return err
+			}, strategy.Backoff(backoff.Fibonacci(1*time.Second))); err != nil {
+				ex.logger.Errorf("retry err with queryInterchain: %w", err)
+				ex.pushErr(err)
+				return
+			}
+			ex.logger.Infof("-----ex.srcServiceMeta[%s]: %v", serviceId, ex.srcServiceMeta[serviceId])
+			ex.logger.Infof("-----ex.srcServiceMeta[%s]: %v", serviceId, ex.destServiceMeta[serviceId])
 		}
-	}
 
-	if repo.UnionMode == ex.mode {
-		ex.recoverUnion(ex.srcServiceMeta, ex.destServiceMeta)
-		// add self_interchains to srcServiceMeta
-		ex.fillSelfInterchain()
-	} else {
-		// gw: 如果在srcServiceMeta或者destServiceMeta初始化的过程中出现了Stop，那么这两个map可能没有被成功的初始化，recover函数不接受这样的场景；
-		// 因此这里需要判断一下是否存在Stop打断了上述初始化的情况，如果是，则直接返回error
-		select {
-		case <-ex.ctx.Done():
-			ex.logger.Warningf("exchanger stopped, directly quit retry")
-			return errors.New("exchanger stopped, ")
-		default:
+		if repo.RelayMode == ex.mode {
+			bxhServiceList := make([]string, 0)
+			if err = retry.Retry(func(attempt uint) error {
+				bxhServiceList, err = ex.destAdapt.GetServiceIDList()
+				if err != nil {
+					ex.logger.Errorf("bxhAdapter GetServiceIDList err:%s", err)
+					return err
+				}
+				return nil
+			}, strategy.Wait(2*time.Second)); err != nil {
+				ex.pushErr(err)
+				return
+			}
+
+			err = ex.checkService(serviceList, bxhServiceList)
+			if err != nil {
+				panic(err)
+			}
 		}
-		ex.recover(ex.srcServiceMeta, ex.destServiceMeta)
-	}
 
-	ex.wg.Add(2)
-	// start consumer
-	go ex.listenIBTPFromSrcAdaptToServicePairCh()
-	go ex.listenIBTPFromDestAdaptToServicePairCh()
+		if repo.UnionMode == ex.mode {
+			ex.recoverUnion(ex.srcServiceMeta, ex.destServiceMeta)
+			// add self_interchains to srcServiceMeta
+			ex.fillSelfInterchain()
+		} else {
+			// gw: 如果在srcServiceMeta或者destServiceMeta初始化的过程中出现了Stop，那么这两个map可能没有被成功的初始化，recover函数不接受这样的场景；
+			// 因此这里需要判断一下是否存在Stop打断了上述初始化的情况，如果是，则直接返回error
+			select {
+			case <-ex.ctx.Done():
+				ex.logger.Warningf("exchanger stopped, directly quit retry")
+				ex.pushErr(errors.New("exchanger stopped, start returned"))
+				return
+			default:
+			}
+			ex.recover(ex.srcServiceMeta, ex.destServiceMeta)
+		}
 
-	ex.logger.Info("Exchanger started")
+		ex.wg.Add(2)
+		// start consumer
+		go ex.listenIBTPFromSrcAdaptToServicePairCh()
+		go ex.listenIBTPFromDestAdaptToServicePairCh()
+		ex.logger.Info("Exchanger goroutine started")
+	}()
 	//go ex.analysisDirectTPS()
+	ex.logger.Info("Exchanger started")
 	return nil
 }
 
@@ -517,12 +538,11 @@ func (ex *Exchanger) queryIBTP(adapt adapt.Adapt, ibtpID string, isReq bool) (*p
 }
 
 func (ex *Exchanger) Stop() error {
-	ex.startLock.Lock()
-	defer ex.startLock.Unlock()
-	if !ex.started {
+	// 防重入
+	if !atomic2.CompareAndSwapUint64(&ex.stopped, 0, 1) {
+		ex.logger.Warningf("cannot call stop when stopped == 1")
 		return nil
 	}
-	ex.started = false
 
 	if err := ex.srcAdapt.Stop(); err != nil {
 		return fmt.Errorf("srcAdapt stop: %w", err)

@@ -38,8 +38,6 @@ type DirectAdapter struct {
 	cancel          context.CancelFunc
 	gopool          *pool
 	wg              *sync.WaitGroup
-	started         bool
-	startLock       *sync.Mutex
 }
 
 func (d *DirectAdapter) ID() string {
@@ -70,19 +68,13 @@ func New(peerMgr peermgr.PeerManager, appchainAdapt adapt.Adapt, logger logrus.F
 		appchainID:    appchainID,
 		gopool:        NewGoPool(runtime.GOMAXPROCS(runtime.NumCPU())),
 		wg:            &sync.WaitGroup{},
-		startLock:     &sync.Mutex{},
 	}
 
 	return da, nil
 }
 
 func (d *DirectAdapter) Start() error {
-	d.startLock.Lock()
-	defer d.startLock.Unlock()
-	if d.started {
-		return nil
-	}
-	d.started = true
+
 	d.ctx, d.cancel = context.WithCancel(context.Background())
 	if d.ibtpC == nil {
 		d.ibtpC = make(chan *pb.IBTP, maxChSize)
@@ -124,12 +116,7 @@ func (d *DirectAdapter) Start() error {
 }
 
 func (d *DirectAdapter) Stop() error {
-	d.startLock.Lock()
-	defer d.startLock.Unlock()
-	if !d.started {
-		return nil
-	}
-	d.started = false
+
 	d.logger.Infof("DirectAdapter stop")
 	if d.peerMgr != nil {
 		err := d.peerMgr.Stop()

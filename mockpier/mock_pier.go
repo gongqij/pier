@@ -29,6 +29,9 @@ type MockPier struct {
 	repoRoot string
 	proxy    proxy.Proxy
 	quitMain signal.QuitMainSignal
+
+	// 负责接收Start过程中的error，外面会尝试做stop，但stop可以做防重入
+	errCh chan error
 }
 
 func NewMockPier(repoRoot string) (*MockPier, error) {
@@ -57,7 +60,9 @@ func NewMockPier(repoRoot string) (*MockPier, error) {
 	loggers.Logger(loggers.App).Infof("redis.send_lease_timeout: %d", config.Redis.SendLeaseTimeout)
 	loggers.Logger(loggers.App).Infof("redis.proxy_enable: %v", config.Proxy.Enable)
 
-	rpm := redisha.New(config.Redis, config.Appchain.ID)
+	errCh := make(chan error)
+
+	rpm := redisha.New(config.Redis, config.Appchain.ID, errCh)
 	mockPier := &MockPier{
 		nodePriv: nodePrivKey,
 		pierHA:   rpm,
@@ -66,6 +71,7 @@ func NewMockPier(repoRoot string) (*MockPier, error) {
 		config:   config,
 		repoRoot: repoRoot,
 		quitMain: rpm,
+		errCh:    errCh,
 	}
 
 	return mockPier, nil
@@ -129,7 +135,7 @@ func (mp *MockPier) startPierHA() {
 				// Besides, Host.Close() has a once.Do logic, so golightp2p.Network can not restart
 				//if pier.config.Mode.Type == repo.DirectMode && pier.config.HA.Mode == "redis" && !firstBeMain {
 				if mp.config.Mode.Type == repo.DirectMode && mp.config.HA.Mode == "redis" {
-					peerManager, err := peermgr.New(mp.config, mp.nodePriv, nil, 1, loggers.Logger(loggers.PeerMgr))
+					peerManager, err := peermgr.New(mp.config, mp.nodePriv, nil, 1, mp.errCh, loggers.Logger(loggers.PeerMgr))
 					if err != nil {
 						mp.log.Errorf("renew create peerManager error: %s", err.Error())
 						panic("create peerManager error")

@@ -9,6 +9,7 @@ import (
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
+	"sync/atomic"
 )
 
 type Proxy interface {
@@ -25,6 +26,8 @@ type ProxyImpl struct {
 
 	sendCh chan *common.Data
 	recvCh chan *common.Data
+
+	stopped uint64
 }
 
 func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.QuitMainSignal, log logrus.FieldLogger) (Proxy, error) {
@@ -51,12 +54,16 @@ func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.Qui
 		myTCP:  mtcp,
 		myHTTP: mhttp,
 
-		sendCh: sendCh,
-		recvCh: recvCh,
+		sendCh:  sendCh,
+		recvCh:  recvCh,
+		stopped: 1,
 	}, nil
 }
 
 func (p ProxyImpl) Start() error {
+
+	atomic.CompareAndSwapUint64(&p.stopped, 1, 0)
+
 	err := p.myHTTP.Start()
 	if err != nil {
 		return err
@@ -71,6 +78,12 @@ func (p ProxyImpl) Start() error {
 }
 
 func (p ProxyImpl) Stop() error {
+	// 防重入
+	if !atomic.CompareAndSwapUint64(&p.stopped, 0, 1) {
+		p.log.Warningf("cannot call stop when stopped == 1")
+		return nil
+	}
+
 	err := p.myHTTP.Stop()
 	if err != nil {
 		return err

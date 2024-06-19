@@ -37,19 +37,17 @@ type AppchainAdapter struct {
 	appchainID string
 	bitxhubID  string
 
-	started   bool
-	startLock *sync.Mutex
+	wg sync.WaitGroup
 }
 
 const IBTP_CH_SIZE = 1024
 
 func NewAppchainAdapter(mode string, config *repo.Config, logger logrus.FieldLogger, crypto txcrypto.Cryptor) (adapt.Adapt, error) {
 	adapter := &AppchainAdapter{
-		mode:      mode,
-		config:    config,
-		cryptor:   crypto,
-		logger:    logger,
-		startLock: &sync.Mutex{},
+		mode:    mode,
+		config:  config,
+		cryptor: crypto,
+		logger:  logger,
 	}
 
 	if err := adapter.init(); err != nil {
@@ -60,12 +58,6 @@ func NewAppchainAdapter(mode string, config *repo.Config, logger logrus.FieldLog
 }
 
 func (a *AppchainAdapter) Start() error {
-	a.startLock.Lock()
-	defer a.startLock.Unlock()
-	if a.started {
-		return nil
-	}
-	a.started = true
 	if a.client == nil || a.pluginClient == nil {
 		if err := a.init(); err != nil {
 			return err
@@ -76,7 +68,9 @@ func (a *AppchainAdapter) Start() error {
 		return err
 	}
 
+	a.wg.Add(1)
 	go func() {
+		defer a.wg.Done()
 		// gw: a.client.GetIBTPCh()这玩意退出以后，ibtpC会被close，这里的goroutine也就可以退出了
 		ibtpC := a.client.GetIBTPCh()
 		if ibtpC != nil {
@@ -111,15 +105,11 @@ func (a *AppchainAdapter) Start() error {
 }
 
 func (a *AppchainAdapter) Stop() error {
-	a.startLock.Lock()
-	defer a.startLock.Unlock()
-	if !a.started {
-		return nil
-	}
-	a.started = false
+
 	if err := a.client.Stop(); err != nil {
 		return err
 	}
+	a.wg.Wait()
 
 	a.pluginClient.Kill()
 	a.logger.Info("appchain adapter stopped")

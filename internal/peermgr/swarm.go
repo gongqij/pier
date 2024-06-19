@@ -41,12 +41,12 @@ type Swarm struct {
 	localAddrInfo   peer.AddrInfo
 	localPierId     string
 
-	lock      sync.RWMutex
-	ctx       context.Context
-	cancel    context.CancelFunc
-	wg        *sync.WaitGroup
-	started   bool
-	startLock *sync.Mutex
+	lock   sync.RWMutex
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     *sync.WaitGroup
+	// 外面传进来，负责接收Start过程中的error，外面会尝试做stop，但stop可以做防重入
+	errCh chan error
 }
 
 // Peers maps remote peer's pierID to addrInfo, pierID indicate the appchainID for remote pier request from appchain
@@ -63,7 +63,7 @@ func (swarm *Swarm) Peers() map[string]*peer.AddrInfo {
 	return m
 }
 
-func New(config *repo.Config, nodePrivKey crypto.PrivateKey, privKey crypto.PrivateKey, providers uint64, logger logrus.FieldLogger) (*Swarm, error) {
+func New(config *repo.Config, nodePrivKey crypto.PrivateKey, privKey crypto.PrivateKey, providers uint64, errch chan error, logger logrus.FieldLogger) (*Swarm, error) {
 	libp2pPrivKey, err := convertToLibp2pPrivKey(nodePrivKey)
 	if err != nil {
 		return nil, fmt.Errorf("convert node private key: %w", err)
@@ -113,17 +113,11 @@ func New(config *repo.Config, nodePrivKey crypto.PrivateKey, privKey crypto.Priv
 		localAddrInfo: localAddrInfo,
 		localPierId:   config.Appchain.ID,
 		wg:            &sync.WaitGroup{},
-		startLock:     &sync.Mutex{},
+		errCh:         errch,
 	}, nil
 }
 
 func (swarm *Swarm) Start() error {
-	swarm.startLock.Lock()
-	defer swarm.startLock.Unlock()
-	if swarm.started {
-		return nil
-	}
-	swarm.started = true
 	swarm.ctx, swarm.cancel = context.WithCancel(context.Background())
 	swarm.p2p.SetMessageHandler(swarm.handleMessage)
 
@@ -132,7 +126,8 @@ func (swarm *Swarm) Start() error {
 	}
 
 	//need to connect one other pier at least
-	swarm.wg.Add(len(swarm.peers))
+	count := len(swarm.peers)
+	swarm.wg.Add(count)
 
 	for id, addr := range swarm.peers {
 		go func(id string, addr *peer.AddrInfo) {
@@ -190,23 +185,22 @@ func (swarm *Swarm) Start() error {
 			}, strategy.Wait(1*time.Second),
 			); err != nil {
 				swarm.logger.Error(err)
+				count--
+				if count <= 0 {
+					// 如果一个都没有连接上，应该推 errCh 通知最外层
+					swarm.pushErr(err)
+				}
+				return
 			}
 		}(id, addr)
 	}
 
-	swarm.wg.Wait()
 	swarm.logger.Infof("swarm start success")
 
 	return nil
 }
 
 func (swarm *Swarm) Stop() error {
-	swarm.startLock.Lock()
-	defer swarm.startLock.Unlock()
-	if !swarm.started {
-		return nil
-	}
-	swarm.started = false
 	swarm.logger.Infof("swarm begin to stop")
 	if err := swarm.p2p.Stop(); err != nil {
 		swarm.logger.Errorf("libp2p stop error: %s", err.Error())
@@ -220,6 +214,13 @@ func (swarm *Swarm) Stop() error {
 	swarm.logger.Infof("swarm.wg finish wait")
 
 	return nil
+}
+
+func (swarm *Swarm) pushErr(err error) {
+	select {
+	case swarm.errCh <- err:
+	default:
+	}
 }
 
 func (swarm *Swarm) AsyncSend(id basicMgr.KeyType, msg *pb.Message) error {
