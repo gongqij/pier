@@ -146,6 +146,8 @@ func (ex *Exchanger) Start() error {
 		}, strategy.Backoff(backoff.Fibonacci(1*time.Second))); err != nil {
 			ex.logger.Errorf("retry err with queryInterchain: %w", err)
 		}
+		ex.logger.Infof("-----ex.srcServiceMeta[%s]: %v", serviceId, ex.srcServiceMeta[serviceId])
+		ex.logger.Infof("-----ex.srcServiceMeta[%s]: %v", serviceId, ex.destServiceMeta[serviceId])
 	}
 
 	if repo.RelayMode == ex.mode {

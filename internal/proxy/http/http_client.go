@@ -3,15 +3,12 @@ package http
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	json "github.com/json-iterator/go"
 	"github.com/meshplus/pier/internal/proxy/common"
 	"github.com/meshplus/pier/internal/proxy/config"
-	"github.com/sirupsen/logrus"
-	mspconf "github.com/ultramesh/flato-msp-cert/config"
-	"github.com/ultramesh/flato-msp-cert/plugin"
-	"github.com/ultramesh/flato-msp-cert/primitives/x509"
-	"github.com/ultramesh/flato-msp-cert/tls"
 	"io"
 	"net"
 	"net/http"
@@ -20,7 +17,7 @@ import (
 	"time"
 )
 
-func newClient(conf *config.ProxyConfig, log logrus.FieldLogger) *http.Client {
+func newClient(conf *config.ProxyConfig) *http.Client {
 	tr := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -43,24 +40,18 @@ func newClient(conf *config.ProxyConfig, log logrus.FieldLogger) *http.Client {
 		if err != nil {
 			panic(fmt.Sprintf("read tlsCA from %s failed", tlsCAPath))
 		}
-		engine, err := plugin.GetCryptoEngine(mspconf.GetMSPClassicConfig(), &loggerWrapper{logger: log})
-		if err != nil {
-			panic("GetCryptoEngine  failed")
-		}
-		pool.AppendCertsFromPEM(engine, caCrt)
+		pool.AppendCertsFromPEM(caCrt)
 
-		cliCrt, err := tls.LoadX509KeyPairs(engine, tlsCertPath, tlsCertPrivPath)
+		cliCrt, err := tls.LoadX509KeyPair(tlsCertPath, tlsCertPrivPath)
 		if err != nil {
 			panic(fmt.Sprintf("read tlspeerCert from %s and %s failed", tlsCertPath, tlsCertPrivPath))
 		}
 
 		cfg := &tls.Config{
-			ServerName: conf.SecurityTLSDomain,
-			RootCAs:    pool,
-			Engine:     engine,
+			ServerName:   conf.SecurityTLSDomain,
+			RootCAs:      pool,
+			Certificates: []tls.Certificate{cliCrt},
 		}
-		cfg.Certificates = cliCrt
-		cfg.BuildNameToCertificate()
 
 		tr.DialTLSContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			tlsConn, err := tls.DialWithDialer(&net.Dialer{

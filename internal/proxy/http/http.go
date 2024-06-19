@@ -2,6 +2,8 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	json "github.com/json-iterator/go"
 	"github.com/meshplus/pier/internal/proxy/common"
@@ -9,13 +11,11 @@ import (
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
-	msp "github.com/ultramesh/flato-msp"
-	mspcert "github.com/ultramesh/flato-msp-cert"
-	"github.com/ultramesh/flato-msp-cert/plugin"
 	"golang.org/x/net/http2"
 	"math"
 	"net"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
@@ -64,7 +64,7 @@ func New(redisCli rediscli.Wrapper, quitMain signal.QuitMainSignal, send chan *c
 			Handler:     mux,
 			ReadTimeout: conf.HTTPRequestTimeout,
 		},
-		httpCli:   newClient(conf, log),
+		httpCli:   newClient(conf),
 		redisCli:  redisCli,
 		quitMain:  quitMain,
 		requestID: 1,
@@ -104,17 +104,33 @@ func (h *Http) startHttpServer() error {
 	)
 
 	if h.conf.SecurityTLSEnable {
-		tls := mspcert.GetTLS(plugin.GetSoftwareEngine(msp.NoneKeyStore))
-		tls, nerr := tls.NewServer(h.conf.SecurityTLSCAPath, h.conf.SecurityTLSCertPath, h.conf.SecurityTLSPrivPath, h.conf.HTTP2Enable)
-		if nerr != nil {
-			h.log.Errorf("create tls server error: %s", nerr.Error())
-			return nerr
+		// load server certificate and key
+		serverCert, err := tls.LoadX509KeyPair(h.conf.SecurityTLSCertPath, h.conf.SecurityTLSPrivPath)
+		if err != nil {
+			h.log.Errorf("failed to load server certificate and key: %v", err)
+			return err
+		}
+		// load CA certificate
+		caCert, err := os.ReadFile(h.conf.SecurityTLSCAPath)
+		if err != nil {
+			h.log.Errorf("failed to read CA certificate: %v", err)
+			return err
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		// create a TLS config
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{serverCert},
+			ClientCAs:    caCertPool,
+			ClientAuth:   tls.RequireAndVerifyClientCert,
 		}
 		// start http listener with secure connection and http/2
-		if listener, lerr = tls.Listen("tcp", fmt.Sprintf(":%d", h.conf.HTTPPort)); lerr != nil {
+		if listener, lerr = tls.Listen("tcp", fmt.Sprintf(":%d", h.conf.HTTPPort), tlsConfig); lerr != nil {
 			h.log.Errorf("failed to listen tls service, Err: %v", lerr)
 			return lerr
 		}
+
 		if h.conf.HTTP2Enable {
 			// http2, https
 			h.log.Infof("starting http/2 service at port %v ... , secure connection is enabled.", h.conf.HTTPPort)
