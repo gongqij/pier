@@ -27,6 +27,7 @@ type ProxyImpl struct {
 	sendCh chan *common.Data
 	recvCh chan *common.Data
 
+	// 1 means the proxy has stopped or not started
 	stopped uint64
 }
 

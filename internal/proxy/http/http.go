@@ -141,6 +141,7 @@ func (h *Http) startHttpServer() error {
 		}
 	} else {
 		listener, lerr = net.Listen("tcp", fmt.Sprintf(":%d", h.conf.HTTPPort))
+		h.log.Infof("starting http/1.1 service at port %v ... , secure connection is disable.", h.conf.HTTPPort)
 	}
 
 	if lerr != nil {
@@ -157,6 +158,7 @@ func (h *Http) readTcpLoop() {
 	for {
 		select {
 		case <-h.stopped:
+			h.log.Info("quit readTcpLoop")
 			return
 		case data := <-h.recv:
 			// receive data from tcp layer
@@ -189,6 +191,7 @@ func (h *Http) switchSignalLoop() {
 	for {
 		select {
 		case <-h.stopped:
+			h.log.Info("quit switchSignalLoop")
 			return
 		case <-timer.C:
 			badCount := 0
