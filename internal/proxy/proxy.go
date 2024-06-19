@@ -84,6 +84,7 @@ func (p ProxyImpl) Stop() error {
 		p.log.Warningf("cannot call stop when stopped == 1")
 		return nil
 	}
+	p.log.Info("start to stop proxy......")
 
 	err := p.myHTTP.Stop()
 	if err != nil {
