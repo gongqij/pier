@@ -76,7 +76,8 @@ type Relay struct {
 }
 
 type Direct struct {
-	GasLimit uint64 `toml:"gas_limit" json:"gas_limit"`
+	GasLimit         uint64 `toml:"gas_limit" json:"gas_limit"`
+	RemoteAppchainID string `mapstructure:"remote_appchain_id" toml:"remote_appchain_id" json:"remote_appchain_id"`
 }
 
 type Union struct {

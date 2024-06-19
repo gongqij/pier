@@ -36,6 +36,7 @@ bitxhub_id = "1356"
 enable_offchain_transmission = false
 [mode.direct]
 gas_limit = 0x5f5e100
+remote_appchain_id = "hpc2"
 
 [mode.union]
 addrs = ["localhost:60011", "localhost:60012", "localhost:60013", "localhost:60014"]

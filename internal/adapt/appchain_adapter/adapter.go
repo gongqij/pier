@@ -109,9 +109,9 @@ func (a *AppchainAdapter) Stop() error {
 	if err := a.client.Stop(); err != nil {
 		return err
 	}
-	a.wg.Wait()
 
 	a.pluginClient.Kill()
+	a.wg.Wait()
 	a.logger.Info("appchain adapter stopped")
 	return nil
 }
@@ -273,35 +273,40 @@ func (a *AppchainAdapter) QueryInterchain(serviceID string) (*pb.Interchain, err
 		for _, value := range services {
 			if strings.EqualFold(serviceID, value) {
 				a.logger.Infof("plugin QueryInterchain enter findSelfInterchain for %s", serviceID)
-				return findSelfInterchain(serviceID, outMeta, callbackMeta, inMeta)
+				return findSelfInterchain(serviceID, outMeta, callbackMeta, inMeta, a.logger)
 			}
 		}
 		a.logger.Infof("plugin QueryInterchain enter findRemoteInterchain for %s", serviceID)
 		return findRemoteInterchain(serviceID, outMeta, callbackMeta, inMeta, a.logger)
 	}
-	return findSelfInterchain(serviceID, outMeta, callbackMeta, inMeta)
+	return findSelfInterchain(serviceID, outMeta, callbackMeta, inMeta, a.logger)
 }
 
-func findSelfInterchain(serviceID string, outMeta map[string]uint64, callbackMeta map[string]uint64, inMeta map[string]uint64) (*pb.Interchain, error) {
+func findSelfInterchain(serviceID string, outMeta map[string]uint64, callbackMeta map[string]uint64, inMeta map[string]uint64, logger logrus.FieldLogger) (*pb.Interchain, error) {
+	logger.Infof("--------remoteServiceID: %s, outMeta: %v, callbackMeta: %v, inMeta: %v", serviceID, outMeta, callbackMeta, inMeta)
 	interchainCounter, err := filterMap(outMeta, serviceID, true)
 	if err != nil {
 		return nil, err
 	}
+	logger.Infof("-------got interchainCounter: %v", interchainCounter)
 
 	receiptCounter, err := filterMap(callbackMeta, serviceID, true)
 	if err != nil {
 		return nil, err
 	}
+	logger.Infof("-------got receiptCounter: %v", receiptCounter)
 
 	sourceInterchainCounter, err := filterMap(inMeta, serviceID, false)
 	if err != nil {
 		return nil, err
 	}
+	logger.Infof("-------got sourceInterchainCounter: %v", sourceInterchainCounter)
 
 	sourceReceiptCounter, err := filterMap(inMeta, serviceID, false)
 	if err != nil {
 		return nil, err
 	}
+	logger.Infof("-------got sourceReceiptCounter: %v", sourceReceiptCounter)
 
 	return &pb.Interchain{
 		ID:                      serviceID,

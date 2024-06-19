@@ -56,7 +56,7 @@ func (d *DirectAdapter) GetServiceIDList() ([]string, error) {
 	panic("implement me")
 }
 
-func New(peerMgr peermgr.PeerManager, appchainAdapt adapt.Adapt, logger logrus.FieldLogger) (*DirectAdapter, error) {
+func New(peerMgr peermgr.PeerManager, appchainAdapt adapt.Adapt, logger logrus.FieldLogger, remoteAppchainID string) (*DirectAdapter, error) {
 
 	appchainID := appchainAdapt.ID()
 	da := &DirectAdapter{
@@ -68,6 +68,7 @@ func New(peerMgr peermgr.PeerManager, appchainAdapt adapt.Adapt, logger logrus.F
 		appchainID:    appchainID,
 		gopool:        NewGoPool(runtime.GOMAXPROCS(runtime.NumCPU())),
 		wg:            &sync.WaitGroup{},
+		remotePierID:  remoteAppchainID,
 	}
 
 	return da, nil
@@ -101,14 +102,6 @@ func (d *DirectAdapter) Start() error {
 	}
 
 	// todo: support multi peers
-	connectedNum := d.peerMgr.CountConnectedPeers()
-	if connectedNum != 1 {
-		return fmt.Errorf("direct adapter connect just 1 remote pier, the actual remote num is : %d",
-			connectedNum)
-	}
-	for pierID, _ := range d.peerMgr.Peers() {
-		d.remotePierID = pierID
-	}
 
 	d.logger.Info("direct adapter start")
 

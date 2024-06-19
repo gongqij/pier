@@ -108,7 +108,7 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 			return nil, fmt.Errorf("new appchain adapter: %w", err)
 		}
 
-		directAdapter, err := direct_adapter.New(peerManager, appchainAdapter, loggers.Logger(loggers.Direct))
+		directAdapter, err := direct_adapter.New(peerManager, appchainAdapter, loggers.Logger(loggers.Direct), config.Mode.Direct.RemoteAppchainID)
 		if err != nil {
 			return nil, fmt.Errorf("new direct adapter: %w", err)
 		}
