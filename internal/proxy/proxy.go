@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"errors"
 	"fmt"
 	"github.com/meshplus/pier/internal/proxy/common"
 	"github.com/meshplus/pier/internal/proxy/config"
@@ -61,9 +62,11 @@ func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.Qui
 	}, nil
 }
 
-func (p ProxyImpl) Start() error {
+func (p *ProxyImpl) Start() error {
 
-	atomic.CompareAndSwapUint64(&p.stopped, 1, 0)
+	if !atomic.CompareAndSwapUint64(&p.stopped, 1, 0) {
+		return errors.New("proxy.stopped is not 1, start failed")
+	}
 
 	err := p.myHTTP.Start()
 	if err != nil {
@@ -78,7 +81,7 @@ func (p ProxyImpl) Start() error {
 	return nil
 }
 
-func (p ProxyImpl) Stop() error {
+func (p *ProxyImpl) Stop() error {
 	// 防重入
 	if !atomic.CompareAndSwapUint64(&p.stopped, 0, 1) {
 		p.log.Warningf("cannot call stop when stopped == 1")
