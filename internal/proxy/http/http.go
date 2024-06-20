@@ -231,19 +231,19 @@ func (h *Http) switchSignalLoop() {
 				if err != nil {
 					h.log.Debug(err)
 					badCount++
-					h.log.Infof("keepalive error: %s, failedCount = %v", err.Error(), badCount)
+					h.log.Infof("keepalive error: %s, failedCount = %v", err.Error(), allBadCount)
 					continue
 				}
 				if response == nil {
 					badCount++
-					h.log.Errorf("response is nil, failedCount = %v", badCount)
+					h.log.Errorf("response is nil, failedCount = %v", allBadCount)
 					continue
 				}
 				if response.StatusCode == http.StatusOK {
 					h.log.Debug("node " + url + " keepalive signal Success!")
 				} else {
 					badCount++
-					h.log.Errorf("response status code is %v, failedCount = %v", response.StatusCode, badCount)
+					h.log.Errorf("response status code is %v, failedCount = %v", response.StatusCode, allBadCount)
 				}
 
 				response.Body.Close()
@@ -254,6 +254,7 @@ func (h *Http) switchSignalLoop() {
 			}
 			if badCount == len(h.nodes) {
 				allBadCount++
+				h.log.Infof("all bad count is %v", allBadCount)
 			} else {
 				allBadCount = 0
 			}
