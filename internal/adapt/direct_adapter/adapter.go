@@ -114,8 +114,7 @@ func (d *DirectAdapter) Stop() error {
 	if d.peerMgr != nil {
 		err := d.peerMgr.Stop()
 		if err != nil {
-			d.logger.Infof("DirectAdapter stop peerManager error: %s", err.Error())
-			return err
+			d.logger.Errorf("DirectAdapter stop peerManager error: %s", err.Error())
 		}
 	}
 

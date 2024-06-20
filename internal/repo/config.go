@@ -135,7 +135,6 @@ type Redis struct {
 	MasterLeaseTimeout int64 `mapstructure:"master_lease_timeout" toml:"master_lease_timeout" json:"master_lease_timeout"`
 	// SendLeaseTimeout used for main instance operate http send lock
 	SendLeaseTimeout int64 `mapstructure:"send_lease_timeout" toml:"send_lease_timeout" json:"send_lease_timeout"`
-	SelfPort         int   `mapstructure:"self_port" toml:"self_port" json:"self_port"`
 }
 
 type ProxyConfig struct {
@@ -216,7 +215,6 @@ func DefaultConfig() *Config {
 			MasterLeaseRenewal: int64(5),
 			MasterLeaseTimeout: int64(10),
 			SendLeaseTimeout:   int64(2),
-			SelfPort:           50111,
 		},
 		Proxy: ProxyConfig{
 			Enable: false,

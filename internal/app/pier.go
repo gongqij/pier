@@ -235,19 +235,20 @@ func (pier *Pier) startPierHA() {
 	for {
 		select {
 		case isMain := <-pier.pierHA.IsMain():
+			logger.Info("receive from isMain: %v, status: %v", isMain, status)
 			if isMain {
 				if status {
 					continue
 				}
-				for serviceID, meta := range pier.serviceMeta {
-					pier.logger.WithFields(logrus.Fields{
-						"id":                        serviceID,
-						"interchain_counter":        meta.InterchainCounter,
-						"receipt_counter":           meta.ReceiptCounter,
-						"source_interchain_counter": meta.SourceInterchainCounter,
-						"source_receipt_counter":    meta.SourceReceiptCounter,
-					}).Infof("Pier information of service %s", serviceID)
-				}
+				//for serviceID, meta := range pier.serviceMeta {
+				//	pier.logger.WithFields(logrus.Fields{
+				//		"id":                        serviceID,
+				//		"interchain_counter":        meta.InterchainCounter,
+				//		"receipt_counter":           meta.ReceiptCounter,
+				//		"source_interchain_counter": meta.SourceInterchainCounter,
+				//		"source_receipt_counter":    meta.SourceReceiptCounter,
+				//	}).Infof("Pier information of service %s", serviceID)
+				//}
 
 				if pier.config.Mode.Type == repo.DirectMode && pier.config.Proxy.Enable {
 					// initialize proxy component

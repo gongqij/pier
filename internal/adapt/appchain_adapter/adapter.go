@@ -107,7 +107,7 @@ func (a *AppchainAdapter) Start() error {
 func (a *AppchainAdapter) Stop() error {
 
 	if err := a.client.Stop(); err != nil {
-		return err
+		a.logger.Errorf("appchain adapter stop client error: %s", err.Error())
 	}
 
 	a.pluginClient.Kill()

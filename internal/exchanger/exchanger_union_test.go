@@ -33,7 +33,7 @@ func prepareUnion(t *testing.T) (
 	mockCtl := gomock.NewController(t)
 	mockAdaptRelay := mock_adapt.NewMockAdapt(mockCtl)
 	mockAdaptUnion := mock_adapt.NewMockAdapt(mockCtl)
-	mockExchanger, err := New(mode, "", "1356", WithSrcAdapt(mockAdaptRelay), WithDestAdapt(mockAdaptUnion), WithLogger(log.NewWithModule("exchanger")))
+	mockExchanger, err := New(mode, "", "1356", make(chan error), WithSrcAdapt(mockAdaptRelay), WithDestAdapt(mockAdaptUnion), WithLogger(log.NewWithModule("exchanger")))
 	require.Nil(t, err)
 	return mockAdaptRelay, mockAdaptUnion, mockExchanger
 }

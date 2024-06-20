@@ -545,10 +545,10 @@ func (ex *Exchanger) Stop() error {
 	}
 
 	if err := ex.srcAdapt.Stop(); err != nil {
-		return fmt.Errorf("srcAdapt stop: %w", err)
+		ex.logger.Errorf("srcAdapt stop: %w", err)
 	}
 	if err := ex.destAdapt.Stop(); err != nil {
-		return fmt.Errorf("destAdapt stop: %w", err)
+		ex.logger.Errorf("destAdapt stop: %w", err)
 	}
 
 	ex.cancel()

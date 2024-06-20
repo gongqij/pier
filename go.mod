@@ -5,12 +5,11 @@ go 1.13
 require (
 	github.com/Rican7/retry v0.1.0
 	github.com/btcsuite/btcd v0.21.0-beta
-	github.com/bytecodealliance/wasmtime-go v0.37.0 // indirect
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/fatih/color v1.9.0
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/go-redis/redis/v8 v8.11.5
+	github.com/garyburd/redigo v1.6.4 // indirect
 	github.com/gobuffalo/packd v1.0.1
 	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/golang/mock v1.6.0
@@ -33,14 +32,14 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.8.3
-	github.com/tidwall/gjson v1.6.8
-	github.com/ultramesh/flato-msp v0.2.10
-	github.com/ultramesh/flato-msp-cert v0.2.30
+	github.com/tidwall/gjson v1.9.3
 	github.com/urfave/cli v1.22.1
 	github.com/wonderivan/logger v1.0.0
 	go.uber.org/atomic v1.7.0
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
 	google.golang.org/grpc v1.38.0
+	gopkg.in/bsm/ratelimit.v1 v1.0.0-20170922094635-f56db5e73a5e // indirect
+	gopkg.in/redis.v4 v4.2.4
 )
 
 replace github.com/libp2p/go-libp2p-core => github.com/libp2p/go-libp2p-core v0.5.6
@@ -49,22 +48,4 @@ replace github.com/hyperledger/fabric => github.com/hyperledger/fabric v2.0.1+in
 
 replace golang.org/x/net => golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 
-replace github.com/binance-chain/tss-lib => github.com/dawn-to-dusk/tss-lib v1.3.3-0.20220330081758-f404e10a1268
-
 replace google.golang.org/grpc => google.golang.org/grpc v1.33.0
-
-replace github.com/ultramesh/crypto-gm => git.hyperchain.cn/ultramesh/crypto-gm.git v0.2.18
-
-replace github.com/ultramesh/crypto-standard => git.hyperchain.cn/ultramesh/crypto-standard.git v0.2.4
-
-replace github.com/ultramesh/fancylogger => git.hyperchain.cn/ultramesh/fancylogger.git v0.1.3
-
-replace github.com/ultramesh/flato-common => git.hyperchain.cn/ultramesh/flato-common.git v0.2.46-0.20220408031420-7fe84146a5f0
-
-replace github.com/ultramesh/flato-db-interface => git.hyperchain.cn/ultramesh/flato-db-interface.git v0.1.29-1
-
-replace github.com/ultramesh/flato-msp => git.hyperchain.cn/ultramesh/flato-msp.git v0.2.10
-
-replace github.com/ultramesh/flato-msp-cert => git.hyperchain.cn/ultramesh/flato-msp-cert.git v0.2.31-3
-
-replace github.com/ultramesh/flato-statedb => git.hyperchain.cn/ultramesh/flato-statedb.git v0.2.16

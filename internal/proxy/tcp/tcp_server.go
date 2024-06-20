@@ -56,7 +56,7 @@ func (srv *TcpServer) Stop() error {
 	close(srv.stopped)
 	if srv.listener != nil {
 		if err := srv.listener.Close(); err != nil {
-			return err
+			srv.logger.Errorf("listener stop error: %s, should release port manually", err.Error())
 		}
 	}
 	srv.wg.Wait()

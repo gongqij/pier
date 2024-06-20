@@ -40,7 +40,7 @@ func prepareRelay(t *testing.T) (
 	mockCtl := gomock.NewController(t)
 	mockAdaptRelay := mock_adapt.NewMockAdapt(mockCtl)
 	mockAdaptAppchain := mock_adapt.NewMockAdapt(mockCtl)
-	mockExchanger, err := New(mode, "fabric", "1356", WithSrcAdapt(mockAdaptAppchain), WithDestAdapt(mockAdaptRelay), WithLogger(log.NewWithModule("exchanger")))
+	mockExchanger, err := New(mode, "fabric", "1356", make(chan error), WithSrcAdapt(mockAdaptAppchain), WithDestAdapt(mockAdaptRelay), WithLogger(log.NewWithModule("exchanger")))
 	require.Nil(t, err)
 	return mockAdaptRelay, mockAdaptAppchain, mockExchanger
 }

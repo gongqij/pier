@@ -63,10 +63,13 @@ func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.Qui
 }
 
 func (p *ProxyImpl) Start() error {
+	p.log.Infof("proxy start")
 
 	if !atomic.CompareAndSwapUint64(&p.stopped, 1, 0) {
+		p.log.Errorf("proxy.stopped is not 1, start failed")
 		return errors.New("proxy.stopped is not 1, start failed")
 	}
+	p.log.Infof("proxy actually start")
 
 	err := p.myHTTP.Start()
 	if err != nil {

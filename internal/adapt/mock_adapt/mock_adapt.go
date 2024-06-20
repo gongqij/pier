@@ -35,6 +35,18 @@ func (m *MockAdapt) EXPECT() *MockAdaptMockRecorder {
 	return m.recorder
 }
 
+// Clear mocks base method.
+func (m *MockAdapt) Clear() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Clear")
+}
+
+// Clear indicates an expected call of Clear.
+func (mr *MockAdaptMockRecorder) Clear() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clear", reflect.TypeOf((*MockAdapt)(nil).Clear))
+}
+
 // GetServiceIDList mocks base method.
 func (m *MockAdapt) GetServiceIDList() ([]string, error) {
 	m.ctrl.T.Helper()

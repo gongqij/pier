@@ -56,7 +56,6 @@ func NewMockPier(repoRoot string) (*MockPier, error) {
 		return nil, fmt.Errorf("log initialize: %w", err)
 	}
 	loggers.InitializeLogger(config)
-	loggers.Logger(loggers.App).Infof("redis.self_port: %d", config.Redis.SelfPort)
 	loggers.Logger(loggers.App).Infof("redis.send_lease_timeout: %d", config.Redis.SendLeaseTimeout)
 	loggers.Logger(loggers.App).Infof("redis.proxy_enable: %v", config.Proxy.Enable)
 

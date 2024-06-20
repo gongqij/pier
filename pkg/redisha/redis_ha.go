@@ -6,14 +6,13 @@ import (
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/sirupsen/logrus"
 	"math/rand"
-	"net"
 	"strings"
 	"time"
 
 	"github.com/meshplus/pier/internal/repo"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"gopkg.in/redis.v4"
 )
 
 // todo: currently outer logic directly New,
@@ -87,21 +86,6 @@ func New(conf repo.Redis, pierID string, errch chan error) *RedisPierMng {
 				Addr:     conf.Address,
 				Password: conf.Password,
 				DB:       conf.Database,
-			}
-			if conf.SelfPort > 0 {
-				// todo: 仅测试
-				opt.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
-					dialer := &net.Dialer{
-						Timeout:   5 * time.Second,
-						KeepAlive: 5 * time.Minute,
-						LocalAddr: &net.TCPAddr{
-							IP:   net.ParseIP("0.0.0.0"),
-							Port: conf.SelfPort,
-						},
-					}
-					return dialer.DialContext(ctx, network, addr)
-				}
-				opt.PoolSize = 1
 			}
 			return redis.NewClient(opt)
 		},

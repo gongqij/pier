@@ -78,7 +78,8 @@ func (t *Tcp) Stop() error {
 	t.tCli.Stop()
 	for _, tsrv := range t.tSrv {
 		if err := tsrv.Stop(); err != nil {
-			return err
+			t.log.Errorf("stop TcpServer error: %s", err.Error())
+			continue
 		}
 	}
 
