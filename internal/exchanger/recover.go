@@ -31,11 +31,14 @@ func (ex *Exchanger) handleMissingIBTPByServicePair(begin, end uint64, fromAdapt
 		//transaction timeout rollback in direct mode
 		if strings.EqualFold(ex.mode, repo.DirectMode) {
 			if isRollback := ex.isIBTPRollbackForDirect(ibtp); isRollback {
+				ex.logger.Infof("handle missing meet timeout, do rollbackIBTPForDirect")
 				ex.rollbackIBTPForDirect(ibtp)
 				return
 			}
 		}
+		ex.logger.Infof("handle missing enter normal logic, do send IBTP[%s] to %s", fmt.Sprintf("%s-%s-%d", srcService, targetService, begin), toAdapt.Name())
 		ex.sendIBTP(fromAdapt, toAdapt, ibtp)
+		ex.logger.Infof("handle missing meet timeout, end send IBTP[%s] to %s", fmt.Sprintf("%s-%s-%d", srcService, targetService, begin), toAdapt.Name())
 	}
 }
 
@@ -73,11 +76,14 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 	ex.logger.Info("Start To Recover IBTPs!")
 	for _, interchain := range srcServiceMeta {
 
+		ex.logger.Info("[recover] handle srcInterchain --> destInterchain")
 		for k, count := range interchain.InterchainCounter {
 			destCount, ok := destServiceMeta[interchain.ID].InterchainCounter[k]
 			if !ok {
 				destCount = 0
 			}
+
+			ex.logger.Info("[recover] handle srcInterchain.counter: %d --> destInterchain.counter: %d", count, destCount)
 
 			// handle the situation that dst chain rollback failed but interchainCounter is balanced
 			if ex.mode == repo.DirectMode && destCount == count {
@@ -100,19 +106,21 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 					}
 				}
 			}
-
 			// handle unsentIBTP : query IBTP -> sendIBTP
 			if destCount < count {
+				ex.logger.Info("[recover] enter handle missing")
 				ex.handleMissingIBTPByServicePair(destCount+1, count, ex.srcAdapt, ex.destAdapt, interchain.ID, k, true)
 				// success then equal index
 				destServiceMeta[interchain.ID].InterchainCounter[k] = count
 			}
 		}
+		ex.logger.Info("[recover] handle srcInterchain --> destInterchain finished, start to handle SourceReceiptCounter")
 		for k, count := range interchain.SourceReceiptCounter {
 			destCount, ok := destServiceMeta[interchain.ID].SourceReceiptCounter[k]
 			if !ok {
 				destCount = 0
 			}
+			ex.logger.Info("[recover] handle srcSourceReceiptCounter.counter: %d --> destSourceReceiptCounter.counter: %d", count, destCount)
 			// handle unsentIBTP : query IBTP -> sendIBTP
 			if destCount < count {
 				ex.handleMissingIBTPByServicePair(destCount+1, count, ex.srcAdapt, ex.destAdapt, k, interchain.ID, false)
@@ -120,7 +128,7 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 			}
 		}
 	}
-
+	ex.logger.Info("[recover] handle srcSourceReceiptCounter --> destSourceReceiptCounter finished, start to handle dest->src")
 	// handle dest -> src
 	for _, interchain := range destServiceMeta {
 		for k, count := range interchain.SourceInterchainCounter {
@@ -138,7 +146,7 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 					srcCount = 0
 				}
 			}
-
+			ex.logger.Info("[recover] handle destSourceInterchainCounter.counter: %d --> srcSourceInterchainCounter.counter:%d", count, srcCount)
 			// srcCount means the count of Interchain from k to interchain.ID
 			// handle unsentIBTP : query IBTP -> sendIBTP
 			if srcCount < count {
@@ -146,7 +154,7 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 				srcServiceMeta[interchain.ID].SourceInterchainCounter[k] = count
 			}
 		}
-
+		ex.logger.Info("[recover] handle destSourceInterchainCounter --> srcSourceInterchainCounter finished, start to handle receipt part")
 		for k, count := range interchain.ReceiptCounter {
 			var srcCount uint64
 			if _, ok := srcServiceMeta[interchain.ID]; !ok {
@@ -162,7 +170,7 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 					srcCount = 0
 				}
 			}
-
+			ex.logger.Info("[recover] handle destReceiptCounter: %d --> srcReceiptCounter: %d", count, srcCount)
 			// handle unsentIBTP : query IBTP -> sendIBTP
 			if srcCount < count {
 				ex.handleMissingIBTPByServicePair(srcCount+1, count, ex.destAdapt, ex.srcAdapt, interchain.ID, k, false)

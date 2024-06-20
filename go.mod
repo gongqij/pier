@@ -50,4 +50,4 @@ replace golang.org/x/net => golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.33.0
 
-replace github.com/meshplus/go-lightp2p => git.hyperchain.cn/bitxhub/go-lightp2p v0.0.0-20240620123431-2f2cf80c0faf
+replace github.com/meshplus/go-lightp2p => git.hyperchain.cn/bitxhub/go-lightp2p v0.0.0-20240620124237-38dcf08158e2
