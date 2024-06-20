@@ -22,7 +22,7 @@
 [security]
     [security.tls]
         enable = true
-        tlsCAPath = "config/tlscerts/tlsca.ca"
-        tlsCertPath = "config/tlscerts/tls_peer1.cert"
-        tlsPrivPath = "config/tlscerts/tls_peer1.priv"
-        tlsDomain = "hyperchain.cn"
+        tlsCAPath = "config/tlscerts/tls.ca"
+        tlsCertPath = "config/tlscerts/tls.cert"
+        tlsPrivPath = "config/tlscerts/tls.priv"
+        tlsDomain = "mloong"

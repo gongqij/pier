@@ -38,13 +38,13 @@ func newClient(conf *config.ProxyConfig) *http.Client {
 
 		caCrt, err := os.ReadFile(tlsCAPath)
 		if err != nil {
-			panic(fmt.Sprintf("read tlsCA from %s failed", tlsCAPath))
+			panic(fmt.Sprintf("read tlsCA from %s failed, err: %s", tlsCAPath, err.Error()))
 		}
 		pool.AppendCertsFromPEM(caCrt)
 
 		cliCrt, err := tls.LoadX509KeyPair(tlsCertPath, tlsCertPrivPath)
 		if err != nil {
-			panic(fmt.Sprintf("read tlspeerCert from %s and %s failed", tlsCertPath, tlsCertPrivPath))
+			panic(fmt.Sprintf("read tlspeerCert from %s and %s failed, err: %s", tlsCertPath, tlsCertPrivPath, err.Error()))
 		}
 
 		cfg := &tls.Config{
