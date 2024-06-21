@@ -8,7 +8,6 @@ import (
 	"github.com/meshplus/bitxhub-kit/hexutil"
 	"github.com/meshplus/bitxhub-model/pb"
 	"github.com/meshplus/pier/internal/adapt"
-	"github.com/meshplus/pier/internal/adapt/appchain_adapter"
 	"github.com/meshplus/pier/internal/repo"
 	"github.com/sirupsen/logrus"
 	"strings"
@@ -90,15 +89,18 @@ func (ex *Exchanger) recover(srcServiceMeta map[string]*pb.Interchain, destServi
 				var begin uint64
 				for begin = 1; begin <= count; begin++ {
 					IBTPid := fmt.Sprintf("%s-%s-%d", interchain.ID, k, begin)
-					_, _, txStatus, err := ex.srcAdapt.(*appchain_adapter.AppchainAdapter).GetDirectTransactionMeta(IBTPid)
+					_, _, txStatus, err := ex.getDirectTransactionMeta(IBTPid)
 					if err != nil {
-						ex.logger.Panicf("fail to get direct transaction status for ibtp %s, err: %s", IBTPid, err.Error())
+						ex.logger.Errorf("fail to get direct transaction status for ibtp %s, err: %s", IBTPid, err.Error())
+						ex.pushErr(err)
+						return
 					}
 					if txStatus == 2 { // transaction status is begin_rollback
 						// notify dst chain rollback
 						ibtp, qerr := ex.queryIBTP(ex.srcAdapt, IBTPid, true)
 						if qerr != nil {
 							ex.logger.Errorf("exchanger stopped, interrupt recover")
+							ex.pushErr(qerr)
 							return
 						}
 						ibtp.Type = pb.IBTP_RECEIPT_ROLLBACK

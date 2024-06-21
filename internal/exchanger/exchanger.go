@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/meshplus/pier/internal/adapt/appchain_adapter"
 	"github.com/meshplus/pier/internal/peermgr"
 	"strings"
 	"sync"
@@ -535,6 +536,31 @@ func (ex *Exchanger) queryIBTP(adapt adapt.Adapt, ibtpID string, isReq bool) (*p
 	}
 	// err is assigned by adapt.QueryIBTP(ibtpID, isReq)
 	return ibtp, err
+}
+
+func (ex *Exchanger) getDirectTransactionMeta(IBTPid string) (uint64, uint64, uint64, error) {
+	var (
+		startTimestamp, timeoutPeriod, txStatus uint64
+		serr                                    error
+	)
+	if err := retry.Retry(func(attempt uint) error {
+		startTimestamp, timeoutPeriod, txStatus, serr = ex.srcAdapt.(*appchain_adapter.AppchainAdapter).GetDirectTransactionMeta(IBTPid)
+		if serr != nil {
+			ex.logger.Errorf("getDirectTransactionMeta from Adapt:%s, error: %v", ex.srcAdapt.Name(), serr.Error())
+			select {
+			case <-ex.ctx.Done():
+				ex.logger.Warningf("exchanger stopped, break getDirectTransactionMeta retry framework, err: %s", serr.Error())
+				return nil
+			default:
+			}
+			return serr
+		}
+		return nil
+	}, strategy.Wait(3*time.Second)); err != nil {
+		ex.logger.Panic(err)
+	}
+	// err is assigned by adapt.QueryIBTP(ibtpID, isReq)
+	return startTimestamp, timeoutPeriod, txStatus, serr
 }
 
 func (ex *Exchanger) Stop() error {
