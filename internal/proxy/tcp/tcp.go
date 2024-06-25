@@ -71,8 +71,7 @@ func (t *Tcp) Start() error {
 	return nil
 }
 
-func (t *Tcp) Stop() error {
-	t.log.Info("start to stop tcp layer...")
+func (t *Tcp) StopConn() {
 	t.log.Info("stop all TCP connection...")
 	t.connMgr.closeAllConn()
 	t.tCli.Stop()
@@ -82,10 +81,11 @@ func (t *Tcp) Stop() error {
 			continue
 		}
 	}
+}
 
+func (t *Tcp) Stop() error {
 	close(t.stopped)
 	t.wg.Wait()
-	t.log.Info("successfully stop tcp layer!")
 	return nil
 }
 

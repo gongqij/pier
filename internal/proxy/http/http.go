@@ -89,11 +89,15 @@ func (h *Http) Start() error {
 	return nil
 }
 
+func (h *Http) StopSrv() {
+	if err := h.httpSrv.Close(); err != nil {
+		h.log.Errorf("stop http server error: %s", err.Error())
+	}
+}
+
 func (h *Http) Stop() error {
-	_ = h.httpSrv.Close()
 	close(h.stopped)
 	h.wg.Wait()
-	h.log.Info("successfully stop http layer!")
 	return nil
 }
 
@@ -214,14 +218,15 @@ func (h *Http) switchSignalLoop() {
 					continue
 				}
 				h.log.Debug("send keepalive signal to " + url)
-				requestTimer := time.NewTimer(requestTimeout)
 				quitGoroutine := make(chan struct{})
 				var wg sync.WaitGroup
 				wg.Add(1)
+				requestTimer := time.NewTimer(requestTimeout)
 				go func() {
 					defer wg.Done()
 					select {
 					case <-requestTimer.C:
+						h.log.Debugf("request %s timeout", url)
 						cancel()
 					case <-quitGoroutine:
 					}

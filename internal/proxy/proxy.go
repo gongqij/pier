@@ -11,6 +11,7 @@ import (
 	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
 	"sync/atomic"
+	"time"
 )
 
 type Proxy interface {
@@ -92,19 +93,28 @@ func (p *ProxyImpl) Stop() error {
 	}
 	p.log.Info("start to stop proxy......")
 
+	// 先停掉http和tcp的server，切断外部进来新数据的可能性，
+	// 然后再分别释放http和tcp的goroutine，否则proxy stop时channel会卡死
+	p.myHTTP.StopSrv()
+	p.log.Info("stop http server successfully")
+	p.myTCP.StopConn()
+	p.log.Info("stop all tcp connection successfully")
+
+	time.Sleep(50 * time.Millisecond)
+
 	err := p.myHTTP.Stop()
 	if err != nil {
 		return err
 	}
 
-	p.log.Infof("proxy.http stopped successfully")
+	p.log.Info("proxy.http stopped successfully")
 
 	err = p.myTCP.Stop()
 	if err != nil {
 		return err
 	}
 
-	p.log.Infof("proxy.tcp stopped successfully")
+	p.log.Info("proxy.tcp stopped successfully")
 
 	return nil
 }

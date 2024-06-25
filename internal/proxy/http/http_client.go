@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	json "github.com/json-iterator/go"
 	"github.com/meshplus/pier/internal/proxy/common"
@@ -214,27 +215,32 @@ func (h *Http) resendHttpRequestForConnectRequest(method string, jsonReq *JsonDa
 
 func (h *Http) resendHttpRequest(method string, jsonReqRaw []byte) (*http.Response, error) {
 	for {
-		confIndex, url, serr := h.selectNodeUrl()
-		if serr != nil {
-			return nil, serr
-		}
+		select {
+		case <-h.stopped:
+			return nil, errors.New("http has stopped, not resend")
+		default:
+			confIndex, url, serr := h.selectNodeUrl()
+			if serr != nil {
+				return nil, serr
+			}
 
-		req, err := newHttpRequest(method, url, jsonReqRaw)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create POST request: %v", err)
-		}
+			req, err := newHttpRequest(method, url, jsonReqRaw)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create POST request: %v", err)
+			}
 
-		resp, rerr := h.httpCli.Do(req)
-		if rerr == nil && resp.StatusCode == http.StatusOK {
-			h.log.Debugf("choose httpUrl to resend %v", url)
-			return resp, rerr
-		}
+			resp, rerr := h.httpCli.Do(req)
+			if rerr == nil && resp.StatusCode == http.StatusOK {
+				h.log.Debugf("choose httpUrl to resend %v", url)
+				return resp, rerr
+			}
 
-		if rerr != nil && strings.Contains(rerr.Error(), "connection refused") {
-			h.nodes[confIndex].alive = false
-			h.wg.Add(1)
-			go h.reconnectNode(confIndex)
-			time.Sleep(200 * time.Millisecond)
+			if rerr != nil && strings.Contains(rerr.Error(), "connection refused") {
+				h.nodes[confIndex].alive = false
+				h.wg.Add(1)
+				go h.reconnectNode(confIndex)
+				time.Sleep(200 * time.Millisecond)
+			}
 		}
 	}
 }
