@@ -206,7 +206,7 @@ func (h *Http) switchSignalLoop() {
 				}
 				req, nerr := newHttpRequest(http.MethodPost, url, body)
 				ctx, cancel := context.WithCancel(req.Context())
-				req.WithContext(ctx)
+				req = req.WithContext(ctx)
 				if nerr != nil {
 					h.log.Error(nerr)
 					badCount++
