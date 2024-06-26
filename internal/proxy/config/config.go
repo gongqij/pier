@@ -24,7 +24,6 @@ type ProxyConfig struct {
 	RemoteReconnectTime time.Duration
 	RemoteAddress       []string
 	RemoteHttpPort      []int
-	RemoteTcpPort       []int
 
 	SecurityTLSEnable   bool
 	SecurityTLSCAPath   string
@@ -111,12 +110,11 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 	remoteReconnectTimeStr := vip.GetString(remoteReconnectTime)
 	remoteAddressStrSlice := vip.GetStringSlice(remoteAddress)
 	remoteHttpPortIntSlice := vip.GetIntSlice(remoteHttpPort)
-	remoteTcpPortIntSlice := vip.GetIntSlice(remoteTcpPort)
-	if len(remoteAddressStrSlice) == 0 || len(remoteHttpPortIntSlice) == 0 || len(remoteTcpPortIntSlice) == 0 {
-		return nil, fmt.Errorf("http.remote.address, http.remote.http_port, http.remote.tcp_port can't be empty")
+	if len(remoteAddressStrSlice) == 0 || len(remoteHttpPortIntSlice) == 0 {
+		return nil, fmt.Errorf("http.remote.address, http.remote.http_port can't be empty")
 	}
-	if (len(remoteAddressStrSlice) != len(remoteHttpPortIntSlice)) || (len(remoteAddressStrSlice) != len(remoteTcpPortIntSlice)) {
-		return nil, fmt.Errorf("the length of array must be same for http.remote.address, http.remote.http_port, http.remote.tcp_port")
+	if len(remoteAddressStrSlice) != len(remoteHttpPortIntSlice) {
+		return nil, fmt.Errorf("the length of array must be same for http.remote.address, http.remote.http_port")
 	}
 
 	reconectTime, derr := time.ParseDuration(remoteReconnectTimeStr)
@@ -141,7 +139,6 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		HTTPRequestTimeout:   duration,
 		HTTPAllowOrigins:     httpAllowOriginsStrSlice,
 		RemoteAddress:        remoteAddressStrSlice,
-		RemoteTcpPort:        remoteTcpPortIntSlice,
 		RemoteHttpPort:       remoteHttpPortIntSlice,
 		RemoteReconnectTime:  reconectTime,
 		SecurityTLSEnable:    securityTlsEnable,

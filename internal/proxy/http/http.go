@@ -52,7 +52,7 @@ func New(redisCli rediscli.Wrapper, quitMain signal.QuitMainSignal, send chan *c
 
 	nodes := make([]*node, len(conf.RemoteAddress))
 	for i, ip := range conf.RemoteAddress {
-		n, nerr := newNode(ip, conf.RemoteHttpPort[i], conf.RemoteTcpPort[i], conf.SecurityTLSEnable, i)
+		n, nerr := newNode(ip, conf.RemoteHttpPort[i], conf.SecurityTLSEnable, i)
 		if nerr != nil {
 			return nil, nerr
 		}
@@ -89,15 +89,11 @@ func (h *Http) Start() error {
 	return nil
 }
 
-func (h *Http) StopSrv() {
-	if err := h.httpSrv.Close(); err != nil {
-		h.log.Errorf("stop http server error: %s", err.Error())
-	}
-}
-
 func (h *Http) Stop() error {
+	_ = h.httpSrv.Close()
 	close(h.stopped)
 	h.wg.Wait()
+	h.log.Info("successfully stop http layer!")
 	return nil
 }
 
@@ -236,7 +232,7 @@ func (h *Http) switchSignalLoop() {
 				if err != nil {
 					h.log.Debug(err)
 					badCount++
-					h.log.Infof("keepalive error: %s, failedCount = %v", err.Error(), allBadCount)
+					h.log.Debugf("keepalive error: %s, failedCount = %v", err.Error(), allBadCount)
 					continue
 				}
 				if response == nil {
@@ -259,7 +255,7 @@ func (h *Http) switchSignalLoop() {
 			}
 			if badCount == len(h.nodes) {
 				allBadCount++
-				h.log.Infof("all bad count is %v", allBadCount)
+				h.log.Debugf("all bad count is %v", allBadCount)
 			} else {
 				allBadCount = 0
 			}

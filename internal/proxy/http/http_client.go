@@ -86,13 +86,11 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 		h.log.Errorf("drop message because can't select a http node, err: %v", serr)
 		return
 	}
-	var jsonReq *JsonData
+
 	if data.Typ == common.TcpProxyTypeConnect {
-		h.log.Infof("prepare to connect target tcp address: %s", h.nodes[confIndex].tcpAddress)
-		jsonReq = generateHttpBodyForConnectRequest(h.requestID, data.Uuid, h.nodes[confIndex].tcpAddress)
-	} else {
-		jsonReq = newJsonData(h.requestID, data.Uuid, data.Typ, data.Content)
+		h.log.Infof("prepare to connect target pier, its http url is: %s", h.nodes[confIndex].httpUrl)
 	}
+	jsonReq := newJsonData(h.requestID, data.Uuid, data.Typ, data.Content)
 	jsonReqRaw, _ := json.Marshal(jsonReq)
 
 	h.log.Debugf("receive data from tcp, send http request { requestId: %v, uuid: %v, httpUrl: %v}", jsonReq.Id, jsonReq.TcpUUid, httpUrl)
@@ -128,20 +126,12 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 				h.wg.Add(1)
 				go h.reconnectNode(confIndex)
 			}
-			if data.Typ == common.TcpProxyTypeConnect {
-				resp, rerr = h.resendHttpRequestForConnectRequest(http.MethodPost, jsonReq)
-				if rerr != nil || resp == nil {
-					h.log.Errorf("drop message because failed to send http request, err: %v", rerr)
-					h.redisCli.SendUnlock()
-					return
-				}
-			} else {
-				resp, rerr = h.resendHttpRequest(http.MethodPost, jsonReqRaw)
-				if rerr != nil || resp == nil {
-					h.log.Errorf("drop message because failed to send http request, err: %v", rerr)
-					h.redisCli.SendUnlock()
-					return
-				}
+
+			resp, rerr = h.resendHttpRequest(http.MethodPost, jsonReqRaw)
+			if rerr != nil || resp == nil {
+				h.log.Errorf("drop message because failed to send http request, err: %v", rerr)
+				h.redisCli.SendUnlock()
+				return
 			}
 
 			if resp.StatusCode != http.StatusOK {
@@ -177,42 +167,6 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 	h.log.Debugf("receive http response { requestId: %v, uuid: %v, httpUrl: %v, statusCode: %v, Err: %v}", respJson.Id, respJson.TcpUUid, httpUrl, resp.StatusCode, respJson.Err)
 }
 
-// generateHttpBodyForConnectRequest only used by message type TcpProxyTypeConnect.
-func generateHttpBodyForConnectRequest(id uint16, tcpUUid string, tcpAddress string) *JsonData {
-	return newJsonData(id, tcpUUid, common.TcpProxyTypeConnect, []byte(tcpAddress))
-}
-
-// resendHttpRequestForConnectRequest only used by message type TcpProxyTypeConnect.
-func (h *Http) resendHttpRequestForConnectRequest(method string, jsonReq *JsonData) (*http.Response, error) {
-	for {
-		confIndex, url, serr := h.selectNodeUrl()
-		if serr != nil {
-			return nil, serr
-		}
-
-		d := generateHttpBodyForConnectRequest(jsonReq.Id, jsonReq.TcpUUid, h.nodes[confIndex].tcpAddress)
-		jsonReqRaw, _ := json.Marshal(d)
-
-		req, err := newHttpRequest(method, url, jsonReqRaw)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create POST request: %v", err)
-		}
-
-		resp, rerr := h.httpCli.Do(req)
-		if rerr == nil && resp.StatusCode == http.StatusOK {
-			h.log.Debugf("choose httpUrl to resend %v", url)
-			return resp, rerr
-		}
-
-		if rerr != nil && strings.Contains(rerr.Error(), "connection refused") {
-			h.nodes[confIndex].alive = false
-			h.wg.Add(1)
-			go h.reconnectNode(confIndex)
-			time.Sleep(200 * time.Millisecond)
-		}
-	}
-}
-
 func (h *Http) resendHttpRequest(method string, jsonReqRaw []byte) (*http.Response, error) {
 	for {
 		select {
@@ -231,7 +185,7 @@ func (h *Http) resendHttpRequest(method string, jsonReqRaw []byte) (*http.Respon
 
 			resp, rerr := h.httpCli.Do(req)
 			if rerr == nil && resp.StatusCode == http.StatusOK {
-				h.log.Debugf("choose httpUrl to resend %v", url)
+				h.log.Infof("choose httpUrl %v to resend", url)
 				return resp, rerr
 			}
 

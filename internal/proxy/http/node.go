@@ -15,17 +15,15 @@ import (
 type node struct {
 	ip       string
 	httpPort int
-	tcpPort  int
 
-	httpUrl    string // join ip and httpPort
-	tcpAddress string // join ip and tcpPort
-	alive      bool
+	httpUrl string // join ip and httpPort
+	alive   bool
 
 	confIndex int // 地址在配置文件里的索引位置
 }
 
 // newNode creates an instance of node.
-func newNode(ip string, httpPort, tcpPort int, isHttps bool, confIndex int) (*node, error) {
+func newNode(ip string, httpPort int, isHttps bool, confIndex int) (*node, error) {
 	var scheme string
 	if isHttps {
 		scheme = "https://"
@@ -37,19 +35,13 @@ func newNode(ip string, httpPort, tcpPort int, isHttps bool, confIndex int) (*no
 	if jerr != nil {
 		return nil, fmt.Errorf("invalid address format, err: %v", jerr.Error())
 	}
-	tcpAddress, jerr := joinIPAndPort(ip, tcpPort)
-	if jerr != nil {
-		return nil, fmt.Errorf("invalid address format, err: %v", jerr.Error())
-	}
 
 	return &node{
-		ip:         ip,
-		httpPort:   httpPort,
-		tcpPort:    tcpPort,
-		httpUrl:    fmt.Sprintf("%s%s%s", scheme, httpAddress, uri),
-		tcpAddress: tcpAddress,
-		alive:      true,
-		confIndex:  confIndex,
+		ip:        ip,
+		httpPort:  httpPort,
+		httpUrl:   fmt.Sprintf("%s%s%s", scheme, httpAddress, uri),
+		alive:     true,
+		confIndex: confIndex,
 	}, nil
 }
 

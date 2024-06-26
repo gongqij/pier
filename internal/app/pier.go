@@ -2,11 +2,14 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/go-plugin"
+	crypto2 "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/meshplus/bitxhub-core/agency"
 	appchainmgr "github.com/meshplus/bitxhub-core/appchain-mgr"
 	"github.com/meshplus/bitxhub-kit/crypto"
+	"github.com/meshplus/bitxhub-kit/crypto/asym/ecdsa"
 	"github.com/meshplus/bitxhub-kit/storage"
 	"github.com/meshplus/bitxhub-model/pb"
 	rpcx "github.com/meshplus/go-bitxhub-client"
@@ -30,6 +33,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/wonderivan/logger"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -228,8 +232,47 @@ func NewPier(repoRoot string, config *repo.Config) (*Pier, error) {
 	}, nil
 }
 
+func (pier *Pier) getSelfP2PPort(nodePrivKey crypto.PrivateKey) (int, error) {
+	ecdsaPrivKey, ok := nodePrivKey.(*ecdsa.PrivateKey)
+	if !ok {
+		return 0, fmt.Errorf("convert to libp2p private key: not ecdsa private key")
+	}
+
+	libp2pPrivKey, _, err := crypto2.ECDSAKeyPairFromKey(ecdsaPrivKey.K)
+	if err != nil {
+		return 0, err
+	}
+
+	networkConfig, err := repo.LoadNetworkConfig(pier.config.RepoRoot, libp2pPrivKey)
+	if err != nil {
+		return 0, fmt.Errorf("load network config err: %w", err)
+	}
+	if networkConfig == nil || networkConfig.LocalAddr == "" {
+		return 0, errors.New("not found local address in network.toml")
+	}
+
+	idx := strings.LastIndex(networkConfig.LocalAddr, "/tcp/")
+	if idx == -1 {
+		return 0, fmt.Errorf("not found tcp protocol on address %v", networkConfig.LocalAddr)
+	}
+
+	tcpPort, aerr := strconv.Atoi(networkConfig.LocalAddr[idx+5:])
+	if aerr != nil {
+		return 0, fmt.Errorf("failed to get tcp port on address %v", networkConfig.LocalAddr)
+	}
+
+	return tcpPort, nil
+}
+
 func (pier *Pier) startPierHA() {
 	logger.Info("pier HA manager start")
+
+	nodePrivKey, _ := repo.LoadNodePrivateKey(pier.config.RepoRoot)
+	selfP2pPort, err := pier.getSelfP2PPort(nodePrivKey)
+	if err != nil {
+		pier.logger.Errorf("failed to get local tcp port, err: %s", err.Error())
+		panic("failed to get local tcp port")
+	}
 
 	status := false
 	for {
@@ -252,7 +295,7 @@ func (pier *Pier) startPierHA() {
 
 				if pier.config.Mode.Type == repo.DirectMode && pier.config.Proxy.Enable {
 					// initialize proxy component
-					px, nerr := proxy.NewProxy(filepath.Join(pier.config.RepoRoot, repo.ProxyConfigName), pier.redisCli, pier.quitMain, loggers.Logger(loggers.Proxy))
+					px, nerr := proxy.NewProxy(filepath.Join(pier.config.RepoRoot, repo.ProxyConfigName), pier.redisCli, pier.quitMain, selfP2pPort, loggers.Logger(loggers.Proxy))
 					if nerr != nil {
 						pier.logger.Errorf("failed to init proxy, err: %s", nerr.Error())
 						panic("failed to init proxy")
@@ -273,7 +316,6 @@ func (pier *Pier) startPierHA() {
 				// so Host does not contain Start() interface;
 				// Besides, Host.Close() has a once.Do logic, so golightp2p.Network can not restart
 				if pier.config.Mode.Type == repo.DirectMode && pier.config.HA.Mode == "redis" {
-					nodePrivKey, _ := repo.LoadNodePrivateKey(pier.config.RepoRoot)
 					peerManager, err := peermgr.New(pier.config, nodePrivKey, pier.privateKey, 1, pier.errCh, loggers.Logger(loggers.PeerMgr))
 					if err != nil {
 						pier.logger.Errorf("renew create peerManager error: %s", err.Error())

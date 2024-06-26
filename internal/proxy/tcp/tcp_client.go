@@ -5,11 +5,13 @@ import (
 	"github.com/meshplus/pier/internal/proxy/common"
 	"github.com/sirupsen/logrus"
 	"net"
+	"strconv"
 	"sync"
 )
 
 type TcpClient struct {
-	writeHttpCh chan *common.Data
+	localP2PPort int
+	writeHttpCh  chan *common.Data
 
 	newConnWithUuidFunc newConnWithUuid
 	closeConnFunc       closeConn
@@ -19,8 +21,9 @@ type TcpClient struct {
 	logger  logrus.FieldLogger
 }
 
-func NewTcpClient(logger logrus.FieldLogger, newConnWithUuidFunc newConnWithUuid, closeConnFunc closeConn) (*TcpClient, error) {
+func NewTcpClient(localP2PPort int, logger logrus.FieldLogger, newConnWithUuidFunc newConnWithUuid, closeConnFunc closeConn) (*TcpClient, error) {
 	return &TcpClient{
+		localP2PPort:        localP2PPort,
 		writeHttpCh:         make(chan *common.Data, 1),
 		stopped:             make(chan struct{}),
 		logger:              logger,
@@ -49,25 +52,19 @@ func (tCli *TcpClient) Dial(ip, port string) (net.Conn, error) {
 	return conn, nil
 }
 
-// TODO 异常处理：对于所有error都需要告知对面代理这边连接建立失败了
 func (tCli *TcpClient) handleConnectRequest(data *common.Data) {
 	connUuid := data.Uuid
 	// 1. 与目标节点建立TCP连接
-	ip, port, err := net.SplitHostPort(string(data.Content))
-	if err != nil {
-		tCli.logger.Errorf("[Client] failed to parse network address, err: %s", err.Error())
-		return
-	}
-	conn, cerr := tCli.Dial(ip, port)
+	conn, cerr := tCli.Dial("127.0.0.1", strconv.Itoa(tCli.localP2PPort))
 	if cerr != nil {
-		tCli.logger.Errorf("[Client] failed to dail %s:%s, err: %s", ip, port, cerr.Error())
+		tCli.logger.Errorf("[Client] failed to dail 127.0.0.1:%v, err: %s", tCli.localP2PPort, cerr.Error())
 		return
 	}
 	if nerr := tCli.newConnWithUuidFunc(connUuid, conn); nerr != nil {
 		tCli.logger.Error(nerr)
 		return
 	}
-	tCli.logger.Infof("[Client] Launch Outbound connection at %s:%s, uuid: %s", ip, port, connUuid)
+	tCli.logger.Infof("[Client] Launch Outbound connection at 127.0.0.1:%v, uuid: %s", tCli.localP2PPort, connUuid)
 	tCli.wg.Add(1)
 	go tCli.readloop(conn, connUuid)
 

@@ -17,7 +17,6 @@ const (
 	remoteReconnectTime = "remote.reconnect_time"
 	remoteAddress       = "remote.address"
 	remoteHttpPort      = "remote.http_port"
-	remoteTcpPort       = "remote.tcp_port"
 
 	securityTLSEnable   = "security.tls.enable"
 	securityTlsCAPath   = "security.tls.tlsCAPath"

@@ -28,7 +28,7 @@ type Tcp struct {
 	stopped chan struct{}
 }
 
-func New(send chan *common.Data, recv chan *common.Data, conf *config.ProxyConfig, log logrus.FieldLogger) (*Tcp, error) {
+func New(send chan *common.Data, recv chan *common.Data, localP2PPort int, conf *config.ProxyConfig, log logrus.FieldLogger) (*Tcp, error) {
 	connMgr := NewConnMgr()
 
 	tcpmgr := &Tcp{
@@ -49,7 +49,7 @@ func New(send chan *common.Data, recv chan *common.Data, conf *config.ProxyConfi
 		tcpmgr.tSrv = append(tcpmgr.tSrv, tSrv)
 	}
 
-	tCli, err := NewTcpClient(log, connMgr.newConnWithUuid, connMgr.closeConn)
+	tCli, err := NewTcpClient(localP2PPort, log, connMgr.newConnWithUuid, connMgr.closeConn)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,8 @@ func (t *Tcp) Start() error {
 	return nil
 }
 
-func (t *Tcp) StopConn() {
+func (t *Tcp) Stop() error {
+	t.log.Info("start to stop tcp layer...")
 	t.log.Info("stop all TCP connection...")
 	t.connMgr.closeAllConn()
 	t.tCli.Stop()
@@ -81,11 +82,9 @@ func (t *Tcp) StopConn() {
 			continue
 		}
 	}
-}
-
-func (t *Tcp) Stop() error {
 	close(t.stopped)
 	t.wg.Wait()
+	t.log.Info("successfully stop tcp layer!")
 	return nil
 }
 

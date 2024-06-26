@@ -10,8 +10,8 @@ import (
 	"github.com/meshplus/pier/pkg/rediscli"
 	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
+	"sync"
 	"sync/atomic"
-	"time"
 )
 
 type Proxy interface {
@@ -33,7 +33,7 @@ type ProxyImpl struct {
 	stopped uint64
 }
 
-func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.QuitMainSignal, log logrus.FieldLogger) (Proxy, error) {
+func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.QuitMainSignal, localP2PPort int, log logrus.FieldLogger) (Proxy, error) {
 	conf, lerr := config.LoadProxyConfig(cfgFilePath)
 	if lerr != nil {
 		return nil, fmt.Errorf("failed to load config %s, err: %s", cfgFilePath, lerr.Error())
@@ -42,7 +42,7 @@ func NewProxy(cfgFilePath string, redisCli rediscli.Wrapper, quitMain signal.Qui
 	sendCh := make(chan *common.Data, 1)
 	recvCh := make(chan *common.Data, 1)
 
-	mtcp, nerr := tcp.New(recvCh, sendCh, conf, log)
+	mtcp, nerr := tcp.New(recvCh, sendCh, localP2PPort, conf, log)
 	if nerr != nil {
 		return nil, fmt.Errorf("failed to init tcp component, err: %s", nerr.Error())
 	}
@@ -93,15 +93,6 @@ func (p *ProxyImpl) Stop() error {
 	}
 	p.log.Info("start to stop proxy......")
 
-	// 先停掉http和tcp的server，切断外部进来新数据的可能性，
-	// 然后再分别释放http和tcp的goroutine，否则proxy stop时channel会卡死
-	p.myHTTP.StopSrv()
-	p.log.Info("stop http server successfully")
-	p.myTCP.StopConn()
-	p.log.Info("stop all tcp connection successfully")
-
-	time.Sleep(50 * time.Millisecond)
-
 	err := p.myHTTP.Stop()
 	if err != nil {
 		return err
@@ -109,12 +100,32 @@ func (p *ProxyImpl) Stop() error {
 
 	p.log.Info("proxy.http stopped successfully")
 
+	// 防止tcp stop的时候管道卡住
+	quit := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-quit:
+				return
+			case <-p.recvCh:
+			}
+		}
+	}()
+
 	err = p.myTCP.Stop()
 	if err != nil {
 		return err
 	}
 
 	p.log.Info("proxy.tcp stopped successfully")
+
+	close(quit)
+	wg.Wait()
+
+	p.log.Info("proxy stooped successfully")
 
 	return nil
 }

@@ -1,9 +1,12 @@
 package mockpier
 
 import (
+	"errors"
 	"fmt"
+	crypto2 "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/meshplus/bitxhub-core/agency"
 	"github.com/meshplus/bitxhub-kit/crypto"
+	"github.com/meshplus/bitxhub-kit/crypto/asym/ecdsa"
 	"github.com/meshplus/bitxhub-kit/log"
 	"github.com/meshplus/bitxhub-model/pb"
 	network "github.com/meshplus/go-lightp2p"
@@ -16,6 +19,8 @@ import (
 	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -98,9 +103,46 @@ func (mp *MockPier) Stop() error {
 	return nil
 }
 
+func (mp *MockPier) getSelfP2PPort(nodePrivKey crypto.PrivateKey) (int, error) {
+	ecdsaPrivKey, ok := nodePrivKey.(*ecdsa.PrivateKey)
+	if !ok {
+		return 0, fmt.Errorf("convert to libp2p private key: not ecdsa private key")
+	}
+
+	libp2pPrivKey, _, err := crypto2.ECDSAKeyPairFromKey(ecdsaPrivKey.K)
+	if err != nil {
+		return 0, err
+	}
+
+	networkConfig, err := repo.LoadNetworkConfig(mp.config.RepoRoot, libp2pPrivKey)
+	if err != nil {
+		return 0, fmt.Errorf("load network config err: %w", err)
+	}
+	if networkConfig == nil || networkConfig.LocalAddr == "" {
+		return 0, errors.New("not found local address in network.toml")
+	}
+
+	idx := strings.LastIndex(networkConfig.LocalAddr, "/tcp/")
+	if idx == -1 {
+		return 0, fmt.Errorf("not found tcp protocol on address %v", networkConfig.LocalAddr)
+	}
+
+	tcpPort, aerr := strconv.Atoi(networkConfig.LocalAddr[idx+5:])
+	if aerr != nil {
+		return 0, fmt.Errorf("failed to get tcp port on address %v", networkConfig.LocalAddr)
+	}
+
+	return tcpPort, nil
+}
+
 func (mp *MockPier) startPierHA() {
 	mp.log.Info("pier HA manager start")
 	status := false
+	selfP2pPort, err := mp.getSelfP2PPort(mp.nodePriv)
+	if err != nil {
+		mp.log.Errorf("failed to get local tcp port, err: %s", err.Error())
+		panic("failed to get local tcp port")
+	}
 	//firstBeMain := true
 	for {
 		select {
@@ -112,7 +154,7 @@ func (mp *MockPier) startPierHA() {
 
 				if mp.config.Proxy.Enable {
 					// initialize proxy component
-					px, nerr := proxy.NewProxy(filepath.Join(mp.repoRoot, repo.ProxyConfigName), mp.redisCli, mp.quitMain, loggers.Logger(loggers.Proxy))
+					px, nerr := proxy.NewProxy(filepath.Join(mp.repoRoot, repo.ProxyConfigName), mp.redisCli, mp.quitMain, selfP2pPort, loggers.Logger(loggers.Proxy))
 					if nerr != nil {
 						mp.log.Errorf("failed to init proxy, err: %s", nerr.Error())
 						panic("failed to init proxy")
