@@ -244,7 +244,7 @@ func (h *Http) switchSignalLoop() {
 					h.log.Debug("node " + url + " keepalive signal Success!")
 				} else {
 					badCount++
-					h.log.Errorf("response status code is %v, failedCount = %v", response.StatusCode, allBadCount)
+					h.log.Errorf("response status code is %v, url = %v, failedCount = %v", response.StatusCode, url, allBadCount)
 				}
 
 				response.Body.Close()
