@@ -124,6 +124,7 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 	}
 
 	securityTlsEnable := vip.GetBool(securityTLSEnable)
+	securityTlsBidirectionalCertAuthEnable := vip.GetBool(securityTLSBidirectionalCertAuthEnable)
 	securityTlsCAPathStr := vip.GetString(securityTlsCAPath)
 	securityTlsCertPathStr := vip.GetString(securityTlsCertPath)
 	securityTlsPrivPathStr := vip.GetString(securityTlsPrivPath)
