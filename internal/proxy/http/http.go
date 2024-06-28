@@ -12,6 +12,7 @@ import (
 	"github.com/meshplus/pier/pkg/redisha/signal"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/http2"
+	"io"
 	"math"
 	"net"
 	"net/http"
@@ -22,7 +23,10 @@ import (
 
 const maxRequestId = math.MaxUint16
 
-const uri = "/pier/proxy"
+const (
+	uri         = "/pier/proxy"
+	loadTestUri = "/pier/transfer"
+)
 
 type Http struct {
 	send chan *common.Data // 向 tcp 层发送数据
@@ -49,6 +53,9 @@ func New(redisCli rediscli.Wrapper, quitMain signal.QuitMainSignal, send chan *c
 	}
 	mux := &http.ServeMux{}
 	mux.Handle(uri, handler)
+
+	thWelcome := &textHandler{"hello pier proxy"}
+	mux.Handle(loadTestUri, thWelcome)
 
 	nodes := make([]*node, len(conf.RemoteAddress))
 	for i, ip := range conf.RemoteAddress {
@@ -248,7 +255,12 @@ func (h *Http) switchSignalLoop() {
 					h.log.Debug("node " + url + " keepalive signal Success!")
 				} else {
 					badCount++
-					h.log.Errorf("response status code is %v, url = %v, failedCount = %v", response.StatusCode, url, allBadCount)
+					bodyBytes, err := io.ReadAll(response.Body)
+					if err != nil {
+						h.log.Errorf("read response error %s", err.Error())
+					}
+					bodyString := string(bodyBytes)
+					h.log.Errorf("response status code is %v, url = %v,body = %s failedCount = %v", response.StatusCode, url, bodyString, allBadCount)
 				}
 
 				response.Body.Close()

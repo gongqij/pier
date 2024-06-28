@@ -13,6 +13,14 @@ import (
 	//code "github.com/ultramesh/flato-common/errorcode"
 )
 
+type textHandler struct {
+	responseText string
+}
+
+func (th *textHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, th.responseText)
+}
+
 type serverHandler struct {
 	sendCh chan *common.Data
 
