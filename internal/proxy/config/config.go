@@ -25,11 +25,12 @@ type ProxyConfig struct {
 	RemoteAddress       []string
 	RemoteHttpPort      []int
 
-	SecurityTLSEnable   bool
-	SecurityTLSCAPath   string
-	SecurityTLSCertPath string
-	SecurityTLSPrivPath string
-	SecurityTLSDomain   string
+	SecurityTLSEnable                      bool
+	SecurityTLSBidirectionalCertAuthEnable bool
+	SecurityTLSCAPath                      string
+	SecurityTLSCertPath                    string
+	SecurityTLSPrivPath                    string
+	SecurityTLSDomain                      string
 }
 
 type ReverseProxyConfig struct {
@@ -129,23 +130,24 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 	securityTlsDomainStr := vip.GetString(securityTlsDomain)
 
 	return &ProxyConfig{
-		ReverseProxys:        reverseProxys,
-		HTTPPort:             httpListenPort,
-		HTTP2Enable:          http2Enable,
-		HTTPCancelTimeout:    hct,
-		HTTPRetryDuration:    hrd,
-		HTTPAllFailedLimit:   hafl,
-		HTTPMaxContentLength: httpMaxContentLength,
-		HTTPRequestTimeout:   duration,
-		HTTPAllowOrigins:     httpAllowOriginsStrSlice,
-		RemoteAddress:        remoteAddressStrSlice,
-		RemoteHttpPort:       remoteHttpPortIntSlice,
-		RemoteReconnectTime:  reconectTime,
-		SecurityTLSEnable:    securityTlsEnable,
-		SecurityTLSCAPath:    securityTlsCAPathStr,
-		SecurityTLSCertPath:  securityTlsCertPathStr,
-		SecurityTLSPrivPath:  securityTlsPrivPathStr,
-		SecurityTLSDomain:    securityTlsDomainStr,
+		ReverseProxys:                          reverseProxys,
+		HTTPPort:                               httpListenPort,
+		HTTP2Enable:                            http2Enable,
+		HTTPCancelTimeout:                      hct,
+		HTTPRetryDuration:                      hrd,
+		HTTPAllFailedLimit:                     hafl,
+		HTTPMaxContentLength:                   httpMaxContentLength,
+		HTTPRequestTimeout:                     duration,
+		HTTPAllowOrigins:                       httpAllowOriginsStrSlice,
+		RemoteAddress:                          remoteAddressStrSlice,
+		RemoteHttpPort:                         remoteHttpPortIntSlice,
+		RemoteReconnectTime:                    reconectTime,
+		SecurityTLSEnable:                      securityTlsEnable,
+		SecurityTLSBidirectionalCertAuthEnable: securityTlsBidirectionalCertAuthEnable,
+		SecurityTLSCAPath:                      securityTlsCAPathStr,
+		SecurityTLSCertPath:                    securityTlsCertPathStr,
+		SecurityTLSPrivPath:                    securityTlsPrivPathStr,
+		SecurityTLSDomain:                      securityTlsDomainStr,
 	}, nil
 }
 

@@ -18,9 +18,10 @@ const (
 	remoteAddress       = "remote.address"
 	remoteHttpPort      = "remote.http_port"
 
-	securityTLSEnable   = "security.tls.enable"
-	securityTlsCAPath   = "security.tls.tlsCAPath"
-	securityTlsCertPath = "security.tls.tlsCertPath"
-	securityTlsPrivPath = "security.tls.tlsPrivPath"
-	securityTlsDomain   = "security.tls.tlsDomain"
+	securityTLSEnable                      = "security.tls.enable"
+	securityTLSBidirectionalCertAuthEnable = "security.tls.bidirectionalCertAuthEnable"
+	securityTlsCAPath                      = "security.tls.tlsCAPath"
+	securityTlsCertPath                    = "security.tls.tlsCertPath"
+	securityTlsPrivPath                    = "security.tls.tlsPrivPath"
+	securityTlsDomain                      = "security.tls.tlsDomain"
 )

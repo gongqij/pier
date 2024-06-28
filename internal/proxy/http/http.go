@@ -123,8 +123,12 @@ func (h *Http) startHttpServer() error {
 		tlsConfig := &tls.Config{
 			Certificates: []tls.Certificate{serverCert},
 			ClientCAs:    caCertPool,
-			ClientAuth:   tls.RequireAndVerifyClientCert,
 		}
+
+		if h.conf.SecurityTLSBidirectionalCertAuthEnable {
+			tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
+		}
+
 		// start http listener with secure connection and http/2
 		if listener, lerr = tls.Listen("tcp", fmt.Sprintf(":%d", h.conf.HTTPPort), tlsConfig); lerr != nil {
 			h.log.Errorf("failed to listen tls service, Err: %v", lerr)

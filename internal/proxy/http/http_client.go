@@ -54,6 +54,10 @@ func newClient(conf *config.ProxyConfig) *http.Client {
 			Certificates: []tls.Certificate{cliCrt},
 		}
 
+		if !conf.SecurityTLSBidirectionalCertAuthEnable {
+			cfg.InsecureSkipVerify = true
+		}
+
 		tr.DialTLSContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			tlsConn, err := tls.DialWithDialer(&net.Dialer{
 				Timeout:   30 * time.Second,
