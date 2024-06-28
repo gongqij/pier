@@ -269,7 +269,7 @@ func (a *AppchainAdapter) QueryInterchain(serviceID string) (*pb.Interchain, err
 			a.logger.Errorf("plugin GetServices error: %s", err.Error())
 			return nil, err
 		}
-		a.logger.Errorf("plugin GetServices success, with result: %v", services)
+		a.logger.Infof("plugin GetServices success, with result: %v", services)
 		for _, value := range services {
 			if strings.EqualFold(serviceID, value) {
 				a.logger.Infof("plugin QueryInterchain enter findSelfInterchain for %s", serviceID)
