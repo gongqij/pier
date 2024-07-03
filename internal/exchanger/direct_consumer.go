@@ -48,7 +48,13 @@ func (ex *Exchanger) listenIBTPFromDestAdaptForDirect(servicePair string) {
 
 			if isRollback := ex.isIBTPRollbackForDirect(ibtp); isRollback {
 				// receipt time out, need update ibtp with invoke info
-				ibtp, _ = ex.srcAdapt.QueryIBTP(ibtp.ID(), true)
+				var qerr error
+				ibtp, qerr = ex.queryIBTP(ex.srcAdapt, ibtp.ID(), true)
+				if qerr != nil {
+					ex.logger.Errorf("in rollback context, queryIBTP meet error: %s, caused by exchanger stop",
+						qerr.Error())
+					continue
+				}
 				ex.rollbackIBTPForDirect(ibtp)
 			} else {
 				ex.sendIBTPForDirect(ex.destAdapt, ex.srcAdapt, ibtp, !ex.isIBTPBelongSrc(ibtp), false)
