@@ -14,7 +14,7 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strings"
+	"sync"
 	"time"
 )
 
@@ -113,8 +113,9 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 		h.redisCli.SendUnlock()
 		return
 	}
-	// 拿到发送锁，说明自己是主pier，可以发送http请求
-	resp, rerr := h.httpCli.Do(req)
+
+	// 拿到发送锁，说明自己是主pier，可以发送http请求，并设置http请求发送的超时时间，防止 httpCli.Do() 的调用卡很久
+	resp, rerr := h.sendHttpWithTimeout(req)
 	if rerr != nil || resp == nil || resp.StatusCode != http.StatusOK {
 		// 2. 第一次 http 请求发送失败，重发
 		if rerr != nil {
@@ -123,13 +124,12 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 			h.log.Errorf("retry send http request to %s, err: status code is %v", httpUrl, resp.StatusCode)
 		}
 		time.Sleep(100 * time.Millisecond)
-		if resp, rerr = h.httpCli.Do(req); rerr != nil {
+		req, _ = newHttpRequest(http.MethodPost, httpUrl, jsonReqRaw)
+		if resp, rerr = h.sendHttpWithTimeout(req); rerr != nil || resp == nil || resp.StatusCode != http.StatusOK {
 			// 3. 第二次 http 请求发送失败，尝试切换 remote httpUrl 发送
-			if strings.Contains(rerr.Error(), "connection refused") {
-				h.nodes[confIndex].alive = false
-				h.wg.Add(1)
-				go h.reconnectNode(confIndex)
-			}
+			h.nodes[confIndex].alive = false
+			h.wg.Add(1)
+			go h.reconnectNode(confIndex)
 
 			resp, rerr = h.resendHttpRequest(http.MethodPost, jsonReqRaw)
 			if rerr != nil || resp == nil {
@@ -171,6 +171,35 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 	h.log.Debugf("receive http response { requestId: %v, uuid: %v, httpUrl: %v, statusCode: %v, Err: %v}", respJson.Id, respJson.TcpUUid, httpUrl, resp.StatusCode, respJson.Err)
 }
 
+func (h *Http) sendHttpWithTimeout(req *http.Request) (*http.Response, error) {
+	requestTimeout := h.conf.HTTPCancelTimeout // 单个http请求的超时时间
+	if requestTimeout == 0 {
+		requestTimeout = 5 * time.Second
+	}
+
+	ctx, cancel := context.WithCancel(req.Context())
+	req = req.WithContext(ctx)
+	quitGoroutine := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Add(1)
+	requestTimer := time.NewTimer(requestTimeout)
+	defer requestTimer.Stop()
+	go func() {
+		defer wg.Done()
+		select {
+		case <-requestTimer.C:
+			h.log.Debugf("http request timeout %s://%s%s", req.URL.Scheme, req.URL.Host, req.URL.Path)
+			cancel()
+		case <-quitGoroutine:
+		}
+	}()
+	resp, rerr := h.httpCli.Do(req)
+	close(quitGoroutine)
+	wg.Wait()
+
+	return resp, rerr
+}
+
 func (h *Http) resendHttpRequest(method string, jsonReqRaw []byte) (*http.Response, error) {
 	for {
 		select {
@@ -187,13 +216,13 @@ func (h *Http) resendHttpRequest(method string, jsonReqRaw []byte) (*http.Respon
 				return nil, fmt.Errorf("failed to create POST request: %v", err)
 			}
 
-			resp, rerr := h.httpCli.Do(req)
+			resp, rerr := h.sendHttpWithTimeout(req)
 			if rerr == nil && resp.StatusCode == http.StatusOK {
 				h.log.Infof("choose httpUrl %v to resend", url)
 				return resp, rerr
 			}
 
-			if rerr != nil && strings.Contains(rerr.Error(), "connection refused") {
+			if rerr != nil || resp == nil || resp.StatusCode != http.StatusOK {
 				h.nodes[confIndex].alive = false
 				h.wg.Add(1)
 				go h.reconnectNode(confIndex)
