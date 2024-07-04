@@ -102,7 +102,7 @@ func (h *Http) reconnectNode(confIndex int) {
 		case <-h.stopped:
 			return
 		case <-timer.C:
-			req, nerr := newHttpRequest(http.MethodPost, url, body)
+			req, nerr := h.newHttpRequest(http.MethodPost, url, body)
 			if nerr != nil {
 				h.log.Error(nerr)
 			}

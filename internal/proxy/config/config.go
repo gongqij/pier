@@ -19,6 +19,7 @@ type ProxyConfig struct {
 	HTTPAllFailedLimit   int
 	HTTPMaxContentLength int64
 	HTTPRequestTimeout   time.Duration
+	HTTPRequestProxyHost string
 	HTTPAllowOrigins     []string
 
 	RemoteReconnectTime time.Duration
@@ -108,6 +109,7 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		return nil, fmt.Errorf("parse request timeout error: %s", derr.Error())
 	}
 	httpMaxContentLength := vip.GetInt64(httpRequestMaxContentLength)
+	proxyHost := vip.GetString(httpRequestProxyHost)
 	remoteReconnectTimeStr := vip.GetString(remoteReconnectTime)
 	remoteAddressStrSlice := vip.GetStringSlice(remoteAddress)
 	remoteHttpPortIntSlice := vip.GetIntSlice(remoteHttpPort)
@@ -139,6 +141,7 @@ func LoadProxyConfig(cfgFilePath string) (*ProxyConfig, error) {
 		HTTPAllFailedLimit:                     hafl,
 		HTTPMaxContentLength:                   httpMaxContentLength,
 		HTTPRequestTimeout:                     duration,
+		HTTPRequestProxyHost:                   proxyHost,
 		HTTPAllowOrigins:                       httpAllowOriginsStrSlice,
 		RemoteAddress:                          remoteAddressStrSlice,
 		RemoteHttpPort:                         remoteHttpPortIntSlice,

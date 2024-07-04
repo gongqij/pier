@@ -11,6 +11,7 @@ const (
 	httpRetryDuration           = "http.retry_duration"
 	httpAllFailedLimit          = "http.all_failed_limit"
 	httpRequestMaxContentLength = "http.request.max_content_length"
+	httpRequestProxyHost        = "http.request.proxy_host"
 	httpRequestTimeout          = "http.request.timeout"
 	httpRequestAllowOrigins     = "http.request.allow_origins"
 

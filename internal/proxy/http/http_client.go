@@ -72,12 +72,15 @@ func newClient(conf *config.ProxyConfig) *http.Client {
 	return &http.Client{Transport: tr}
 }
 
-func newHttpRequest(method, url string, body []byte) (*http.Request, error) {
+func (h *Http) newHttpRequest(method, url string, body []byte) (*http.Request, error) {
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if h.conf.HTTPRequestProxyHost != "" {
+		req.Host = h.conf.HTTPRequestProxyHost
+	}
 	return req, nil
 }
 
@@ -99,7 +102,7 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 
 	h.log.Debugf("receive data from tcp, send http request { requestId: %v, uuid: %v, httpUrl: %v}", jsonReq.Id, jsonReq.TcpUUid, httpUrl)
 
-	req, err := newHttpRequest(http.MethodPost, httpUrl, jsonReqRaw)
+	req, err := h.newHttpRequest(http.MethodPost, httpUrl, jsonReqRaw)
 	if err != nil {
 		h.log.Errorf("drop message because failed to create POST request: %v", err)
 		return
@@ -124,7 +127,7 @@ func (h *Http) sendHttpRequest(data *common.Data) {
 			h.log.Errorf("retry send http request to %s, err: status code is %v", httpUrl, resp.StatusCode)
 		}
 		time.Sleep(100 * time.Millisecond)
-		req, _ = newHttpRequest(http.MethodPost, httpUrl, jsonReqRaw)
+		req, _ = h.newHttpRequest(http.MethodPost, httpUrl, jsonReqRaw)
 		if resp, rerr = h.sendHttpWithTimeout(req); rerr != nil || resp == nil || resp.StatusCode != http.StatusOK {
 			// 3. 第二次 http 请求发送失败，尝试切换 remote httpUrl 发送
 			h.nodes[confIndex].alive = false
@@ -211,7 +214,7 @@ func (h *Http) resendHttpRequest(method string, jsonReqRaw []byte) (*http.Respon
 				return nil, serr
 			}
 
-			req, err := newHttpRequest(method, url, jsonReqRaw)
+			req, err := h.newHttpRequest(method, url, jsonReqRaw)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create POST request: %v", err)
 			}
