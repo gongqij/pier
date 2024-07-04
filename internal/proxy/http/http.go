@@ -260,7 +260,7 @@ func (h *Http) switchSignalLoop() {
 						h.log.Errorf("read response error %s", err.Error())
 					}
 					bodyString := string(bodyBytes)
-					h.log.Errorf("response status code is %v, url = %v,body = %s failedCount = %v", response.StatusCode, url, bodyString, allBadCount)
+					h.log.Debug("response status code is %v, url = %v,body = %s failedCount = %v", response.StatusCode, url, bodyString, allBadCount)
 				}
 
 				response.Body.Close()
