@@ -35,7 +35,7 @@ func (d *DirectAdapter) handleGetIBTPMessage(stream network.Stream, msg *pb.Mess
 	// if msg is receipt, isReq is false
 	ibtp, err := d.appchainadapt.QueryIBTP(ibtpID, isReq)
 	if err != nil {
-		d.logger.Error("Get wrong ibtp id")
+		d.logger.Error("Get wrong ibtp id, errMsg:%s", err.Error())
 		return
 	}
 
