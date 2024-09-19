@@ -32,7 +32,7 @@ func (ex *Exchanger) handleMissingIBTPByServicePair(begin, end uint64, fromAdapt
 			if isRollback := ex.isIBTPRollbackForDirect(ibtp); isRollback {
 				ex.logger.Infof("handle missing meet timeout, do rollbackIBTPForDirect")
 				ex.rollbackIBTPForDirect(ibtp)
-				return
+				continue
 			}
 		}
 		ex.logger.Infof("handle missing enter normal logic, do send IBTP[%s] to %s", fmt.Sprintf("%s-%s-%d", srcService, targetService, begin), toAdapt.Name())
