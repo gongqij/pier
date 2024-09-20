@@ -1,6 +1,7 @@
 package exchanger
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Rican7/retry"
 	"github.com/Rican7/retry/backoff"
@@ -17,6 +18,13 @@ import (
 func (ex *Exchanger) handleMissingIBTPByServicePair(begin, end uint64, fromAdapt, toAdapt adapt.Adapt, srcService, targetService string, isReq bool) {
 	adaptName := fromAdapt.Name()
 	for ; begin <= end; begin++ {
+		select {
+		case <-ex.ctx.Done():
+			ex.logger.Warningf("exchanger stopped, directly interrupt handleMissingIBTPByServicePair")
+			ex.pushErr(errors.New("exchanger stopped, directly interrupt handleMissingIBTPByServicePair"))
+			return
+		default:
+		}
 		ex.logger.WithFields(logrus.Fields{
 			"service pair": fmt.Sprintf("%s-%s", srcService, targetService),
 			"index":        begin,

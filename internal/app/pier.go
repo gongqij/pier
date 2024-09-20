@@ -278,7 +278,7 @@ func (pier *Pier) startPierHA() {
 	for {
 		select {
 		case isMain := <-pier.pierHA.IsMain():
-			logger.Info("receive from isMain: %v, status: %v", isMain, status)
+			pier.logger.Info("receive from isMain: %v, status: %v", isMain, status)
 			if isMain {
 				if status {
 					continue
