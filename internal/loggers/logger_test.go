@@ -14,6 +14,7 @@ func TestLogger(t *testing.T) {
 			Filename:     "pier.log",
 			ReportCaller: false,
 			Level:        "info",
+			Day:          6,
 			Module: repo.LogModule{
 				AppchainMgr: "info",
 				Exchanger:   "info",

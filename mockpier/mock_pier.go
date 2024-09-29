@@ -54,7 +54,7 @@ func NewMockPier(repoRoot string) (*MockPier, error) {
 		log.WithFilePath(filepath.Join(repoRoot, config.Log.Dir)),
 		log.WithFileName(config.Log.Filename),
 		log.WithMaxSize(2*1024*1024),
-		log.WithMaxAge(24*time.Hour),
+		log.WithMaxAge(time.Duration(config.Log.Day)*24*time.Hour),
 		log.WithRotationTime(24*time.Hour),
 	)
 	if err != nil {

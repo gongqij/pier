@@ -91,6 +91,7 @@ type Log struct {
 	Filename     string    `toml:"filename" json:"filename"`
 	ReportCaller bool      `mapstructure:"report_caller"`
 	Level        string    `toml:"level" json:"level"`
+	Day          int       `toml:"day" json:"day"`
 	Module       LogModule `toml:"module" json:"module"`
 }
 
@@ -171,6 +172,7 @@ func DefaultConfig() *Config {
 			Filename:     "pier.log",
 			ReportCaller: false,
 			Level:        "info",
+			Day:          6,
 			Module: LogModule{
 				AppchainMgr: "info",
 				Exchanger:   "info",
