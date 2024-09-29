@@ -210,7 +210,6 @@ func DefaultConfig() *Config {
 		},
 		Redis: Redis{
 			Address:            "127.0.0.1:6379",
-			Password:           "",
 			Database:           1,
 			MasterLockPrefix:   "lock_master",
 			SendLockPrefix:     "lock_send",
