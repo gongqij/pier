@@ -185,7 +185,9 @@ func initPier(ctx *cli.Context) error {
 			return err
 		}
 		vpr.Set("mode.type", "union")
-
+	default:
+		err := fmt.Errorf("unsupport mode type: %s", mode)
+		return err
 	}
 
 	if err := updateInitOptions(ctx, vpr, repoRoot); err != nil {

@@ -172,5 +172,7 @@ func (t *Tcp) handleDataFromHttp(data *common.Data) {
 			t.log.Errorf("[tcp] write error: %s", werr.Error())
 			break
 		}
+	default:
+		t.log.Errorf("handleDataFromHttp meet error, unsupport http type: %s", data.Typ)
 	}
 }

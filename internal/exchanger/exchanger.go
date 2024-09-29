@@ -509,6 +509,8 @@ func (ex *Exchanger) isIBTPBelongSrc(ibtp *pb.IBTP) bool {
 		if strings.EqualFold(ex.srcBxhId, bxhID) {
 			isIBTPBelongSrc = true
 		}
+	default:
+		ex.logger.Errorf("isIBTPBelongSrc meet error, unsupport mod type: %s", ex.mode)
 	}
 	return isIBTPBelongSrc
 }

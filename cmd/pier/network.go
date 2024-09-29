@@ -135,7 +135,9 @@ func configNetwork(ctx *cli.Context) error {
 				return err
 			}
 		}
-
+	default:
+		err := fmt.Errorf("unsupport mode type: %s", mode)
+		return err
 	}
 	return nil
 

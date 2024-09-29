@@ -402,6 +402,9 @@ func updateAppchainConfig(ctx *cli.Context, configDir, chainType string) error {
 		if err := setBcosConfig(ctx, configDir); err != nil {
 			return err
 		}
+	default:
+		err := fmt.Errorf("unsupport chain type: %s", chainType)
+		return err
 	}
 
 	return nil
