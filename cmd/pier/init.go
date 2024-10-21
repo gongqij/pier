@@ -256,6 +256,8 @@ func initClientWithKeyPath(ctx *cli.Context, chainAdminKeyPath string) (rpcx.Cli
 		break
 	case repo.UnionMode:
 		addrs = config.Mode.Union.Addrs
+	default:
+		return nil, nil, fmt.Errorf("unsupported mode")
 	}
 
 	client, err := loadClient(chainAdminKeyPath, addrs, ctx)
