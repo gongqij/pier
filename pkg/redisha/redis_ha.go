@@ -12,6 +12,7 @@ import (
 	"github.com/meshplus/pier/internal/repo"
 
 	"github.com/google/uuid"
+	"github.com/meshplus/pier/pkg/gmsm"
 	"gopkg.in/redis.v4"
 )
 
@@ -74,6 +75,16 @@ func New(conf repo.Redis, pierID string, errch chan error) *RedisPierMng {
 
 		relMasterSignal: make(chan interface{}, 1),
 	}
+
+	authSecret := ""
+	if conf.AuthEnable {
+		var err error
+		authSecret, err = gmsm.Sm4Decrypt(conf.AuthSecret, gmsm.Sm4Key)
+		if err != nil {
+			obj.log.Errorf("sm4 decrypt meet error:%v", err)
+		}
+	}
+
 	obj.RedisCliW = rediscli.NewWrapperImpl(
 		strings.Join([]string{conf.SendLockPrefix, pierID}, "_"),
 		strings.Join([]string{conf.MasterLockPrefix, pierID}, "_"),
@@ -84,7 +95,7 @@ func New(conf repo.Redis, pierID string, errch chan error) *RedisPierMng {
 		func() *redis.Client {
 			opt := &redis.Options{
 				Addr:     conf.Address,
-				Password: conf.Password,
+				Password: authSecret,
 				DB:       conf.Database,
 			}
 			return redis.NewClient(opt)

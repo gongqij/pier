@@ -122,8 +122,9 @@ type Appchain struct {
 }
 
 type Redis struct {
-	Address  string `toml:"address" json:"address"`
-	Password string `toml:"password" json:"password"`
+	Address    string `toml:"address" json:"address"`
+	AuthEnable bool   `toml:"auth_enable" json:"auth_enable"`
+	AuthSecret string `toml:"auth_secret" json:"auth_secret"`
 	// redis default contains 0-15 buckets(databases)
 	Database int `toml:"database" json:"database"`
 	// LockPrefix will concat with appchainID(pierID) as lock name

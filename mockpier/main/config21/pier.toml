@@ -63,7 +63,8 @@ enable_tss = false
 #address = "10.10.97.125:6379"
 #password = ""
 address = "172.22.67.36:6379"
-password = "123456"
+auth_enable = false
+auth_secret = "OINbAi2YQT93NHGx/4y4eg=="
 database = 15
 master_lock_prefix = "lock_master"
 send_lock_prefix = "lock_send"

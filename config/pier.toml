@@ -62,7 +62,8 @@ enable_tss = false
 
 [redis]
 address = "10.10.97.125:6379"
-password = ""
+auth_enable = false
+auth_secret = "OINbAi2YQT93NHGx/4y4eg=="
 database = 15
 master_lock_prefix = "lock_master"
 send_lock_prefix = "lock_send"
