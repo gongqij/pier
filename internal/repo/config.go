@@ -123,8 +123,8 @@ type Appchain struct {
 
 type Redis struct {
 	Address    string `toml:"address" json:"address"`
-	AuthEnable bool   `toml:"auth_enable" json:"auth_enable"`
-	AuthSecret string `toml:"auth_secret" json:"auth_secret"`
+	AuthEnable bool   `mapstructure:"auth_enable" toml:"auth_enable" json:"auth_enable"`
+	AuthSecret string `mapstructure:"auth_secret" toml:"auth_secret" json:"auth_secret"`
 	// redis default contains 0-15 buckets(databases)
 	Database int `toml:"database" json:"database"`
 	// LockPrefix will concat with appchainID(pierID) as lock name
@@ -212,6 +212,8 @@ func DefaultConfig() *Config {
 		Redis: Redis{
 			Address:            "127.0.0.1:6379",
 			Database:           1,
+			AuthEnable:         false,
+			AuthSecret:         "",
 			MasterLockPrefix:   "lock_master",
 			SendLockPrefix:     "lock_send",
 			MasterLeaseRenewal: int64(5),
