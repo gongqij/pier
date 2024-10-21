@@ -232,8 +232,8 @@ func prepare(t *testing.T) (*DirectAdapter, *DirectAdapter, *mock_peermgr.MockPe
 	mockPeerMgr := mock_peermgr.NewMockPeerManager(mockCtl)
 	mockAppChainAdapt := mock_adapt.NewMockAdapt(mockCtl)
 	mockAppChainAdapt.EXPECT().ID().Return(appChainId).AnyTimes()
-	adapter1, err := New(mockPeerMgr, mockAppChainAdapt, log.NewWithModule("direct_adapter1"))
-	adapter2, err := New(mockPeerMgr, mockAppChainAdapt, log.NewWithModule("direct_adapter2"))
+	adapter1, err := New(mockPeerMgr, mockAppChainAdapt, log.NewWithModule("direct_adapter1"), "")
+	adapter2, err := New(mockPeerMgr, mockAppChainAdapt, log.NewWithModule("direct_adapter2"), "")
 	require.Nil(t, err)
 
 	return adapter1, adapter2, mockPeerMgr, mockAppChainAdapt
