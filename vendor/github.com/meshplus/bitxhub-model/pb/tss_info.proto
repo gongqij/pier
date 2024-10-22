@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package pb;
-
-message TssInfo {
-  map<string, bytes> parties_pk_map = 1;
-  bytes pubkey = 2;
-}
