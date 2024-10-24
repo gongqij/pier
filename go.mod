@@ -87,7 +87,7 @@ require (
 	github.com/libp2p/go-conn-security-multistream v0.2.0 // indirect
 	github.com/libp2p/go-eventbus v0.1.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.0.3 // indirect
-	github.com/libp2p/go-libp2p v0.9.2 // indirect
+	github.com/libp2p/go-libp2p v0.29.1 // indirect
 	github.com/libp2p/go-libp2p-autonat v0.2.3 // indirect
 	github.com/libp2p/go-libp2p-blankhost v0.1.6 // indirect
 	github.com/libp2p/go-libp2p-circuit v0.2.2 // indirect
