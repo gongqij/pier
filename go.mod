@@ -20,7 +20,6 @@ require (
 	github.com/ipfs/go-cid v0.0.7
 	github.com/json-iterator/go v1.1.11
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
-	github.com/libp2p/go-libp2p v0.29.2 // indirect
 	github.com/libp2p/go-libp2p-core v0.6.1
 	github.com/meshplus/bitxhub-core v1.3.1-0.20220511024304-f7458609c30a
 	github.com/meshplus/bitxhub-kit v1.2.1-0.20220412092457-5836414df781
@@ -41,9 +40,8 @@ require (
 	github.com/wonderivan/logger v1.0.0
 	go.uber.org/atomic v1.7.0
 	golang.org/x/crypto v0.28.0 // indirect
-	golang.org/x/net v0.25.0
-	golang.org/x/text v0.3.8 // indirect
-	google.golang.org/grpc v1.60.0
+	golang.org/x/net v0.28.0
+	google.golang.org/grpc v1.38.0
 	gopkg.in/bsm/ratelimit.v1 v1.0.0-20170922094635-f56db5e73a5e // indirect
 	gopkg.in/redis.v4 v4.2.4
 )
@@ -51,12 +49,8 @@ require (
 replace (
 	github.com/btcsuite/btcd => ./third/btcd
 	github.com/hyperledger/fabric => github.com/hyperledger/fabric v2.0.1+incompatible
-	github.com/libp2p/go-buffer-pool => github.com/libp2p/go-buffer-pool v0.0.2
-	github.com/libp2p/go-libp2p => github.com/libp2p/go-libp2p v0.9.2
+	github.com/libp2p/go-libp2p => ./third/go-libp2p
 	github.com/libp2p/go-libp2p-core => github.com/libp2p/go-libp2p-core v0.5.6
 	github.com/meshplus/go-lightp2p => ./third/lightp2p
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.1
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
-	golang.org/x/net => golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
-	google.golang.org/grpc => google.golang.org/grpc v1.33.0
 )
