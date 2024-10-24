@@ -28,10 +28,10 @@ require (
 	github.com/multiformats/go-multiaddr v0.3.0
 	github.com/pelletier/go-toml v1.9.3
 	github.com/rs/cors v1.7.0
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.8.3
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.8.3
-	github.com/tidwall/gjson v1.9.3
+	github.com/tidwall/gjson v1.17.3
 	github.com/tjfoc/gmsm v1.4.1
 	github.com/urfave/cli v1.22.1
 	github.com/wonderivan/logger v1.0.0
@@ -49,14 +49,14 @@ require (
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidlazar/go-crypto v0.0.0-20190912175916-7055855a373f // indirect
-	github.com/ethereum/go-ethereum v1.10.4 // indirect
+	github.com/ethereum/go-ethereum v1.14.4 // indirect
 	github.com/garyburd/redigo v1.6.4 // indirect
 	github.com/gobuffalo/logger v1.0.6 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gopacket v1.1.17 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
@@ -182,6 +182,7 @@ require (
 
 replace (
 	github.com/btcsuite/btcd => ./third/btcd
+	github.com/ethereum/go-ethereum => ./third/go-ethereum
 	github.com/hyperledger/fabric => github.com/hyperledger/fabric v2.0.1+incompatible
 	github.com/libp2p/go-libp2p => ./third/go-libp2p
 	github.com/libp2p/go-libp2p-core => github.com/libp2p/go-libp2p-core v0.5.6
