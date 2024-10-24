@@ -173,7 +173,7 @@ require (
 	golang.org/x/term v0.25.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
+	google.golang.org/protobuf v1.35.0 // indirect
 	gopkg.in/bsm/ratelimit.v1 v1.0.0-20170922094635-f56db5e73a5e // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -189,4 +189,5 @@ replace (
 	github.com/meshplus/go-lightp2p => ./third/lightp2p
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.1
 	google.golang.org/grpc => ./third/grpc
+	google.golang.org/protobuf => ./third/protobuf
 )
