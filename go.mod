@@ -41,7 +41,7 @@ require (
 	go.uber.org/atomic v1.7.0
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/net v0.28.0
-	google.golang.org/grpc v1.38.0
+	google.golang.org/grpc v1.68.0
 	gopkg.in/bsm/ratelimit.v1 v1.0.0-20170922094635-f56db5e73a5e // indirect
 	gopkg.in/redis.v4 v4.2.4
 )
@@ -53,4 +53,5 @@ replace (
 	github.com/libp2p/go-libp2p-core => github.com/libp2p/go-libp2p-core v0.5.6
 	github.com/meshplus/go-lightp2p => ./third/lightp2p
 	github.com/pkg/sftp => github.com/pkg/sftp v1.13.1
+	google.golang.org/grpc => ./third/grpc
 )
