@@ -157,6 +157,8 @@ func newCallback(receiver, fn reflect.Value) *callback {
 			return nil
 		}
 		c.errPos = 1
+	default:
+		_ = 0
 	}
 	return c
 }

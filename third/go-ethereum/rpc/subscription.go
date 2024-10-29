@@ -359,6 +359,8 @@ func (sub *ClientSubscription) forward() (unsubscribeServer bool, err error) {
 		case 2: // sub.channel<-
 			cases[2].Send = reflect.Value{} // Don't hold onto the value.
 			buffer.Remove(buffer.Front())
+		default:
+			_ = 0
 		}
 	}
 }

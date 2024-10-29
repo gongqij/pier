@@ -180,6 +180,8 @@ func readSize(b []byte, slen byte) (uint64, error) {
 		s = uint64(b[0])<<48 | uint64(b[1])<<40 | uint64(b[2])<<32 | uint64(b[3])<<24 | uint64(b[4])<<16 | uint64(b[5])<<8 | uint64(b[6])
 	case 8:
 		s = uint64(b[0])<<56 | uint64(b[1])<<48 | uint64(b[2])<<40 | uint64(b[3])<<32 | uint64(b[4])<<24 | uint64(b[5])<<16 | uint64(b[6])<<8 | uint64(b[7])
+	default:
+		_ = 0
 	}
 	// Reject sizes < 56 (shouldn't have separate size) and sizes with
 	// leading zero bytes.

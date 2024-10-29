@@ -81,6 +81,8 @@ func diffTries(t1, t2 state.Trie) error {
 		return fmt.Errorf("full trie iterator has more k/v pairs")
 	case i2.Next():
 		return fmt.Errorf("light trie iterator has more k/v pairs")
+	default:
+		_ = 0
 	}
 	return nil
 }

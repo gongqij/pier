@@ -767,6 +767,8 @@ func (field *Field) resolveDependencies(gen *Plugin) error {
 			return fmt.Errorf("field %v: no descriptor for type %v", desc.FullName(), name)
 		}
 		field.Message = message
+	default:
+		_ = 0
 	}
 	if desc.IsExtension() {
 		name := desc.ContainingMessage().FullName()
@@ -1130,11 +1132,15 @@ func (g *GeneratedFile) metaFile(content []byte) (string, error) {
 								annotate(spec.Name.Name+"."+name.Name, name)
 							}
 						}
+					default:
+						_ = 0
 					}
 				case *ast.ValueSpec:
 					for _, name := range spec.Names {
 						annotate(name.Name, name)
 					}
+				default:
+					_ = 0
 				}
 			}
 		case *ast.FuncDecl:
@@ -1149,6 +1155,8 @@ func (g *GeneratedFile) metaFile(content []byte) (string, error) {
 					annotate(id.Name+"."+decl.Name.Name, decl.Name)
 				}
 			}
+		default:
+			_ = 0
 		}
 	}
 	for a := range g.annotations {

@@ -84,6 +84,8 @@ func (bn *BlockNumber) UnmarshalJSON(data []byte) error {
 	case "pending":
 		*bn = PendingBlockNumber
 		return nil
+	default:
+		_ = 0
 	}
 
 	blckNum, err := hexutil.DecodeUint64(input)

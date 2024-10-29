@@ -227,8 +227,12 @@ func (t Token) Bool() (bool, bool) {
 				return false, true
 			case 1:
 				return true, true
+			default:
+				_ = 0
 			}
 		}
+	default:
+		_ = 0
 	}
 	return false, false
 }
@@ -324,6 +328,8 @@ func (t Token) Float64() (float64, bool) {
 		if nerr.Err == strconv.ErrRange {
 			return n, true
 		}
+	default:
+		_ = 0
 	}
 	return 0, false
 }

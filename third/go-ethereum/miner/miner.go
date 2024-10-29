@@ -127,6 +127,8 @@ func (miner *Miner) update() {
 				}
 				// Stop reacting to downloader events
 				events.Unsubscribe()
+			default:
+				_ = 0
 			}
 		case addr := <-miner.startCh:
 			miner.SetEtherbase(addr)

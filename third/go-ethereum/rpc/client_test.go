@@ -239,6 +239,8 @@ func testClientCancel(transport string, t *testing.T) {
 				t.Errorf("no error for call with %v wait time (deadline: %v)", timeout, hasDeadline)
 				// default:
 				// 	t.Logf("got expected error with %v wait time: %v", timeout, err)
+			default:
+				_ = 0
 			}
 			cancel()
 		}

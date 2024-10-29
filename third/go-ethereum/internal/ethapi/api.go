@@ -1267,6 +1267,8 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		} else {
 			result.GasPrice = nil
 		}
+	default:
+		_ = 0
 	}
 	return result
 }

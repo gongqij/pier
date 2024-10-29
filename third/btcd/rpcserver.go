@@ -1916,6 +1916,8 @@ func handleGetBlockTemplateRequest(s *rpcServer, request *btcjson.TemplateReques
 				hasCoinbaseTxn = true
 			case "coinbasevalue":
 				hasCoinbaseValue = true
+			default:
+				_ = 0
 			}
 		}
 
@@ -2080,6 +2082,8 @@ func chainErrToGBTErrString(err error) string {
 		return "bad-prevblk"
 	case blockchain.ErrPrevBlockNotBest:
 		return "inconclusive-not-best-prvblk"
+	default:
+		_ = 0
 	}
 
 	return "rejected: " + err.Error()

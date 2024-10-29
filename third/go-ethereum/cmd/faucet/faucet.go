@@ -711,6 +711,8 @@ func authTwitter(url string, tokenV1, tokenV2 string) (string, string, string, c
 		return authTwitterWithTokenV1(tweetID, tokenV1)
 	case tokenV2 != "":
 		return authTwitterWithTokenV2(tweetID, tokenV2)
+	default:
+		_ = 0
 	}
 	// Twiter API token isn't provided so we just load the public posts
 	// and scrape it for the Ethereum address and profile URL. We need to load

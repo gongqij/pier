@@ -556,6 +556,8 @@ func parseInteger(encType string, encValue interface{}) (*big.Int, error) {
 		} else {
 			return nil, fmt.Errorf("invalid float value %v for type %v", v, encType)
 		}
+	default:
+		_ = 0
 	}
 	if b == nil {
 		return nil, fmt.Errorf("invalid integer value %v/%v for type %v", encValue, reflect.TypeOf(encValue), encType)
@@ -602,6 +604,8 @@ func (typedData *TypedData) EncodePrimitiveValue(encType string, encValue interf
 			return nil, dataMismatchError(encType, encValue)
 		}
 		return crypto.Keccak256(bytesValue), nil
+	default:
+		_ = 0
 	}
 	if strings.HasPrefix(encType, "bytes") {
 		lengthStr := strings.TrimPrefix(encType, "bytes")
@@ -818,6 +822,8 @@ func formatPrimitiveValue(encType string, encValue interface{}) (string, error) 
 		}
 	case "bytes", "string":
 		return fmt.Sprintf("%s", encValue), nil
+	default:
+		_ = 0
 	}
 	if strings.HasPrefix(encType, "bytes") {
 		return fmt.Sprintf("%s", encValue), nil

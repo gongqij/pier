@@ -182,6 +182,8 @@ func (x *Duration) AsDuration() time.Duration {
 			return time.Duration(math.MinInt64)
 		case secs > 0:
 			return time.Duration(math.MaxInt64)
+		default:
+			_ = 0
 		}
 	}
 	return d

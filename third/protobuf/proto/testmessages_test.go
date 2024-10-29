@@ -1523,6 +1523,8 @@ var testValidMessages = []testProto{
 					case "optional_nested_message",
 						"optional_int32":
 						return true
+					default:
+						_ = 0
 					}
 					return false
 				},

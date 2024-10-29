@@ -483,6 +483,8 @@ func assignField(paramNum int, fieldName string, dest reflect.Value, src reflect
 		default:
 			_ = 0
 		}
+	default:
+		_ = 0
 	}
 
 	return nil

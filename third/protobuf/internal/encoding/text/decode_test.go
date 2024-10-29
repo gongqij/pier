@@ -1651,6 +1651,8 @@ func checkToken(t *testing.T, tok text.Token, idx int, r R, in string) {
 			if got != want.N {
 				errorf(t, in, "want#%d: Token.FieldNumber() got %v want %v", idx, got, want.N)
 			}
+		default:
+			_ = 0
 		}
 
 	case text.Scalar:
@@ -1665,6 +1667,8 @@ func checkToken(t *testing.T, tok text.Token, idx int, r R, in string) {
 				errorf(t, in, "want#%d: %s", idx, err)
 			}
 		}
+	default:
+		_ = 0
 	}
 }
 

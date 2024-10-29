@@ -1990,6 +1990,8 @@ func (s *server) handleQuery(state *peerState, querymsg interface{}) {
 		}
 
 		msg.reply <- errors.New("peer not found")
+	default:
+		_ = 0
 	}
 }
 
@@ -2316,6 +2318,8 @@ out:
 			// now remove it, if it was present.
 			case broadcastInventoryDel:
 				delete(pendingInvs, *msg)
+			default:
+				_ = 0
 			}
 
 		case <-timer.C:
@@ -2333,6 +2337,8 @@ out:
 
 		case <-s.quit:
 			break out
+		default:
+			_ = 0
 		}
 	}
 
@@ -3145,6 +3151,8 @@ func dynamicTickDuration(remaining time.Duration) time.Duration {
 		return time.Minute * 5
 	case remaining <= time.Hour:
 		return time.Minute * 15
+	default:
+		_ = 0
 	}
 	return time.Hour
 }

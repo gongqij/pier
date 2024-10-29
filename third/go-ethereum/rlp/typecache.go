@@ -221,6 +221,8 @@ func parseStructTag(typ reflect.Type, fi, lastPublic int) (tags, error) {
 				ts.nilKind = String
 			case "nilList":
 				ts.nilKind = List
+			default:
+				_ = 0
 			}
 		case "optional":
 			ts.optional = true

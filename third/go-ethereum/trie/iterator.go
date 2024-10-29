@@ -421,6 +421,8 @@ func (it *nodeIterator) nextChild(parent *nodeIteratorState, ancestor common.Has
 			path := append(it.path, node.Key...)
 			return state, path, true
 		}
+	default:
+		_ = 0
 	}
 	return parent, it.path, false
 }
@@ -467,6 +469,8 @@ func (it *nodeIterator) nextChildAt(parent *nodeIteratorState, ancestor common.H
 			path := append(it.path, n.Key...)
 			return state, path, true
 		}
+	default:
+		_ = 0
 	}
 	return parent, it.path, false
 }
@@ -591,6 +595,8 @@ func (it *differenceIterator) Next(bool) bool {
 				return true
 			}
 			it.count++
+		default:
+			_ = 0
 		}
 	}
 }

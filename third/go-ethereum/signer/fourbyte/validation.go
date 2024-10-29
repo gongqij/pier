@@ -82,6 +82,8 @@ func (db *Database) ValidateTransaction(selector *string, tx *core.SendTxArgs) (
 		messages.Crit("Both 'gasPrice' and 'maxFeePerGas' specified.")
 	case tx.GasPrice != nil && tx.MaxPriorityFeePerGas != nil:
 		messages.Crit("Both 'gasPrice' and 'maxPriorityFeePerGas' specified.")
+	default:
+		_ = 0
 	}
 	// Semantic fields validated, try to make heads or tails of the call data
 	db.ValidateCallData(selector, data, messages)
