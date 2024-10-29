@@ -287,6 +287,8 @@ func testField(t testing.TB, m pref.Message, fd pref.FieldDescriptor) {
 		if got, want := m.Get(fd), fd.Default(); !valueEqual(got, want) {
 			t.Errorf("after clearing %q:\nMessage.Get(%v) = %v, want default %v", name, num, formatValue(got), formatValue(want))
 		}
+	default:
+		_ = 0
 	}
 
 	// Set to the default value.
@@ -301,6 +303,8 @@ func testField(t testing.TB, m pref.Message, fd pref.FieldDescriptor) {
 		if got, want := m.Get(fd), fd.Default(); !valueEqual(got, want) {
 			t.Errorf("after setting %q to default:\nMessage.Get(%v) = %v, want default %v", name, num, formatValue(got), formatValue(want))
 		}
+	default:
+		_ = 0
 	}
 	m.Clear(fd)
 
@@ -716,6 +720,8 @@ func newSeed(n seed, adjust ...int) seed {
 	switch n {
 	case minVal, maxVal:
 		return n
+	default:
+		_ = 0
 	}
 	for _, a := range adjust {
 		n = 10*n + seed(a)
@@ -858,6 +864,8 @@ func newScalarValue(fd pref.FieldDescriptor, n seed) pref.Value {
 			return pref.ValueOfBytes(nil)
 		}
 		return pref.ValueOfBytes([]byte{byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)})
+	default:
+		_ = 0
 	}
 	panic("unhandled kind")
 }

@@ -57,6 +57,8 @@ func TestOverflow(t *testing.T) {
 			_, overflows = SafeAdd(test.x, test.y)
 		case mul:
 			_, overflows = SafeMul(test.x, test.y)
+		default:
+			_ = 0
 		}
 
 		if test.overflow != overflows {

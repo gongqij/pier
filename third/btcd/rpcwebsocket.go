@@ -317,7 +317,11 @@ func (f *wsClientFilter) addAddress(a btcutil.Address) {
 			copy(uncompressedPubKey[:], serializedPubKey)
 			f.uncompressedPubKeys[uncompressedPubKey] = struct{}{}
 			return
+		default:
+			_ = 0
 		}
+	default:
+		_ = 0
 	}
 
 	f.otherAddresses[a.EncodeAddress()] = struct{}{}
@@ -369,7 +373,11 @@ func (f *wsClientFilter) existsAddress(a btcutil.Address) bool {
 				_, ok = f.pubKeyHashes[*a.AddressPubKeyHash().Hash160()]
 			}
 			return ok
+		default:
+			_ = 0
 		}
+	default:
+		_ = 0
 	}
 
 	_, ok := f.otherAddresses[a.EncodeAddress()]
@@ -401,7 +409,11 @@ func (f *wsClientFilter) removeAddress(a btcutil.Address) {
 			copy(uncompressedPubKey[:], serializedPubKey)
 			delete(f.uncompressedPubKeys, uncompressedPubKey)
 			return
+		default:
+			_ = 0
 		}
+	default:
+		_ = 0
 	}
 
 	delete(f.otherAddresses, a.EncodeAddress())
@@ -595,6 +607,8 @@ out:
 		case <-m.quit:
 			// RPC server shutting down.
 			break out
+		default:
+			_ = 0
 		}
 	}
 
@@ -1423,6 +1437,8 @@ out:
 			}
 			c.SendMessage(reply, nil)
 			continue
+		default:
+			_ = 0
 		}
 
 		// Check if the client is using limited RPC credentials and

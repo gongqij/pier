@@ -67,6 +67,8 @@ func ReadDiskStats(stats *DiskStats) error {
 			stats.ReadBytes = value
 		case "wchar":
 			stats.WriteBytes = value
+		default:
+			_ = 0
 		}
 	}
 }

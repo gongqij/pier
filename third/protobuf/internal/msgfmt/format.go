@@ -155,6 +155,8 @@ func appendKnownMessage(b []byte, m protoreflect.Message) []byte {
 		genid.BytesValue_message_fullname:
 		fd := fds.ByNumber(genid.WrapperValue_Value_field_number)
 		return appendValue(b, m.Get(fd), fd)
+	default:
+		_ = 0
 	}
 
 	return nil

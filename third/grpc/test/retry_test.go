@@ -55,6 +55,8 @@ func (s) TestRetryUnary(t *testing.T) {
 				return &testpb.Empty{}, nil
 			case 6, 8, 11:
 				return nil, status.New(codes.Internal, "non-retryable error").Err()
+			default:
+				_ = 0
 			}
 			return nil, status.New(codes.AlreadyExists, "retryable error").Err()
 		},
@@ -123,6 +125,8 @@ func (s) TestRetryDisabledByDefault(t *testing.T) {
 			switch i {
 			case 0:
 				return nil, status.New(codes.AlreadyExists, "retryable error").Err()
+			default:
+				_ = 0
 			}
 			return &testpb.Empty{}, nil
 		},
@@ -183,6 +187,8 @@ func (s) TestRetryThrottling(t *testing.T) {
 			switch i {
 			case 0, 3, 6, 10, 11, 12, 13, 14, 16, 18:
 				return &testpb.Empty{}, nil
+			default:
+				_ = 0
 			}
 			return nil, status.New(codes.Unavailable, "retryable error").Err()
 		},

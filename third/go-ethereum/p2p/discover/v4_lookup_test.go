@@ -145,6 +145,8 @@ func serveTestnet(test *udpTest, testnet *preminedTestnet) {
 				dist := enode.LogDist(n.ID(), testnet.target.id())
 				nodes := testnet.nodesAtDistance(dist - 1)
 				test.packetInFrom(nil, key, to, &v4wire.Neighbors{Expiration: futureExp, Nodes: nodes})
+			default:
+				_ = 0
 			}
 		})
 	}

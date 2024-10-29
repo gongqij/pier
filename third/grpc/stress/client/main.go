@@ -238,6 +238,8 @@ func performRPCs(gauge *gauge, conn *grpc.ClientConn, selector *weightedRandomTe
 			interop.DoStatusCodeAndMessage(client, grpc.WaitForReady(true))
 		case "custom_metadata":
 			interop.DoCustomMetadata(client, grpc.WaitForReady(true))
+		default:
+			_ = 0
 		}
 		numCalls++
 		gauge.set(int64(float64(numCalls) / time.Since(startTime).Seconds()))

@@ -75,6 +75,8 @@ func ExampleGenerateChain() {
 			b3 := gen.PrevBlock(2).Header()
 			b3.Extra = []byte("foo")
 			gen.AddUncle(b3)
+		default:
+			_ = 0
 		}
 	})
 

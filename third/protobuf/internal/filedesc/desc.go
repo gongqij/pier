@@ -618,6 +618,8 @@ func (dv *defaultValue) get(fd pref.FieldDescriptor) pref.Value {
 				return pref.ValueOfEnum(evs.Get(0).Number())
 			}
 			return pref.ValueOfEnum(0)
+		default:
+			_ = 0
 		}
 	}
 

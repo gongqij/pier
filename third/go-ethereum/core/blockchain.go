@@ -1764,6 +1764,8 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, er
 		stats.ignored += len(it.chain)
 		bc.reportBlock(block, nil, err)
 		return it.index, err
+	default:
+		_ = 0
 	}
 	// No validation errors for the first block (or chain prefix skipped)
 	var activeState *state.StateDB

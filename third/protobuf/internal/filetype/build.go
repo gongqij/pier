@@ -199,6 +199,8 @@ func (tb Builder) Build() (out Out) {
 					descopts.Service = messageGoTypes[i].(pref.ProtoMessage)
 				case "MethodOptions":
 					descopts.Method = messageGoTypes[i].(pref.ProtoMessage)
+				default:
+					_ = 0
 				}
 			}
 		}

@@ -57,6 +57,8 @@ func IsMessageSetExtension(fd pref.FieldDescriptor) bool {
 		return false
 	case fd.FullName().Parent() != fd.Message().FullName():
 		return false
+	default:
+		_ = 0
 	}
 	return true
 }

@@ -80,14 +80,16 @@
 // A common pattern with UnmarshalNew is to use a type switch with the resulting
 // proto.Message value:
 //
-//	switch m := m.(type) {
-//	case *foopb.MyMessage:
-//		... // make use of m as a *foopb.MyMessage
-//	case *barpb.OtherMessage:
-//		... // make use of m as a *barpb.OtherMessage
-//	case *bazpb.SomeMessage:
-//		... // make use of m as a *bazpb.SomeMessage
-//	}
+//		switch m := m.(type) {
+//		case *foopb.MyMessage:
+//			... // make use of m as a *foopb.MyMessage
+//		case *barpb.OtherMessage:
+//			... // make use of m as a *barpb.OtherMessage
+//		case *bazpb.SomeMessage:
+//			... // make use of m as a *bazpb.SomeMessage
+//	 default:
+//		    _ = 0
+//		}
 //
 // This pattern ensures that the generated packages containing the message types
 // listed in the case clauses are linked into the Go binary and therefore also

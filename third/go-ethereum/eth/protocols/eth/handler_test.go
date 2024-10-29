@@ -429,6 +429,8 @@ func testGetNodeData(t *testing.T, protocol uint) {
 			b3 := block.PrevBlock(2).Header()
 			b3.Extra = []byte("foo")
 			block.AddUncle(b3)
+		default:
+			_ = 0
 		}
 	}
 	// Assemble the test environment
@@ -545,6 +547,8 @@ func testGetBlockReceipts(t *testing.T, protocol uint) {
 			b3 := block.PrevBlock(2).Header()
 			b3.Extra = []byte("foo")
 			block.AddUncle(b3)
+		default:
+			_ = 0
 		}
 	}
 	// Assemble the test environment

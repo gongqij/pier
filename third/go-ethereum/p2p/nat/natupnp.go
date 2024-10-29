@@ -147,6 +147,8 @@ func discoverUPnP() Interface {
 			return &upnp{service: "IGDv1-IP1", client: &internetgateway1.WANIPConnection1{ServiceClient: sc}}
 		case internetgateway1.URN_WANPPPConnection_1:
 			return &upnp{service: "IGDv1-PPP1", client: &internetgateway1.WANPPPConnection1{ServiceClient: sc}}
+		default:
+			_ = 0
 		}
 		return nil
 	})
@@ -159,6 +161,8 @@ func discoverUPnP() Interface {
 			return &upnp{service: "IGDv2-IP2", client: &internetgateway2.WANIPConnection2{ServiceClient: sc}}
 		case internetgateway2.URN_WANPPPConnection_1:
 			return &upnp{service: "IGDv2-PPP1", client: &internetgateway2.WANPPPConnection1{ServiceClient: sc}}
+		default:
+			_ = 0
 		}
 		return nil
 	})

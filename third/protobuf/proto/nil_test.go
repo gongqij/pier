@@ -168,6 +168,8 @@ func TestNil(t *testing.T) {
 					t.Errorf("unexpected panic")
 				case !gotPanic && tt.panic:
 					t.Errorf("expected panic")
+				default:
+					_ = 0
 				}
 			}()
 			tt.test()

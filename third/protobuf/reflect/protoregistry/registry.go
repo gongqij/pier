@@ -257,6 +257,8 @@ func (r *Files) FindDescriptorByName(name protoreflect.FullName) (protoreflect.D
 				if d := d.Methods().ByName(suffix.Pop()); d != nil && d.FullName() == name {
 					return d, nil
 				}
+			default:
+				_ = 0
 			}
 			return nil, NotFound
 		}
@@ -860,6 +862,8 @@ func goPackage(v interface{}) string {
 		v = d.Descriptor()
 	case protoreflect.ExtensionType:
 		v = d.TypeDescriptor()
+	default:
+		_ = 0
 	}
 	if d, ok := v.(protoreflect.Descriptor); ok {
 		v = d.ParentFile()

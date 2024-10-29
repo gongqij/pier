@@ -623,6 +623,8 @@ func (t *UDPv4) wrapPacket(p v4wire.Packet) *packetHandlerV4 {
 		h.handle = t.handleENRRequest
 	case *v4wire.ENRResponse:
 		h.preverify = t.verifyENRResponse
+	default:
+		_ = 0
 	}
 	return &h
 }

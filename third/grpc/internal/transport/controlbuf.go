@@ -851,6 +851,8 @@ func (l *loopyWriter) applySettings(ss []http2.Setting) error {
 			}
 		case http2.SettingHeaderTableSize:
 			updateHeaderTblSize(l.hEnc, s.Val)
+		default:
+			_ = 0
 		}
 	}
 	return nil

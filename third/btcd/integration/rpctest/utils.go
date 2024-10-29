@@ -39,6 +39,8 @@ func JoinNodes(nodes []*Harness, joinType JoinType) error {
 		return syncBlocks(nodes)
 	case Mempools:
 		return syncMempools(nodes)
+	default:
+		_ = 0
 	}
 	return nil
 }

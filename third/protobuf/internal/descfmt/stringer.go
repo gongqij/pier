@@ -236,6 +236,8 @@ func (rs *records) Append(v reflect.Value, accessors ...string) {
 			isZero = rv.Uint() == 0
 		case reflect.String:
 			isZero = rv.String() == ""
+		default:
+			_ = 0
 		}
 		if n, ok := rv.Interface().(list); ok {
 			isZero = n.Len() == 0

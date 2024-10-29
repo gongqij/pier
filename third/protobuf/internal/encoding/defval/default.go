@@ -44,6 +44,8 @@ func Unmarshal(s string, k pref.Kind, evs pref.EnumValueDescriptors, f Format) (
 				return pref.ValueOfBool(true), nil, nil
 			case "0":
 				return pref.ValueOfBool(false), nil, nil
+			default:
+				_ = 0
 			}
 		} else {
 			switch s {
@@ -51,6 +53,8 @@ func Unmarshal(s string, k pref.Kind, evs pref.EnumValueDescriptors, f Format) (
 				return pref.ValueOfBool(true), nil, nil
 			case "false":
 				return pref.ValueOfBool(false), nil, nil
+			default:
+				_ = 0
 			}
 		}
 	case pref.EnumKind:
@@ -111,6 +115,8 @@ func Unmarshal(s string, k pref.Kind, evs pref.EnumValueDescriptors, f Format) (
 		if b, ok := unmarshalBytes(s); ok {
 			return pref.ValueOfBytes(b), nil, nil
 		}
+	default:
+		_ = 0
 	}
 	return pref.Value{}, nil, errors.New("could not parse value for %v: %q", k, s)
 }
@@ -167,6 +173,8 @@ func Marshal(v pref.Value, ev pref.EnumValueDescriptor, k pref.Kind, f Format) (
 		if s, ok := marshalBytes(v.Bytes()); ok {
 			return s, nil
 		}
+	default:
+		_ = 0
 	}
 	return "", errors.New("could not format value for %v: %v", k, v)
 }

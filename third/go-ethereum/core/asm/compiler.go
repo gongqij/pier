@@ -78,6 +78,8 @@ func (c *Compiler) Feed(ch <-chan token) {
 			if prev.typ == element && isJump(prev.text) {
 				c.pc++
 			}
+		default:
+			_ = 0
 		}
 
 		c.tokens = append(c.tokens, i)
@@ -112,6 +114,8 @@ func (c *Compiler) Compile() (string, []error) {
 			bin += fmt.Sprintf("%x", []byte{byte(v)})
 		case []byte:
 			bin += fmt.Sprintf("%x", v)
+		default:
+			_ = 0
 		}
 	}
 	return bin, errors

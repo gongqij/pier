@@ -61,6 +61,8 @@ func SetExtension(m Message, xt protoreflect.ExtensionType, v interface{}) {
 		isValid = pv.Map().IsValid()
 	case xd.Message() != nil:
 		isValid = pv.Message().IsValid()
+	default:
+		_ = 0
 	}
 	if !isValid {
 		m.ProtoReflect().Clear(xd)

@@ -714,6 +714,8 @@ func (t *UDPv5) handle(p v5wire.Packet, fromID enode.ID, fromAddr *net.UDPAddr) 
 		t.handleTalkRequest(p, fromID, fromAddr)
 	case *v5wire.TalkResponse:
 		t.handleCallResponse(fromID, fromAddr, p)
+	default:
+		_ = 0
 	}
 }
 

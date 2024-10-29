@@ -228,6 +228,8 @@ func (c *committer) commitLoop(db *Database) {
 				if n.Children[16] != nil {
 					c.onleaf(nil, nil, n.Children[16].(valueNode), hash)
 				}
+			default:
+				_ = 0
 			}
 		}
 	}

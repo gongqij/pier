@@ -173,6 +173,8 @@ func prepare(n int, backend *backends.SimulatedBackend) {
 			data := common.Hex2Bytes("C16431B900000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002")
 			tx, _ := types.SignTx(types.NewTransaction(bankNonce, testContractAddr, big.NewInt(0), 100000, big.NewInt(params.InitialBaseFee), data), signer, bankKey)
 			backend.SendTransaction(ctx, tx)
+		default:
+			_ = 0
 		}
 		backend.Commit()
 	}

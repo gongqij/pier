@@ -94,6 +94,8 @@ func (t *Transaction) MarshalJSON() ([]byte, error) {
 		enc.V = (*hexutil.Big)(tx.V)
 		enc.R = (*hexutil.Big)(tx.R)
 		enc.S = (*hexutil.Big)(tx.S)
+	default:
+		_ = 0
 	}
 	return json.Marshal(&enc)
 }

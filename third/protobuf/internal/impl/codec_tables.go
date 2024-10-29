@@ -281,6 +281,8 @@ func fieldCoder(fd pref.FieldDescriptor, ft reflect.Type) (*MessageInfo, pointer
 			if ft.Kind() == reflect.Slice && ft.Elem().Kind() == reflect.Uint8 {
 				return nil, coderBytesNoZero
 			}
+		default:
+			_ = 0
 		}
 	case ft.Kind() == reflect.Ptr:
 		ft := ft.Elem()
@@ -352,6 +354,8 @@ func fieldCoder(fd pref.FieldDescriptor, ft reflect.Type) (*MessageInfo, pointer
 			if ft.Kind() == reflect.String {
 				return nil, coderStringPtr
 			}
+		default:
+			_ = 0
 		}
 	default:
 		switch fd.Kind() {
@@ -483,6 +487,8 @@ func encoderFuncsForValue(fd pref.FieldDescriptor) valueCoderFuncs {
 			return coderMessageSliceValue
 		case pref.GroupKind:
 			return coderGroupSliceValue
+		default:
+			_ = 0
 		}
 	case fd.Cardinality() == pref.Repeated && fd.IsPacked():
 		switch fd.Kind() {
@@ -514,6 +520,8 @@ func encoderFuncsForValue(fd pref.FieldDescriptor) valueCoderFuncs {
 			return coderFixed64PackedSliceValue
 		case pref.DoubleKind:
 			return coderDoublePackedSliceValue
+		default:
+			_ = 0
 		}
 	default:
 		switch fd.Kind() {

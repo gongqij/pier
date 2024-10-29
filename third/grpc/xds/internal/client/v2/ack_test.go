@@ -1,3 +1,4 @@
+//go:build go1.12
 // +build go1.12
 
 /*
@@ -68,6 +69,8 @@ func startXDSV2Client(t *testing.T, cc *grpc.ClientConn) (v2c *client, cbLDS, cb
 				if _, ok := d[goodEDSName]; ok {
 					cbEDS.Send(struct{}{})
 				}
+			default:
+				_ = 0
 			}
 		},
 	}, cc, goodNodeProto, func(int) time.Duration { return 0 }, nil)
@@ -130,6 +133,8 @@ func startXDS(ctx context.Context, t *testing.T, rType xdsclient.ResourceType, v
 		nameToWatch = goodClusterName1
 	case xdsclient.EndpointsResource:
 		nameToWatch = goodEDSName
+	default:
+		_ = 0
 	}
 	v2c.AddWatch(rType, nameToWatch)
 
@@ -175,6 +180,8 @@ func sendBadResp(ctx context.Context, t *testing.T, rType xdsclient.ResourceType
 		typeURL = version.V2ClusterURL
 	case xdsclient.EndpointsResource:
 		typeURL = version.V2EndpointsURL
+	default:
+		_ = 0
 	}
 	nonce := sendXDSRespWithVersion(fakeServer.XDSResponseChan, &xdspb.DiscoveryResponse{
 		Resources: []*anypb.Any{{}},

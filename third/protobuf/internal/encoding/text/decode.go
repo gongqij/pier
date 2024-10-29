@@ -84,6 +84,8 @@ func (d *Decoder) Read() (Token, error) {
 		if err != nil {
 			return Token{}, err
 		}
+	default:
+		_ = 0
 	}
 	d.lastToken = tok
 	return tok, nil
@@ -181,6 +183,8 @@ func (d *Decoder) parseNext(lastKind Kind) (Token, error) {
 			default:
 				return Token{}, d.newSyntaxError(unexpectedFmt, ch)
 			}
+		default:
+			_ = 0
 		}
 
 	case MessageOpen:
@@ -250,6 +254,8 @@ func (d *Decoder) parseNext(lastKind Kind) (Token, error) {
 			default:
 				return Token{}, d.newSyntaxError(unexpectedFmt, ch)
 			}
+		default:
+			_ = 0
 		}
 
 	case ListOpen:
@@ -352,7 +358,11 @@ func (d *Decoder) parseNext(lastKind Kind) (Token, error) {
 			default:
 				return d.parseScalar()
 			}
+		default:
+			_ = 0
 		}
+	default:
+		_ = 0
 	}
 
 	line, column := d.Position(len(d.orig) - len(d.in))
@@ -380,6 +390,8 @@ func (d *Decoder) currentOpenKind() (Kind, byte) {
 		return MessageOpen, '>'
 	case '[':
 		return ListOpen, ']'
+	default:
+		_ = 0
 	}
 	panic(fmt.Sprintf("Decoder: openStack contains invalid byte %s", string(openCh)))
 }

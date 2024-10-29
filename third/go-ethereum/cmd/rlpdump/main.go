@@ -124,6 +124,8 @@ func dump(s *rlp.Stream, depth int) error {
 			}
 			fmt.Print(ws(depth) + "]")
 		}
+	default:
+		_ = 0
 	}
 	return nil
 }

@@ -113,6 +113,8 @@ func (pw *pickerWrapper) pick(ctx context.Context, failfast bool, info balancer.
 					return nil, nil, status.Error(codes.DeadlineExceeded, errStr)
 				case context.Canceled:
 					return nil, nil, status.Error(codes.Canceled, errStr)
+				default:
+					_ = 0
 				}
 			case <-ch:
 			}

@@ -149,6 +149,8 @@ func (it *NodeIterator) retrieve() bool {
 		it.Hash, it.Parent = it.codeHash, it.accountHash
 	case it.stateIt != nil:
 		it.Hash, it.Parent = it.stateIt.Hash(), it.stateIt.Parent()
+	default:
+		_ = 0
 	}
 	return true
 }

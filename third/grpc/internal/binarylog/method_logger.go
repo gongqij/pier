@@ -377,6 +377,8 @@ func metadataKeyOmit(key string) bool {
 		return true
 	case "grpc-trace-bin": // grpc-trace-bin is special because it's visiable to users.
 		return false
+	default:
+		_ = 0
 	}
 	return strings.HasPrefix(key, "grpc-")
 }

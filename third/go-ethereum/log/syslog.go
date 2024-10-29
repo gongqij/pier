@@ -41,6 +41,8 @@ func sharedSyslog(fmtr Format, sysWr *syslog.Writer, err error) (Handler, error)
 			syslogFn = sysWr.Debug
 		case LvlTrace:
 			syslogFn = func(m string) error { return nil } // There's no syslog level for trace
+		default:
+			_ = 0
 		}
 
 		s := strings.TrimSpace(string(fmtr.Format(r)))

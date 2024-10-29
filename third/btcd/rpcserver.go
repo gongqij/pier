@@ -2168,6 +2168,8 @@ func handleGetBlockTemplate(s *rpcServer, cmd interface{}, closeChan <-chan stru
 		return handleGetBlockTemplateRequest(s, request, closeChan)
 	case "proposal":
 		return handleGetBlockTemplateProposal(s, request)
+	default:
+		_ = 0
 	}
 
 	return nil, &btcjson.RPCError{
@@ -4364,6 +4366,8 @@ func (s *rpcServer) handleBlockchainNotification(notification *blockchain.Notifi
 
 		// Notify registered websocket clients.
 		s.ntfnMgr.NotifyBlockDisconnected(block)
+	default:
+		_ = 0
 	}
 }
 

@@ -130,6 +130,8 @@ func answerGetBlockHeadersQuery(backend Backend, query *GetBlockHeadersPacket, p
 		case !query.Reverse:
 			// Number based traversal towards the leaf block
 			query.Origin.Number += query.Skip + 1
+		default:
+			_ = 0
 		}
 	}
 	return headers

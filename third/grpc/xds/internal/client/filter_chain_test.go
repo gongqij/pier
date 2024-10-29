@@ -1,3 +1,4 @@
+//go:build go1.12
 // +build go1.12
 
 /*
@@ -1484,6 +1485,8 @@ func (fci *FilterChainManager) Equal(other *FilterChainManager) bool {
 		return false
 	case !cmp.Equal(fci.def, other.def):
 		return false
+	default:
+		_ = 0
 	}
 	return true
 }
@@ -1528,6 +1531,8 @@ func (spe *sourcePrefixEntry) Equal(other *sourcePrefixEntry) bool {
 		return false
 	case !cmp.Equal(spe.srcPortMap, other.srcPortMap):
 		return false
+	default:
+		_ = 0
 	}
 	return true
 }

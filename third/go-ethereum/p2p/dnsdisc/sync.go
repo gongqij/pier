@@ -275,6 +275,8 @@ func (ts *subtreeSync) resolveNext(ctx context.Context, hash string) (entry, err
 		ts.leaves++
 	case *branchEntry:
 		ts.missing = append(ts.missing, e.children...)
+	default:
+		_ = 0
 	}
 	return e, nil
 }

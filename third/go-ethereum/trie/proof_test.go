@@ -589,6 +589,8 @@ func TestBadRangeProof(t *testing.T) {
 			// Set random value to nil, deletion
 			index = mrand.Intn(end - start)
 			vals[index] = nil
+		default:
+			_ = 0
 		}
 		_, err := VerifyRangeProof(trie.Hash(), first, last, keys, vals, proof)
 		if err == nil {

@@ -1288,6 +1288,8 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 				gdmsg.AddInvVect(iv)
 				numRequested++
 			}
+		default:
+			_ = 0
 		}
 
 		if numRequested >= wire.MaxInvPerMsg {
@@ -1471,6 +1473,8 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 		if sm.feeEstimator != nil {
 			sm.feeEstimator.Rollback(block.Hash())
 		}
+	default:
+		_ = 0
 	}
 }
 

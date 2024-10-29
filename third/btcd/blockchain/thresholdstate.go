@@ -249,6 +249,8 @@ func (b *BlockChain) thresholdState(prevNode *blockNode, checker thresholdCondit
 		// they are both terminal states.
 		case ThresholdActive:
 		case ThresholdFailed:
+		default:
+			_ = 0
 		}
 
 		// Update the cache to avoid recalculating the state in the

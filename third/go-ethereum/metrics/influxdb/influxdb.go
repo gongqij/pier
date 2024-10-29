@@ -246,6 +246,8 @@ func (r *reporter) send() error {
 					Time: now,
 				})
 			}
+		default:
+			_ = 0
 		}
 	})
 

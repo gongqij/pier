@@ -152,6 +152,8 @@ func (fd *File) unmarshalSeed(b []byte) {
 					posServices = len(b0) - len(b) - n - m
 				}
 				numServices++
+			default:
+				_ = 0
 			}
 			prevField = num
 		default:
@@ -237,6 +239,8 @@ func (ed *Enum) unmarshalSeed(b []byte, sb *strs.Builder, pf *File, pd pref.Desc
 				ed.L0.FullName = appendFullName(sb, pd.FullName(), v)
 			case genid.EnumDescriptorProto_Value_field_number:
 				numValues++
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -263,6 +267,8 @@ func (ed *Enum) unmarshalSeed(b []byte, sb *strs.Builder, pf *File, pd pref.Desc
 			case genid.EnumDescriptorProto_Value_field_number:
 				ed.L2.Values.List[i].unmarshalFull(v, sb, pf, ed, i)
 				i++
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -316,6 +322,8 @@ func (md *Message) unmarshalSeed(b []byte, sb *strs.Builder, pf *File, pd pref.D
 				numExtensions++
 			case genid.DescriptorProto_Options_field_number:
 				md.unmarshalSeedOptions(v)
+			default:
+				_ = 0
 			}
 			prevField = num
 		default:
@@ -379,6 +387,8 @@ func (md *Message) unmarshalSeedOptions(b []byte) {
 				md.L1.IsMapEntry = protowire.DecodeBool(v)
 			case genid.MessageOptions_MessageSetWireFormat_field_number:
 				md.L1.IsMessageSet = protowire.DecodeBool(v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -406,6 +416,8 @@ func (xd *Extension) unmarshalSeed(b []byte, sb *strs.Builder, pf *File, pd pref
 				xd.L1.Cardinality = pref.Cardinality(v)
 			case genid.FieldDescriptorProto_Type_field_number:
 				xd.L1.Kind = pref.Kind(v)
+			default:
+				_ = 0
 			}
 		case protowire.BytesType:
 			v, m := protowire.ConsumeBytes(b)
@@ -415,6 +427,8 @@ func (xd *Extension) unmarshalSeed(b []byte, sb *strs.Builder, pf *File, pd pref
 				xd.L0.FullName = appendFullName(sb, pd.FullName(), v)
 			case genid.FieldDescriptorProto_Extendee_field_number:
 				xd.L1.Extendee = PlaceholderMessage(makeFullName(sb, v))
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -438,6 +452,8 @@ func (sd *Service) unmarshalSeed(b []byte, sb *strs.Builder, pf *File, pd pref.D
 			switch num {
 			case genid.ServiceDescriptorProto_Name_field_number:
 				sd.L0.FullName = appendFullName(sb, pd.FullName(), v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)

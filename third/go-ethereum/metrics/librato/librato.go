@@ -230,6 +230,8 @@ func (rep *Reporter) BuildRequest(now time.Time, r metrics.Registry) (snapshot B
 					},
 				)
 			}
+		default:
+			_ = 0
 		}
 	})
 	return

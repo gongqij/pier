@@ -218,6 +218,8 @@ func (mi *MessageInfo) makeFieldTypes(si structInfo) {
 				ft = nil
 			}
 			isMessage = true
+		default:
+			_ = 0
 		}
 		if isMessage && ft != nil && ft.Kind() != reflect.Ptr {
 			ft = reflect.PtrTo(ft) // never occurs for officially generated message types
@@ -263,6 +265,8 @@ func (m *extensionMap) Has(xt pref.ExtensionType) (ok bool) {
 		return x.Value().Map().Len() > 0
 	case xd.Message() != nil:
 		return x.Value().Message().IsValid()
+	default:
+		_ = 0
 	}
 	return true
 }
@@ -290,6 +294,8 @@ func (m *extensionMap) Set(xt pref.ExtensionType, v pref.Value) {
 		isValid = v.Map().IsValid()
 	case xd.Message() != nil:
 		isValid = v.Message().IsValid()
+	default:
+		_ = 0
 	}
 	if !isValid {
 		panic(fmt.Sprintf("%v: assigning invalid value", xt.TypeDescriptor().FullName()))

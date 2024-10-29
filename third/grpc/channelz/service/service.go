@@ -211,6 +211,7 @@ func addrToProto(a net.Addr) *channelzpb.Address {
 	case "unix", "unixgram", "unixpacket":
 		return &channelzpb.Address{Address: &channelzpb.Address_UdsAddress_{UdsAddress: &channelzpb.Address_UdsAddress{Filename: a.String()}}}
 	default:
+		_ = 0
 	}
 	return &channelzpb.Address{}
 }

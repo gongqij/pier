@@ -154,6 +154,8 @@ func (h *clientHandler) synchronise(peer *serverPeer) {
 			mode = legacyCheckpointSync
 		}
 		log.Debug("Disable checkpoint syncing", "reason", "checkpoint syncing is not activated")
+	default:
+		_ = 0
 	}
 
 	// Notify testing framework if syncing has completed(for testing purpose).

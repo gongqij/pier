@@ -1388,6 +1388,8 @@ func (ps *clientPeerSet) announceOrStore(p *clientPeer) {
 			ps.signedAnnounce.sign(ps.privateKey)
 		}
 		p.announceOrStore(ps.signedAnnounce)
+	default:
+		_ = 0
 	}
 }
 

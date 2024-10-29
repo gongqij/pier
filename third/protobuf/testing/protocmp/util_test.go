@@ -1322,6 +1322,8 @@ func apply(m proto.Message, ops ...interface{}) proto.Message {
 			mr.SetUnknown(op.raw)
 		case setExtension:
 			mr.Set(op.typ.TypeDescriptor(), protoreflect.ValueOf(op.val))
+		default:
+			_ = 0
 		}
 	}
 	return m

@@ -177,6 +177,8 @@ func mustFindFieldDescriptor(md protoreflect.MessageDescriptor, s protoreflect.N
 		suggestion = fmt.Sprintf("; consider specifying field %q instead", d.TextName())
 	case protoreflect.OneofDescriptor:
 		suggestion = fmt.Sprintf("; consider specifying oneof %q with IgnoreOneofs instead", d.Name())
+	default:
+		_ = 0
 	}
 	panic(fmt.Sprintf("message %q has no field %q%s", md.FullName(), s, suggestion))
 }
@@ -193,6 +195,8 @@ func mustFindOneofDescriptor(md protoreflect.MessageDescriptor, s protoreflect.N
 		suggestion = fmt.Sprintf("; consider specifying oneof %q instead", d.Name())
 	case protoreflect.FieldDescriptor:
 		suggestion = fmt.Sprintf("; consider specifying field %q with IgnoreFields instead", d.TextName())
+	default:
+		_ = 0
 	}
 	panic(fmt.Sprintf("message %q has no oneof %q%s", md.FullName(), s, suggestion))
 }
@@ -324,6 +328,8 @@ func (f *nameFilters) filterFieldValue(v reflect.Value) bool {
 	case t.Kind() == reflect.Map && (t.Elem() == enumReflectType || t.Elem() == messageReflectType):
 		// Check for map field of enum or message type.
 		return f.filterValue(v.MapIndex(v.MapKeys()[0]))
+	default:
+		_ = 0
 	}
 	return false
 }
@@ -340,6 +346,8 @@ func (f *nameFilters) filterValue(v reflect.Value) bool {
 		return v.Descriptor() != nil && f.names[v.Descriptor().FullName()]
 	case Message:
 		return v.Descriptor() != nil && f.names[v.Descriptor().FullName()]
+	default:
+		_ = 0
 	}
 	return false
 }

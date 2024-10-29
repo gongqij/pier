@@ -327,6 +327,8 @@ func putCompressedScript(target, pkScript []byte) int {
 			target[0] = pubKeyFormat | (serializedPubKey[64] & 0x01)
 			copy(target[1:33], serializedPubKey[1:33])
 			return 33
+		default:
+			_ = 0
 		}
 	}
 
@@ -411,6 +413,8 @@ func decompressScript(compressedPkScript []byte) []byte {
 		copy(pkScript[1:], key.SerializeUncompressed())
 		pkScript[66] = txscript.OP_CHECKSIG
 		return pkScript
+	default:
+		_ = 0
 	}
 
 	// When none of the special cases apply, the script was encoded using

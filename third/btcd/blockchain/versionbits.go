@@ -259,6 +259,8 @@ func (b *BlockChain) warnUnknownRuleActivations(node *blockNode) error {
 			activationHeight := window - (node.height % window)
 			log.Warnf("Unknown new rules are about to activate in "+
 				"%d blocks (bit %d)", activationHeight, bit)
+		default:
+			_ = 0
 		}
 	}
 

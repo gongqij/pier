@@ -303,6 +303,8 @@ func isPackable(fd protoreflect.FieldDescriptor) bool {
 	switch fd.Kind() {
 	case protoreflect.StringKind, protoreflect.BytesKind, protoreflect.MessageKind, protoreflect.GroupKind:
 		return false
+	default:
+		_ = 0
 	}
 	return fd.IsList()
 }
@@ -324,6 +326,8 @@ func checkValidGroup(fd protoreflect.FieldDescriptor) error {
 		return errors.New("message name must start with an uppercase")
 	case fd.Name() != protoreflect.Name(strings.ToLower(string(md.Name()))):
 		return errors.New("field name must be lowercased form of the message name")
+	default:
+		_ = 0
 	}
 	return nil
 }
@@ -348,6 +352,8 @@ func checkValidMap(fd protoreflect.FieldDescriptor) error {
 		return errors.New("message must not have any extension ranges")
 	case md.Enums().Len()+md.Messages().Len()+md.Extensions().Len() > 0:
 		return errors.New("message must not have any nested declarations")
+	default:
+		_ = 0
 	}
 	kf := md.Fields().Get(0)
 	vf := md.Fields().Get(1)
@@ -356,6 +362,8 @@ func checkValidMap(fd protoreflect.FieldDescriptor) error {
 		return errors.New("invalid key field")
 	case vf.Name() != genid.MapEntry_Value_field_name || vf.Number() != genid.MapEntry_Value_field_number || vf.Cardinality() != protoreflect.Optional || vf.ContainingOneof() != nil || vf.HasDefault():
 		return errors.New("invalid value field")
+	default:
+		_ = 0
 	}
 	switch kf.Kind() {
 	case protoreflect.BoolKind: // bool

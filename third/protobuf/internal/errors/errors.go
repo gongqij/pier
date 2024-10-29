@@ -75,6 +75,8 @@ func format(f string, x ...interface{}) string {
 			x[i] = e.s
 		case *wrapError:
 			x[i] = format("%v: %v", e.s, e.err)
+		default:
+			_ = 0
 		}
 	}
 	return fmt.Sprintf(f, x...)

@@ -439,6 +439,8 @@ func (api *PublicFilterAPI) GetFilterChanges(id rpc.ID) (interface{}, error) {
 			logs := f.logs
 			f.logs = nil
 			return returnLogs(logs), nil
+		default:
+			_ = 0
 		}
 	}
 

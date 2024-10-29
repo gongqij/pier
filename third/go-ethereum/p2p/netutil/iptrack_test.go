@@ -105,6 +105,8 @@ func runIPTrackerTest(t *testing.T, evs []iptrackTestEvent) {
 			if pred != ev.ip {
 				t.Errorf("op %d: wrong prediction %s, want %s", i, pred, ev.ip)
 			}
+		default:
+			_ = 0
 		}
 	}
 }

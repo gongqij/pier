@@ -127,6 +127,8 @@ func (w *wizard) deployDashboard() {
 			infos.explorer = page
 		case "faucet":
 			infos.faucet = page
+		default:
+			_ = 0
 		}
 	}
 	// If we have ethstats running, ask whether to make the secret public or not

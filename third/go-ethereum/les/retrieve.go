@@ -237,6 +237,8 @@ func (r *sentReq) stateRequesting() reqStateFn {
 		case rpDeliveredValid:
 			r.stop(nil)
 			return r.stateStopped
+		default:
+			_ = 0
 		}
 		return r.stateRequesting
 	case <-r.stopCh:
@@ -295,6 +297,8 @@ func (r *sentReq) update(ev reqPeerEvent) {
 		} else {
 			r.reqSrtoCount--
 		}
+	default:
+		_ = 0
 	}
 }
 

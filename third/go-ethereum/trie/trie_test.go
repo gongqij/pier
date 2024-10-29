@@ -400,6 +400,8 @@ func (randTest) Generate(r *rand.Rand, size int) reflect.Value {
 			binary.BigEndian.PutUint64(step.value, uint64(i))
 		case opGet, opDelete:
 			step.key = genKey()
+		default:
+			_ = 0
 		}
 		steps = append(steps, step)
 	}
@@ -453,6 +455,8 @@ func runRandTest(rt randTest) bool {
 			if tr.Hash() != checktr.Hash() {
 				rt[i].err = fmt.Errorf("hash mismatch in opItercheckhash")
 			}
+		default:
+			_ = 0
 		}
 		// Abort the test on error.
 		if rt[i].err != nil {

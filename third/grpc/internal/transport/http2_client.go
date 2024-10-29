@@ -176,6 +176,8 @@ func isTemporary(err error) bool {
 		// Timeouts may be resolved upon retry, and are thus treated as
 		// temporary.
 		return err.Timeout()
+	default:
+		_ = 0
 	}
 	return true
 }
@@ -1220,6 +1222,8 @@ func (t *http2Client) setGoAwayReason(f *http2.GoAwayFrame) {
 		if string(f.DebugData()) == "too_many_pings" {
 			t.goAwayReason = GoAwayTooManyPings
 		}
+	default:
+		_ = 0
 	}
 	t.goAwayDebugMessage = fmt.Sprintf("code: %s, debug data: %v", f.ErrCode, string(f.DebugData()))
 }

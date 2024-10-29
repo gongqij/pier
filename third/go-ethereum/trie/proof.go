@@ -125,6 +125,8 @@ func VerifyProof(rootHash common.Hash, key []byte, proofDb ethdb.KeyValueReader)
 			copy(wantHash[:], cld)
 		case valueNode:
 			return cld, nil
+		default:
+			_ = 0
 		}
 	}
 }
@@ -188,6 +190,8 @@ func proofToPath(rootHash common.Hash, root node, key []byte, proofDb ethdb.KeyV
 			}
 		case valueNode:
 			valnode = cld
+		default:
+			_ = 0
 		}
 		// Link the parent and child.
 		switch pnode := parent.(type) {

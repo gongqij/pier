@@ -453,6 +453,8 @@ func (c *Config) AccountConfig() (int, int, string, error) {
 		}
 	case c.KeyStoreDir != "":
 		keydir, err = filepath.Abs(c.KeyStoreDir)
+	default:
+		_ = 0
 	}
 	return scryptN, scryptP, keydir, err
 }

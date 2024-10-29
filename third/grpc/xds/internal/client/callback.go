@@ -61,6 +61,8 @@ func (c *clientImpl) callCallback(wiu *watcherInfoWithUpdate) {
 		if s, ok := c.edsWatchers[wiu.wi.target]; ok && s[wiu.wi] {
 			ccb = func() { wiu.wi.edsCallback(wiu.update.(EndpointsUpdate), wiu.err) }
 		}
+	default:
+		_ = 0
 	}
 	c.mu.Unlock()
 

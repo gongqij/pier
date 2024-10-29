@@ -507,6 +507,8 @@ func newWithConfig(config *bootstrap.Config, watchExpiryTimeout time.Duration) (
 		return nil, errors.New("xds: no credentials provided in options")
 	case config.NodeProto == nil:
 		return nil, errors.New("xds: no node_proto provided in options")
+	default:
+		_ = 0
 	}
 
 	switch config.TransportAPI {
@@ -518,6 +520,8 @@ func newWithConfig(config *bootstrap.Config, watchExpiryTimeout time.Duration) (
 		if _, ok := config.NodeProto.(*v3corepb.Node); !ok {
 			return nil, fmt.Errorf("xds: Node proto type (%T) does not match API version: %v", config.NodeProto, config.TransportAPI)
 		}
+	default:
+		_ = 0
 	}
 
 	dopts := []grpc.DialOption{

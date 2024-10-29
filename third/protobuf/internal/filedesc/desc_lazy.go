@@ -45,6 +45,8 @@ func (file *File) resolveMessages() {
 			case pref.MessageKind, pref.GroupKind:
 				fd.L1.Message = file.resolveMessageDependency(fd.L1.Message, listFieldDeps, depIdx)
 				depIdx++
+			default:
+				_ = 0
 			}
 
 			// Default is resolved here since it depends on Enum being resolved.
@@ -68,6 +70,8 @@ func (file *File) resolveExtensions() {
 		case pref.MessageKind, pref.GroupKind:
 			xd.L2.Message = file.resolveMessageDependency(xd.L2.Message, listExtDeps, depIdx)
 			depIdx++
+		default:
+			_ = 0
 		}
 
 		// Default is resolved here since it depends on Enum being resolved.
@@ -147,6 +151,8 @@ func (fd *File) unmarshalFull(b []byte) {
 				fd.L2.Imports[v].IsPublic = true
 			case genid.FileDescriptorProto_WeakDependency_field_number:
 				fd.L2.Imports[v].IsWeak = true
+			default:
+				_ = 0
 			}
 		case protowire.BytesType:
 			v, m := protowire.ConsumeBytes(b)
@@ -173,6 +179,8 @@ func (fd *File) unmarshalFull(b []byte) {
 				serviceIdx++
 			case genid.FileDescriptorProto_Options_field_number:
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -204,6 +212,8 @@ func (ed *Enum) unmarshalFull(b []byte, sb *strs.Builder) {
 				ed.L2.ReservedRanges.List = append(ed.L2.ReservedRanges.List, unmarshalEnumReservedRange(v))
 			case genid.EnumDescriptorProto_Options_field_number:
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -232,6 +242,8 @@ func unmarshalEnumReservedRange(b []byte) (r [2]pref.EnumNumber) {
 				r[0] = pref.EnumNumber(v)
 			case genid.EnumDescriptorProto_EnumReservedRange_End_field_number:
 				r[1] = pref.EnumNumber(v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -257,6 +269,8 @@ func (vd *EnumValue) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref
 			switch num {
 			case genid.EnumValueDescriptorProto_Number_field_number:
 				vd.L1.Number = pref.EnumNumber(v)
+			default:
+				_ = 0
 			}
 		case protowire.BytesType:
 			v, m := protowire.ConsumeBytes(b)
@@ -267,6 +281,8 @@ func (vd *EnumValue) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref
 				vd.L0.FullName = appendFullName(sb, pd.Parent().FullName(), v)
 			case genid.EnumValueDescriptorProto_Options_field_number:
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -314,6 +330,8 @@ func (md *Message) unmarshalFull(b []byte, sb *strs.Builder) {
 			case genid.DescriptorProto_Options_field_number:
 				md.unmarshalOptions(v)
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -351,6 +369,8 @@ func (md *Message) unmarshalOptions(b []byte) {
 				md.L1.IsMapEntry = protowire.DecodeBool(v)
 			case genid.MessageOptions_MessageSetWireFormat_field_number:
 				md.L1.IsMessageSet = protowire.DecodeBool(v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -372,6 +392,8 @@ func unmarshalMessageReservedRange(b []byte) (r [2]pref.FieldNumber) {
 				r[0] = pref.FieldNumber(v)
 			case genid.DescriptorProto_ReservedRange_End_field_number:
 				r[1] = pref.FieldNumber(v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -394,6 +416,8 @@ func unmarshalMessageExtensionRange(b []byte) (r [2]pref.FieldNumber, rawOptions
 				r[0] = pref.FieldNumber(v)
 			case genid.DescriptorProto_ExtensionRange_End_field_number:
 				r[1] = pref.FieldNumber(v)
+			default:
+				_ = 0
 			}
 		case protowire.BytesType:
 			v, m := protowire.ConsumeBytes(b)
@@ -401,6 +425,8 @@ func unmarshalMessageExtensionRange(b []byte) (r [2]pref.FieldNumber, rawOptions
 			switch num {
 			case genid.DescriptorProto_ExtensionRange_Options_field_number:
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -443,6 +469,8 @@ func (fd *Field) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref.Des
 				fd.L1.ContainingOneof = od
 			case genid.FieldDescriptorProto_Proto3Optional_field_number:
 				fd.L1.IsProto3Optional = protowire.DecodeBool(v)
+			default:
+				_ = 0
 			}
 		case protowire.BytesType:
 			v, m := protowire.ConsumeBytes(b)
@@ -459,6 +487,8 @@ func (fd *Field) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref.Des
 			case genid.FieldDescriptorProto_Options_field_number:
 				fd.unmarshalOptions(v)
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -472,6 +502,8 @@ func (fd *Field) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref.Des
 			fd.L1.Enum = PlaceholderEnum(name)
 		case pref.MessageKind, pref.GroupKind:
 			fd.L1.Message = PlaceholderMessage(name)
+		default:
+			_ = 0
 		}
 	}
 	fd.L1.Options = pf.builder.optionsUnmarshaler(&descopts.Field, rawOptions)
@@ -496,6 +528,8 @@ func (fd *Field) unmarshalOptions(b []byte) {
 			case FieldOptions_EnforceUTF8:
 				fd.L1.HasEnforceUTF8 = true
 				fd.L1.EnforceUTF8 = protowire.DecodeBool(v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -522,6 +556,8 @@ func (od *Oneof) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref.Des
 				od.L0.FullName = appendFullName(sb, pd.FullName(), v)
 			case genid.OneofDescriptorProto_Options_field_number:
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -545,6 +581,8 @@ func (xd *Extension) unmarshalFull(b []byte, sb *strs.Builder) {
 			switch num {
 			case genid.FieldDescriptorProto_Proto3Optional_field_number:
 				xd.L2.IsProto3Optional = protowire.DecodeBool(v)
+			default:
+				_ = 0
 			}
 		case protowire.BytesType:
 			v, m := protowire.ConsumeBytes(b)
@@ -559,6 +597,8 @@ func (xd *Extension) unmarshalFull(b []byte, sb *strs.Builder) {
 			case genid.FieldDescriptorProto_Options_field_number:
 				xd.unmarshalOptions(v)
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -572,6 +612,8 @@ func (xd *Extension) unmarshalFull(b []byte, sb *strs.Builder) {
 			xd.L2.Enum = PlaceholderEnum(name)
 		case pref.MessageKind, pref.GroupKind:
 			xd.L2.Message = PlaceholderMessage(name)
+		default:
+			_ = 0
 		}
 	}
 	xd.L2.Options = xd.L0.ParentFile.builder.optionsUnmarshaler(&descopts.Field, rawOptions)
@@ -588,6 +630,8 @@ func (xd *Extension) unmarshalOptions(b []byte) {
 			switch num {
 			case genid.FieldOptions_Packed_field_number:
 				xd.L2.IsPacked = protowire.DecodeBool(v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -612,6 +656,8 @@ func (sd *Service) unmarshalFull(b []byte, sb *strs.Builder) {
 				rawMethods = append(rawMethods, v)
 			case genid.ServiceDescriptorProto_Options_field_number:
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)
@@ -645,6 +691,8 @@ func (md *Method) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref.De
 				md.L1.IsStreamingClient = protowire.DecodeBool(v)
 			case genid.MethodDescriptorProto_ServerStreaming_field_number:
 				md.L1.IsStreamingServer = protowire.DecodeBool(v)
+			default:
+				_ = 0
 			}
 		case protowire.BytesType:
 			v, m := protowire.ConsumeBytes(b)
@@ -658,6 +706,8 @@ func (md *Method) unmarshalFull(b []byte, sb *strs.Builder, pf *File, pd pref.De
 				md.L1.Output = PlaceholderMessage(makeFullName(sb, v))
 			case genid.MethodDescriptorProto_Options_field_number:
 				rawOptions = appendOptions(rawOptions, v)
+			default:
+				_ = 0
 			}
 		default:
 			m := protowire.ConsumeFieldValue(num, typ, b)

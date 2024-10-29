@@ -198,6 +198,8 @@ func TestLoadECDSA(t *testing.T) {
 			t.Fatalf("wrong error for input %q:\n  %v", test.input, err)
 		case err == nil && test.err != "":
 			t.Fatalf("LoadECDSA did not return error for input %q", test.input)
+		default:
+			_ = 0
 		}
 	}
 }

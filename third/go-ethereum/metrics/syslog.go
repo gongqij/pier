@@ -73,6 +73,8 @@ func Syslog(r Registry, d time.Duration, w *syslog.Writer) {
 					t.Rate15(),
 					t.RateMean(),
 				))
+			default:
+				_ = 0
 			}
 		})
 	}

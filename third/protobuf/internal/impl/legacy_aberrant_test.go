@@ -352,6 +352,8 @@ func TestAberrantExtensions(t *testing.T) {
 				t.Errorf("Number() = %v, want %v", xtd.Number(), tt.wantNumber)
 			case xtd.IsPlaceholder() != tt.wantPlaceholder:
 				t.Errorf("IsPlaceholder() = %v, want %v", xtd.IsPlaceholder(), tt.wantPlaceholder)
+			default:
+				_ = 0
 			}
 		})
 	}

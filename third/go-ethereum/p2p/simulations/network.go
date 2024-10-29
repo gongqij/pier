@@ -249,6 +249,8 @@ func (net *Network) watchPeerEvents(id enode.ID, events chan *p2p.PeerEvent, sub
 			case p2p.PeerEventTypeMsgRecv:
 				net.DidReceive(peer, id, event.Protocol, *event.MsgCode)
 
+			default:
+				_ = 0
 			}
 
 		case err := <-sub.Err():
@@ -1079,6 +1081,8 @@ func (net *Network) executeControlEvent(event *Event) {
 		}
 	case EventTypeMsg:
 		log.Warn("Ignoring control msg event")
+	default:
+		_ = 0
 	}
 }
 

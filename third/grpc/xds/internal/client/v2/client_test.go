@@ -1,3 +1,4 @@
+//go:build go1.12
 // +build go1.12
 
 /*
@@ -390,6 +391,8 @@ func testWatchHandle(t *testing.T, test *watchHandleTestcase) {
 						dd[n] = u.(xdsclient.EndpointsUpdate)
 					}
 					gotUpdateCh.Send(updateErr{dd, md, nil})
+				default:
+					_ = 0
 				}
 			}
 		},
@@ -427,6 +430,8 @@ func testWatchHandle(t *testing.T, test *watchHandleTestcase) {
 		handleXDSResp = v2c.handleCDSResponse
 	case xdsclient.EndpointsResource:
 		handleXDSResp = v2c.handleEDSResponse
+	default:
+		_ = 0
 	}
 	if err := handleXDSResp(test.responseToHandle); (err != nil) != test.wantHandleErr {
 		t.Fatalf("v2c.handleRDSResponse() returned err: %v, wantErr: %v", err, test.wantHandleErr)

@@ -125,6 +125,8 @@ func main() {
 		credsChosen = credsGoogleDefaultCreds
 	case useCEC:
 		credsChosen = credsComputeEngineCreds
+	default:
+		_ = 0
 	}
 
 	resolver.SetDefaultScheme("dns")

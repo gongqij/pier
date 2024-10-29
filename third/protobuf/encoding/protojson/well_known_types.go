@@ -688,6 +688,8 @@ func parseDuration(input string) (int64, int32, bool) {
 		b = b[1:]
 	case '+':
 		b = b[1:]
+	default:
+		_ = 0
 	}
 	if len(b) == 0 {
 		return 0, 0, false

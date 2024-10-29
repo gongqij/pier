@@ -57,6 +57,8 @@ func (m *messageState) Range(f func(protoreflect.FieldDescriptor, protoreflect.V
 					return
 				}
 			}
+		default:
+			_ = 0
 		}
 	}
 	m.messageInfo().extensionMap(m.pointer()).Range(f)
@@ -177,6 +179,8 @@ func (m *messageReflectWrapper) Range(f func(protoreflect.FieldDescriptor, proto
 					return
 				}
 			}
+		default:
+			_ = 0
 		}
 	}
 	m.messageInfo().extensionMap(m.pointer()).Range(f)

@@ -390,6 +390,8 @@ func (cib *clusterImplBalancer) run() {
 						Picker:            newDropPicker(cib.childState, u, cib.loadWrapper),
 					})
 				}
+			default:
+				_ = 0
 			}
 			cib.mu.Unlock()
 		case <-cib.closed.Done():

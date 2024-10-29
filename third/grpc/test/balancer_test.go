@@ -111,6 +111,8 @@ func (b *testBalancer) UpdateSubConnState(sc balancer.SubConn, s balancer.SubCon
 		b.cc.UpdateState(balancer.State{ConnectivityState: s.ConnectivityState, Picker: &picker{err: balancer.ErrNoSubConnAvailable, bal: b}})
 	case connectivity.TransientFailure:
 		b.cc.UpdateState(balancer.State{ConnectivityState: s.ConnectivityState, Picker: &picker{err: balancer.ErrTransientFailure, bal: b}})
+	default:
+		_ = 0
 	}
 }
 

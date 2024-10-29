@@ -125,30 +125,31 @@ func bootstrapConfigFromEnvVariable() ([]byte, error) {
 // bootstrap file found at ${GRPC_XDS_BOOTSTRAP}.
 //
 // The format of the bootstrap file will be as follows:
-// {
-//    "xds_server": {
-//      "server_uri": <string containing URI of management server>,
-//      "channel_creds": [
-//        {
-//          "type": <string containing channel cred type>,
-//          "config": <JSON object containing config for the type>
-//        }
-//      ],
-//      "server_features": [ ... ],
-//    },
-//    "node": <JSON form of Node proto>,
-//    "certificate_providers" : {
-//      "default": {
-//        "plugin_name": "default-plugin-name",
-//        "config": { default plugin config in JSON }
-//       },
-//      "foo": {
-//        "plugin_name": "foo",
-//        "config": { foo plugin config in JSON }
-//      }
-//    },
-//    "server_listener_resource_name_template": "grpc/server?xds.resource.listening_address=%s"
-// }
+//
+//	{
+//	   "xds_server": {
+//	     "server_uri": <string containing URI of management server>,
+//	     "channel_creds": [
+//	       {
+//	         "type": <string containing channel cred type>,
+//	         "config": <JSON object containing config for the type>
+//	       }
+//	     ],
+//	     "server_features": [ ... ],
+//	   },
+//	   "node": <JSON form of Node proto>,
+//	   "certificate_providers" : {
+//	     "default": {
+//	       "plugin_name": "default-plugin-name",
+//	       "config": { default plugin config in JSON }
+//	      },
+//	     "foo": {
+//	       "plugin_name": "foo",
+//	       "config": { foo plugin config in JSON }
+//	     }
+//	   },
+//	   "server_listener_resource_name_template": "grpc/server?xds.resource.listening_address=%s"
+//	}
 //
 // Currently, we support exactly one type of credential, which is
 // "google_default", where we use the host's default certs for transport
@@ -212,6 +213,8 @@ func NewConfig() (*Config, error) {
 				switch f {
 				case serverFeaturesV3:
 					serverSupportsV3 = true
+				default:
+					_ = 0
 				}
 			}
 		case "certificate_providers":
@@ -247,6 +250,8 @@ func NewConfig() (*Config, error) {
 			if err := json.Unmarshal(v, &config.ServerListenerResourceNameTemplate); err != nil {
 				return nil, fmt.Errorf("xds: json.Unmarshal(%v) for field %q failed during bootstrap: %v", string(v), k, err)
 			}
+		default:
+			_ = 0
 		}
 		// Do not fail the xDS bootstrap when an unknown field is seen. This can
 		// happen when an older version client reads a newer version bootstrap

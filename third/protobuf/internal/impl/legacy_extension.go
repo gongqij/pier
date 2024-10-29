@@ -104,6 +104,8 @@ func (xi *ExtensionInfo) initFromLegacy() {
 		md = v.ProtoReflect().Descriptor()
 	case messageV1:
 		md = LegacyLoadMessageDesc(t)
+	default:
+		_ = 0
 	}
 
 	// Derive basic field information from the struct tag.

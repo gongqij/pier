@@ -99,6 +99,8 @@ func (wi *watchInfo) sendErrorLocked(err error) {
 		u = ClusterUpdate{}
 	case EndpointsResource:
 		u = EndpointsUpdate{}
+	default:
+		_ = 0
 	}
 	wi.c.scheduleCallback(wi, u, err)
 }
@@ -179,6 +181,8 @@ func (c *clientImpl) watch(wi *watchInfo) (cancel func()) {
 			c.logger.Debugf("EDS resource with name %v found in cache: %+v", wi.target, v)
 			wi.newUpdate(v)
 		}
+	default:
+		_ = 0
 	}
 
 	return func() {
@@ -209,6 +213,8 @@ func (c *clientImpl) watch(wi *watchInfo) (cancel func()) {
 					delete(c.cdsCache, resourceName)
 				case EndpointsResource:
 					delete(c.edsCache, resourceName)
+				default:
+					_ = 0
 				}
 			}
 		}

@@ -56,6 +56,8 @@ func (b *pickfirstBalancer) ResolverError(err error) {
 		b.cc.UpdateState(balancer.State{ConnectivityState: connectivity.TransientFailure,
 			Picker: &picker{err: fmt.Errorf("name resolver error: %v", err)},
 		})
+	default:
+		_ = 0
 	}
 	if logger.V(2) {
 		logger.Infof("pickfirstBalancer: ResolverError called with error %v", err)
@@ -116,6 +118,8 @@ func (b *pickfirstBalancer) UpdateSubConnState(sc balancer.SubConn, s balancer.S
 			ConnectivityState: s.ConnectivityState,
 			Picker:            &picker{err: s.ConnectionError},
 		})
+	default:
+		_ = 0
 	}
 }
 

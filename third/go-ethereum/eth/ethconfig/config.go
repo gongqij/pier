@@ -219,6 +219,8 @@ func CreateConsensusEngine(stack *node.Node, chainConfig *params.ChainConfig, co
 		log.Warn("Ethash used in test mode")
 	case ethash.ModeShared:
 		log.Warn("Ethash used in shared mode")
+	default:
+		_ = 0
 	}
 	engine := ethash.New(ethash.Config{
 		PowMode:          config.PowMode,

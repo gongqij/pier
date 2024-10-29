@@ -645,6 +645,8 @@ func (d decoder) unmarshalMapKey(tok json.Token, fd pref.FieldDescriptor) (pref.
 			return pref.ValueOfBool(true).MapKey(), nil
 		case "false":
 			return pref.ValueOfBool(false).MapKey(), nil
+		default:
+			_ = 0
 		}
 
 	case pref.Int32Kind, pref.Sint32Kind, pref.Sfixed32Kind:

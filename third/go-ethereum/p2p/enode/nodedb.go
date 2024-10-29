@@ -127,6 +127,8 @@ func newPersistentDB(path string) (*DB, error) {
 			}
 			return newPersistentDB(path)
 		}
+	default:
+		_ = 0
 	}
 	return &DB{lvl: db, quit: make(chan struct{})}, nil
 }

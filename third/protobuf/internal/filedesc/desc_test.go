@@ -549,6 +549,8 @@ func checkAccessors(t *testing.T, p string, rv reflect.Value, want map[string]in
 			case reflect.Int32, reflect.Int:
 				n, _ := strconv.ParseInt(s, 0, 64)
 				arg.SetInt(n)
+			default:
+				_ = 0
 			}
 			rets = fnc.Call([]reflect.Value{arg})
 		} else {
@@ -589,6 +591,8 @@ func checkAccessors(t *testing.T, p string, rv reflect.Value, want map[string]in
 				t.Errorf("%v = nil, want non-nil", p)
 			case !proto.Equal(gotMsg, wantMsg):
 				t.Errorf("%v = %v, want %v", p, gotMsg, wantMsg)
+			default:
+				_ = 0
 			}
 			continue
 		}

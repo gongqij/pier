@@ -106,6 +106,8 @@ func TestDBInt64(t *testing.T) {
 				t.Errorf("test %d, item %d: value mismatch: have %v, want %v", i, j, num, tests[j].value)
 			case j > i && num != 0:
 				t.Errorf("test %d, item %d: value mismatch: have %v, want %v", i, j, num, 0)
+			default:
+				_ = 0
 			}
 		}
 	}

@@ -138,6 +138,8 @@ func (db *Builder) unmarshalCounts(b []byte, isFile bool) {
 					db.NumExtensions++
 				case genid.FileDescriptorProto_Service_field_number:
 					db.NumServices++
+				default:
+					_ = 0
 				}
 			} else {
 				switch num {
@@ -148,6 +150,8 @@ func (db *Builder) unmarshalCounts(b []byte, isFile bool) {
 					db.NumMessages++
 				case genid.DescriptorProto_Extension_field_number:
 					db.NumExtensions++
+				default:
+					_ = 0
 				}
 			}
 		default:

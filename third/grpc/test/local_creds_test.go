@@ -63,6 +63,8 @@ func testLocalCredsE2ESucceed(network, address string) error {
 				if secLevel != credentials.NoSecurity {
 					return nil, status.Errorf(codes.Unauthenticated, "Wrong security level: got %q, want %q", secLevel, credentials.NoSecurity)
 				}
+			default:
+				_ = 0
 			}
 			return &testpb.Empty{}, nil
 		},

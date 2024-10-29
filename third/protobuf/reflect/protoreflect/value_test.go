@@ -94,6 +94,8 @@ func TestValue(t *testing.T) {
 			if got := tt.in.Map(); got != want {
 				t.Errorf("Value(%v).Map() = %v, want %v", tt.in, got, tt.want)
 			}
+		default:
+			_ = 0
 		}
 	}
 }

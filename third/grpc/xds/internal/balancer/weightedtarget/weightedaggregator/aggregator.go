@@ -209,6 +209,8 @@ func (wbsa *Aggregator) build() balancer.State {
 			readyPickerWithWeights = append(readyPickerWithWeights, *ps)
 		case connectivity.Connecting:
 			connectingN++
+		default:
+			_ = 0
 		}
 	}
 	var aggregatedState connectivity.State

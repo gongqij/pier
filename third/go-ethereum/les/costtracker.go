@@ -295,6 +295,8 @@ func (ct *costTracker) gfLoop() {
 						relativeCostSendTxHistogram.Update(relCost)
 					case GetTxStatusMsg:
 						relativeCostTxStatusHistogram.Update(relCost)
+					default:
+						_ = 0
 					}
 				}
 				// SendTxV2 and GetTxStatus requests are two special cases.

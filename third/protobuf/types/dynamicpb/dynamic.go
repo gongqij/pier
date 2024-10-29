@@ -258,6 +258,8 @@ func (m *Message) Set(fd pref.FieldDescriptor, v pref.Value) {
 			isValid = v.Map().IsValid()
 		case fd.Message() != nil:
 			isValid = v.Message().IsValid()
+		default:
+			_ = 0
 		}
 		if !isValid {
 			panic(errors.New("%v: assigning invalid type %T", fd.FullName(), v.Interface()))
@@ -510,6 +512,8 @@ func isSet(fd pref.FieldDescriptor, v pref.Value) bool {
 			return v.String() != ""
 		case pref.BytesKind:
 			return len(v.Bytes()) > 0
+		default:
+			_ = 0
 		}
 	}
 	return true
@@ -540,6 +544,8 @@ func typeIsValid(fd pref.FieldDescriptor, v pref.Value) error {
 			if list.desc == fd && list.IsValid() {
 				return nil
 			}
+		default:
+			_ = 0
 		}
 		return errors.New("%v: assigning invalid type %T", fd.FullName(), v.Interface())
 	default:
@@ -587,6 +593,8 @@ func singularTypeIsValid(fd pref.FieldDescriptor, v pref.Value) error {
 		if dm, ok := vi.(*Message); ok && dm.known == nil {
 			return errors.New("%v: assigning invalid zero-value message", fd.FullName())
 		}
+	default:
+		_ = 0
 	}
 	if !ok {
 		return errors.New("%v: assigning invalid type %T", fd.FullName(), v.Interface())
@@ -618,6 +626,8 @@ func newListEntry(fd pref.FieldDescriptor) pref.Value {
 		return pref.ValueOfBytes(nil)
 	case pref.MessageKind, pref.GroupKind:
 		return pref.ValueOfMessage(NewMessage(fd.Message()).ProtoReflect())
+	default:
+		_ = 0
 	}
 	panic(errors.New("%v: unknown kind %v", fd.FullName(), fd.Kind()))
 }

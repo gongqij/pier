@@ -493,6 +493,8 @@ func routesProtoToSlice(routes []*v3routepb.Route, logger *grpclog.PrefixLogger,
 			case v3typepb.FractionalPercent_TEN_THOUSAND:
 				n *= 100
 			case v3typepb.FractionalPercent_MILLION:
+			default:
+				_ = 0
 			}
 			route.Fraction = &n
 		}
@@ -529,6 +531,8 @@ func routesProtoToSlice(routes []*v3routepb.Route, logger *grpclog.PrefixLogger,
 			}
 		case *v3routepb.RouteAction_ClusterHeader:
 			continue
+		default:
+			_ = 0
 		}
 
 		msd := action.GetMaxStreamDuration()
@@ -796,6 +800,8 @@ func parseDropPolicy(dropPolicy *v3endpointpb.ClusterLoadAssignment_Policy_DropO
 		denominator = 10000
 	case v3typepb.FractionalPercent_MILLION:
 		denominator = 1000000
+	default:
+		_ = 0
 	}
 	return OverloadDropConfig{
 		Category:    dropPolicy.GetCategory(),
@@ -921,6 +927,8 @@ func processAllResources(version string, resources []*anypb.Any, logger *grpclog
 			// Add place holder in the map so we know this resource name was in
 			// the response.
 			ret2[name] = EndpointsUpdate{}
+		default:
+			_ = 0
 		}
 	}
 
@@ -939,6 +947,8 @@ func processAllResources(version string, resources []*anypb.Any, logger *grpclog
 		typeStr = "CDS"
 	case map[string]EndpointsUpdate:
 		typeStr = "EDS"
+	default:
+		_ = 0
 	}
 
 	md.Status = ServiceStatusNACKed

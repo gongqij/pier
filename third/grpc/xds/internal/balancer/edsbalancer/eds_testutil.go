@@ -92,6 +92,8 @@ func parseDropPolicy(dropPolicy *xdspb.ClusterLoadAssignment_Policy_DropOverload
 		denominator = 10000
 	case typepb.FractionalPercent_MILLION:
 		denominator = 1000000
+	default:
+		_ = 0
 	}
 	return xdsclient.OverloadDropConfig{
 		Category:    dropPolicy.GetCategory(),

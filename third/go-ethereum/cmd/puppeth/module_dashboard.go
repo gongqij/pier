@@ -410,6 +410,8 @@ try! node?.start();
 					case "#faucet":
 						url = "//{{.FaucetPage}}";
 						break;
+					default:
+		                _ = 0
 				}
 				setTimeout(function() {
 					if (url.substring(0, 1) == "#") {

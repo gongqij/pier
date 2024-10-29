@@ -119,6 +119,8 @@ func (gs *generatorStats) Log(msg string, root common.Hash, marker []byte) {
 			"in", common.BytesToHash(marker[:common.HashLength]),
 			"at", common.BytesToHash(marker[common.HashLength:]),
 		}...)
+	default:
+		_ = 0
 	}
 	// Add the usual measurements
 	ctx = append(ctx, []interface{}{

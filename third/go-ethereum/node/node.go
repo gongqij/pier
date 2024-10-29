@@ -165,6 +165,8 @@ func (n *Node) Start() error {
 	case closedState:
 		n.lock.Unlock()
 		return ErrNodeStopped
+	default:
+		_ = 0
 	}
 	n.state = runningState
 	// open networking and RPC endpoints
@@ -591,6 +593,8 @@ func (n *Node) OpenDatabaseWithFreezer(name string, cache, handles int, freezer,
 			freezer = filepath.Join(root, "ancient")
 		case !filepath.IsAbs(freezer):
 			freezer = n.ResolvePath(freezer)
+		default:
+			_ = 0
 		}
 		db, err = rawdb.NewLevelDBDatabaseWithFreezer(root, cache, handles, freezer, namespace, readonly)
 	}

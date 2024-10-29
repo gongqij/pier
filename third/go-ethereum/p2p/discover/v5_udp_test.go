@@ -566,6 +566,8 @@ func TestUDPv5_lookup(t *testing.T) {
 				for _, resp := range packNodes(p.ReqID, nodes) {
 					test.packetInFrom(key, to, resp)
 				}
+			default:
+				_ = 0
 			}
 		})
 	}

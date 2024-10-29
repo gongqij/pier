@@ -224,6 +224,8 @@ func readASCII(buf []byte, r *bufio.Reader) (n int, err error) {
 			return n, nil
 		case err != nil:
 			return n, err
+		default:
+			_ = 0
 		}
 	}
 	return n, nil
@@ -242,6 +244,8 @@ func checkKeyFileEnd(r *bufio.Reader) error {
 			return fmt.Errorf("invalid character %q at end of key file", b)
 		case i >= 2:
 			return errors.New("key file too long, want 64 hex characters")
+		default:
+			_ = 0
 		}
 	}
 }

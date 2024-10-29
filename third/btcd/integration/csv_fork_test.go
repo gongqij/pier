@@ -676,6 +676,8 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 
 		// Transaction was rejected as wanted, nothing more to do.
 		case !test.accept && err != nil:
+		default:
+			_ = 0
 		}
 
 		// If the transaction should be rejected, manually mine a block

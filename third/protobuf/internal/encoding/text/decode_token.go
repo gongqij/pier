@@ -354,6 +354,8 @@ func (t Token) Float32() (float32, bool) {
 		if nerr.Err == strconv.ErrRange {
 			return float32(n), true
 		}
+	default:
+		_ = 0
 	}
 	return 0, false
 }

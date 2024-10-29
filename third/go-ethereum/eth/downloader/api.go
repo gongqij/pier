@@ -80,6 +80,8 @@ func (api *PublicDownloaderAPI) eventLoop() {
 				}
 			case DoneEvent, FailedEvent:
 				notification = false
+			default:
+				_ = 0
 			}
 			// broadcast
 			for c := range syncSubscriptions {

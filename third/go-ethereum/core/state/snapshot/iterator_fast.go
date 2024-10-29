@@ -50,6 +50,8 @@ func (its weightedIterators) Less(i, j int) bool {
 		return true
 	case 1:
 		return false
+	default:
+		_ = 0
 	}
 	// Same account/storage-slot in multiple layers, split by priority
 	return its[i].priority < its[j].priority

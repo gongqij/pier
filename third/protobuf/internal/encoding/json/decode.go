@@ -140,6 +140,8 @@ func (d *Decoder) Read() (Token, error) {
 			d.lastToken.kind&(scalar|ObjectClose|ArrayClose) == 0 {
 			return Token{}, d.newSyntaxError(tok.pos, unexpectedFmt, tok.RawString())
 		}
+	default:
+		_ = 0
 	}
 
 	// Update d.lastToken only after validating token to be in the right sequence.
@@ -208,6 +210,8 @@ func (d *Decoder) parseNext() (Token, error) {
 
 	case ',':
 		return d.consumeToken(comma, 1), nil
+	default:
+		_ = 0
 	}
 	return Token{}, d.newSyntaxError(d.currPos(), "invalid value %s", errRegexp.Find(in))
 }
@@ -287,6 +291,8 @@ func (d *Decoder) isValueNext() bool {
 		return d.lastToken.kind&Name != 0
 	case ArrayOpen:
 		return d.lastToken.kind&(ArrayOpen|comma) != 0
+	default:
+		_ = 0
 	}
 	panic(fmt.Sprintf(
 		"unreachable logic in Decoder.isValueNext, lastToken.kind: %v, openStack: %v",

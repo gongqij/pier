@@ -366,6 +366,8 @@ func TestUnmarshalFixedUnprefixedText(t *testing.T) {
 			t.Errorf("%q: unexpected error %q", test.input, err)
 		case err != nil && err.Error() != test.wantErr.Error():
 			t.Errorf("%q: error mismatch: got %q, want %q", test.input, err, test.wantErr)
+		default:
+			_ = 0
 		}
 		if test.want != nil && !bytes.Equal(out, test.want) {
 			t.Errorf("%q: output mismatch: got %x, want %x", test.input, out, test.want)

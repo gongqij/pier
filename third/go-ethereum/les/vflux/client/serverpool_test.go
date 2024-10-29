@@ -139,6 +139,8 @@ func (s *ServerPoolTest) start() {
 				s.clock.Sleep(time.Second * 5)
 				s.endWait()
 				return -1
+			default:
+				_ = 0
 			}
 			return -1
 		}

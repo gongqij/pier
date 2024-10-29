@@ -233,6 +233,8 @@ func handleGetBlockHeaders(msg Decoder) (serveRequestFn, uint64, uint64, error) 
 			case !r.Query.Reverse:
 				// Number based traversal towards the leaf block
 				r.Query.Origin.Number += r.Query.Skip + 1
+			default:
+				_ = 0
 			}
 			first = false
 		}

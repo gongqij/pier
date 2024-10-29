@@ -437,6 +437,8 @@ func (d decoder) unmarshalList(fd pref.FieldDescriptor, list pref.List) error {
 			}
 			list.Append(pval)
 			return nil
+		default:
+			_ = 0
 		}
 	}
 
@@ -753,6 +755,8 @@ func (d decoder) skipValue() error {
 				}
 			}
 		}
+	default:
+		_ = 0
 	}
 	return nil
 }
@@ -772,6 +776,8 @@ func (d decoder) skipMessageValue() error {
 			if err := d.skipValue(); err != nil {
 				return err
 			}
+		default:
+			_ = 0
 		}
 	}
 }

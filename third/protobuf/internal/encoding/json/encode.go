@@ -151,6 +151,8 @@ func appendFloat(out []byte, n float64, bitSize int) []byte {
 		return append(out, `"Infinity"`...)
 	case math.IsInf(n, -1):
 		return append(out, `"-Infinity"`...)
+	default:
+		_ = 0
 	}
 
 	// JSON number formatting logic based on encoding/json.
@@ -262,6 +264,8 @@ func (e *Encoder) prepareNext(next kind) {
 		case next&(objectClose|arrayClose) != 0:
 			e.indents = e.indents[:len(e.indents)-len(e.indent)]
 			e.out = append(e.out, '\n')
+		default:
+			_ = 0
 		}
 		e.out = append(e.out, e.indents...)
 
@@ -272,5 +276,7 @@ func (e *Encoder) prepareNext(next kind) {
 		if detrand.Bool() {
 			e.out = append(e.out, ' ')
 		}
+	default:
+		_ = 0
 	}
 }

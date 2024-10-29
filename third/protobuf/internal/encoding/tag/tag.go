@@ -61,6 +61,8 @@ func Unmarshal(tag string, goType reflect.Type, evs pref.EnumValueDescriptors) p
 				f.L1.Kind = pref.Uint32Kind
 			case reflect.Uint64:
 				f.L1.Kind = pref.Uint64Kind
+			default:
+				_ = 0
 			}
 		case s == "zigzag32":
 			if goType.Kind() == reflect.Int32 {
@@ -78,6 +80,8 @@ func Unmarshal(tag string, goType reflect.Type, evs pref.EnumValueDescriptors) p
 				f.L1.Kind = pref.Fixed32Kind
 			case reflect.Float32:
 				f.L1.Kind = pref.FloatKind
+			default:
+				_ = 0
 			}
 		case s == "fixed64":
 			switch goType.Kind() {
@@ -87,6 +91,8 @@ func Unmarshal(tag string, goType reflect.Type, evs pref.EnumValueDescriptors) p
 				f.L1.Kind = pref.Fixed64Kind
 			case reflect.Float64:
 				f.L1.Kind = pref.DoubleKind
+			default:
+				_ = 0
 			}
 		case s == "bytes":
 			switch {
@@ -120,6 +126,8 @@ func Unmarshal(tag string, goType reflect.Type, evs pref.EnumValueDescriptors) p
 			f.L1.Default = fdesc.DefaultValue(v, ev)
 		case s == "proto3":
 			f.L0.ParentFile = fdesc.SurrogateProto3
+		default:
+			_ = 0
 		}
 		tag = strings.TrimPrefix(tag[i:], ",")
 	}
@@ -157,6 +165,8 @@ func Marshal(fd pref.FieldDescriptor, enumName string) string {
 		tag = append(tag, "bytes")
 	case pref.GroupKind:
 		tag = append(tag, "group")
+	default:
+		_ = 0
 	}
 	tag = append(tag, strconv.Itoa(int(fd.Number())))
 	switch fd.Cardinality() {
@@ -166,6 +176,8 @@ func Marshal(fd pref.FieldDescriptor, enumName string) string {
 		tag = append(tag, "req")
 	case pref.Repeated:
 		tag = append(tag, "rep")
+	default:
+		_ = 0
 	}
 	if fd.IsPacked() {
 		tag = append(tag, "packed")

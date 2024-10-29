@@ -335,6 +335,8 @@ func (p *parser) parseMessage(msgDesc protoreflect.MessageDescriptor, group bool
 					if subDesc == nil || subDesc.IsPlaceholder() {
 						kind = 0
 					}
+				default:
+					_ = 0
 				}
 			}
 		}
@@ -531,6 +533,8 @@ func (m Message) format(source, multi bool) string {
 				}
 			case Message, Raw: // has preceding and succeeding newlines
 				prefix, nextPrefix = "\n", "\n"
+			default:
+				_ = 0
 			}
 		}
 

@@ -61,6 +61,8 @@ func (p *Names) CheckValid() error {
 			// NOTE: The C++ implementation does not validate the identifier.
 			// See https://github.com/protocolbuffers/protobuf/issues/6335.
 			return errors.New("invalid name: %q", s)
+		default:
+			_ = 0
 		}
 	}
 	return nil
@@ -111,6 +113,8 @@ func (p *EnumRanges) CheckValid() error {
 			return errors.New("invalid range: %v", r)
 		case !(rp.End() < r.Start()) && i > 0:
 			return errors.New("overlapping ranges: %v with %v", rp, r)
+		default:
+			_ = 0
 		}
 		rp = r
 	}
@@ -177,6 +181,8 @@ func (p *FieldRanges) CheckValid(isMessageSet bool) error {
 			return errors.New("invalid range: %v", r)
 		case !(rp.End() < r.Start()) && i > 0:
 			return errors.New("overlapping ranges: %v with %v", rp, r)
+		default:
+			_ = 0
 		}
 		rp = r
 	}

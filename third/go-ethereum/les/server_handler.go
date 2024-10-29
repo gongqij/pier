@@ -388,6 +388,8 @@ func (h *serverHandler) GetHelperTrie(typ uint, index uint64) *trie.Trie {
 	case htBloomBits:
 		sectionHead := rawdb.ReadCanonicalHash(h.chainDb, (index+1)*h.server.iConfig.BloomTrieSize-1)
 		root, prefix = light.GetBloomTrieRoot(h.chainDb, index, sectionHead), light.BloomTrieTablePrefix
+	default:
+		_ = 0
 	}
 	if root == (common.Hash{}) {
 		return nil

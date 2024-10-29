@@ -84,6 +84,8 @@ func main() {
 		if nodeKey, err = crypto.HexToECDSA(*nodeKeyHex); err != nil {
 			utils.Fatalf("-nodekeyhex: %v", err)
 		}
+	default:
+		_ = 0
 	}
 
 	if *writeAddr {

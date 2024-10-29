@@ -224,6 +224,8 @@ func newValidationInfo(fd pref.FieldDescriptor, ft reflect.Type) validationInfo 
 				vi.typ = validationTypeFixed64
 			case protowire.BytesType:
 				vi.typ = validationTypeBytes
+			default:
+				_ = 0
 			}
 		}
 	}
@@ -297,11 +299,15 @@ State:
 					vi.typ = st.valType
 					vi.mi = st.mi
 					vi.requiredBit = 1
+				default:
+					_ = 0
 				}
 			case flags.ProtoLegacy && st.mi.isMessageSet:
 				switch num {
 				case messageset.FieldItem:
 					vi.typ = validationTypeMessageSetItem
+				default:
+					_ = 0
 				}
 			default:
 				var f *coderFieldInfo
@@ -366,6 +372,8 @@ State:
 					ok = wtyp == protowire.BytesType
 				case validationTypeGroup:
 					ok = wtyp == protowire.StartGroupType
+				default:
+					_ = 0
 				}
 				if ok {
 					st.requiredMask |= vi.requiredBit
@@ -490,6 +498,8 @@ State:
 					if !utf8.Valid(v) {
 						return out, ValidationInvalid
 					}
+				default:
+					_ = 0
 				}
 			case protowire.Fixed32Type:
 				if len(b) < 4 {
@@ -567,6 +577,8 @@ State:
 			if st.mi != nil && st.mi.numRequiredFields > 0 {
 				numRequiredFields = 1
 			}
+		default:
+			_ = 0
 		}
 		// If there are more than 64 required fields, this check will
 		// always fail and we will report that the message is potentially

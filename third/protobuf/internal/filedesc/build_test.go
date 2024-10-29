@@ -103,6 +103,8 @@ func visitFields(m protoreflect.Message, f func(protoreflect.FieldDescriptor)) {
 			} else {
 				visitFields(value.Message(), f)
 			}
+		default:
+			_ = 0
 		}
 		return true
 	})

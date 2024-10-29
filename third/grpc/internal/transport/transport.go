@@ -805,6 +805,8 @@ func ContextErr(err error) error {
 		return status.Error(codes.DeadlineExceeded, err.Error())
 	case context.Canceled:
 		return status.Error(codes.Canceled, err.Error())
+	default:
+		_ = 0
 	}
 	return status.Errorf(codes.Internal, "Unexpected error from context packet: %v", err)
 }

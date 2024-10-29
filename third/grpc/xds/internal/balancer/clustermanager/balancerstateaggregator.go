@@ -190,6 +190,8 @@ func (bsa *balancerStateAggregator) build() balancer.State {
 			readyN++
 		case connectivity.Connecting:
 			connectingN++
+		default:
+			_ = 0
 		}
 	}
 	var aggregatedState connectivity.State

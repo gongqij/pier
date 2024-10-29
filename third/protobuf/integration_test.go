@@ -358,6 +358,8 @@ func downloadArchive(check func(error), dstPath, srcURL, skipPrefix, wantSHA256 
 			check(ioutil.WriteFile(path, b, mode))
 		case tar.TypeDir:
 			check(os.Mkdir(path, mode))
+		default:
+			_ = 0
 		}
 	}
 }

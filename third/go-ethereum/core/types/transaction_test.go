@@ -467,6 +467,8 @@ func TestTransactionCoding(t *testing.T) {
 				GasPrice:   big.NewInt(10),
 				AccessList: accesses,
 			}
+		default:
+			_ = 0
 		}
 		tx, err := SignNewTx(key, signer, txdata)
 		if err != nil {

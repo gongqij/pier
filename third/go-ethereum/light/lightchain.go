@@ -365,6 +365,8 @@ func (lc *LightChain) postChainEvents(events []interface{}) {
 			lc.chainFeed.Send(ev)
 		case core.ChainSideEvent:
 			lc.chainSideFeed.Send(ev)
+		default:
+			_ = 0
 		}
 	}
 }
@@ -412,6 +414,8 @@ func (lc *LightChain) InsertHeaderChain(chain []*types.Header, checkFreq int) (i
 		events = append(events, core.ChainEvent{Block: block, Hash: block.Hash()})
 	case core.SideStatTy:
 		events = append(events, core.ChainSideEvent{Block: block})
+	default:
+		_ = 0
 	}
 	lc.postChainEvents(events)
 

@@ -180,6 +180,8 @@ func TestIsValid(t *testing.T) {
 			wantHas = v.Len() > 0
 		case protoreflect.Message:
 			wantHas = v.IsValid()
+		default:
+			_ = 0
 		}
 		m := &testpb.TestAllExtensions{}
 		proto.SetExtension(m, tt.xt, tt.vi)

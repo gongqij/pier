@@ -48,6 +48,8 @@ func assertVersionBit(r *rpctest.Harness, t *testing.T, hash *chainhash.Hash, bi
 		_, _, line, _ := runtime.Caller(1)
 		t.Fatalf("assertion failed at line %d: block %s, version 0x%x "+
 			"has bit %d set", line, hash, block.Header.Version, bit)
+	default:
+		_ = 0
 	}
 }
 
@@ -79,6 +81,8 @@ func thresholdStateToStatus(state blockchain.ThresholdState) (string, error) {
 		return "active", nil
 	case blockchain.ThresholdFailed:
 		return "failed", nil
+	default:
+		_ = 0
 	}
 
 	return "", fmt.Errorf("unrecognized threshold state: %v", state)

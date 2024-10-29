@@ -189,6 +189,8 @@ func injectDelay(ctx context.Context, delayCfg *cpb.FaultDelay) error {
 				numerator = num
 			}
 		}
+	default:
+		_ = 0
 	}
 	if delay == 0 || randIntn(denominator) >= numerator {
 		return nil
@@ -229,6 +231,8 @@ func injectAbort(ctx context.Context, abortCfg *fpb.FaultAbort) error {
 				numerator = num
 			}
 		}
+	default:
+		_ = 0
 	}
 	if !okCode || randIntn(denominator) >= numerator {
 		return nil
@@ -263,6 +267,8 @@ func splitPct(fp *tpb.FractionalPercent) (num int, den int) {
 		return num, 10 * 1000
 	case tpb.FractionalPercent_MILLION:
 		return num, 1000 * 1000
+	default:
+		_ = 0
 	}
 	return num, 100
 }

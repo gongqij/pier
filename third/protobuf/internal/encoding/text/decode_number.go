@@ -110,6 +110,8 @@ func parseNumber(input []byte) number {
 					n++
 				}
 				size += n
+			default:
+				_ = 0
 			}
 
 			if kind&(numHex|numOct) > 0 {

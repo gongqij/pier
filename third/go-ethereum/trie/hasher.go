@@ -112,6 +112,8 @@ func (h *hasher) hashShortNodeChildren(n *shortNode) (collapsed, cached *shortNo
 	switch n.Val.(type) {
 	case *fullNode, *shortNode:
 		collapsed.Val, cached.Val = h.hash(n.Val, false)
+	default:
+		_ = 0
 	}
 	return collapsed, cached
 }

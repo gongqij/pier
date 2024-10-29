@@ -329,6 +329,8 @@ func Intersect(mx *FieldMask, my *FieldMask, ms ...*FieldMask) *FieldMask {
 				i1++
 			case lessPath(s2, s1):
 				i2++
+			default:
+				_ = 0
 			}
 		}
 		return out

@@ -98,6 +98,8 @@ func (cdsBB) Build(cc balancer.ClientConn, opts balancer.BuildOptions) balancer.
 		creds = opts.DialCreds
 	case opts.CredsBundle != nil:
 		creds = opts.CredsBundle.TransportCredentials()
+	default:
+		_ = 0
 	}
 	if xc, ok := creds.(interface{ UsesXDS() bool }); ok && xc.UsesXDS() {
 		b.xdsCredsInUse = true
@@ -381,6 +383,8 @@ func (b *cdsBalancer) run() {
 				b.edsLB.UpdateSubConnState(update.subConn, update.state)
 			case *watchUpdate:
 				b.handleWatchUpdate(update)
+			default:
+				_ = 0
 			}
 		case <-b.closed.Done():
 			b.cancelWatch()

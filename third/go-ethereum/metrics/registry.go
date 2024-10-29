@@ -167,6 +167,8 @@ func (r *StandardRegistry) GetAll() map[string]map[string]interface{} {
 			values["5m.rate"] = t.Rate5()
 			values["15m.rate"] = t.Rate15()
 			values["mean.rate"] = t.RateMean()
+		default:
+			_ = 0
 		}
 		data[name] = values
 	})
@@ -198,6 +200,8 @@ func (r *StandardRegistry) register(name string, i interface{}) error {
 	switch i.(type) {
 	case Counter, Gauge, GaugeFloat64, Healthcheck, Histogram, Meter, Timer, ResettingTimer:
 		r.metrics[name] = i
+	default:
+		_ = 0
 	}
 	return nil
 }
@@ -266,6 +270,8 @@ func findPrefix(registry Registry, prefix string) (Registry, string) {
 		return findPrefix(r.underlying, r.prefix+prefix)
 	case *StandardRegistry:
 		return r, prefix
+	default:
+		_ = 0
 	}
 	return nil, ""
 }

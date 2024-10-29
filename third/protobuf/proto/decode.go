@@ -210,6 +210,8 @@ func (o UnmarshalOptions) unmarshalMap(b []byte, wtyp protowire.Type, mapv proto
 	switch valField.Kind() {
 	case protoreflect.GroupKind, protoreflect.MessageKind:
 		val = mapv.NewValue()
+	default:
+		_ = 0
 	}
 	// Map entries are represented as a two-element message with fields
 	// containing the key and value.
@@ -245,6 +247,8 @@ func (o UnmarshalOptions) unmarshalMap(b []byte, wtyp protowire.Type, mapv proto
 				val = v
 			}
 			haveVal = true
+		default:
+			_ = 0
 		}
 		if err == errUnknown {
 			n = protowire.ConsumeFieldValue(num, wtyp, b)

@@ -55,6 +55,8 @@ func (k Kind) String() string {
 		return "]"
 	case comma:
 		return ","
+	default:
+		_ = 0
 	}
 	return "<invalid>"
 }

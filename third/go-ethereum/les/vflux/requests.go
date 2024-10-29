@@ -101,6 +101,8 @@ func (i *IntOrInf) BigInt() *big.Int {
 		panic(nil) // caller should check Inf() before trying to convert to big.Int
 	case IntMinusInf:
 		panic(nil)
+	default:
+		_ = 0
 	}
 	return &big.Int{} // invalid type decodes to 0 value
 }
@@ -112,6 +114,8 @@ func (i *IntOrInf) Inf() int {
 		return 1
 	case IntMinusInf:
 		return -1
+	default:
+		_ = 0
 	}
 	return 0 // invalid type decodes to 0 value
 }
@@ -135,6 +139,8 @@ func (i *IntOrInf) Int64() int64 {
 		return math.MaxInt64
 	case IntMinusInf:
 		return math.MinInt64
+	default:
+		_ = 0
 	}
 	return 0 // invalid type decodes to 0 value
 }

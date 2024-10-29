@@ -251,6 +251,8 @@ func (e *Encoder) prepareNext(next encType) {
 		}
 		e.out = append(e.out, '\n')
 		e.out = append(e.out, e.indents...)
+	default:
+		_ = 0
 	}
 }
 

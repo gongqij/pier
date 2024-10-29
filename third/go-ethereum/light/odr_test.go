@@ -88,6 +88,8 @@ func (odr *testOdr) Retrieve(ctx context.Context, req OdrRequest) error {
 		req.Proof = nodes
 	case *CodeRequest:
 		req.Data = rawdb.ReadCode(odr.sdb, req.Hash)
+	default:
+		_ = 0
 	}
 	req.StoreResult(odr.ldb)
 	return nil
@@ -246,6 +248,8 @@ func testChainGen(i int, block *core.BlockGen) {
 		data := common.Hex2Bytes("C16431B900000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002")
 		tx, _ := types.SignTx(types.NewTransaction(block.TxNonce(testBankAddress), testContractAddr, big.NewInt(0), 100000, block.BaseFee(), data), signer, testBankKey)
 		block.AddTx(tx)
+	default:
+		_ = 0
 	}
 }
 

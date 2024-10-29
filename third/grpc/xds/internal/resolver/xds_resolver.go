@@ -75,6 +75,8 @@ func (b *xdsResolverBuilder) Build(t resolver.Target, cc resolver.ClientConn, op
 		creds = opts.DialCreds
 	case opts.CredsBundle != nil:
 		creds = opts.CredsBundle.TransportCredentials()
+	default:
+		_ = 0
 	}
 	if xc, ok := creds.(interface{ UsesXDS() bool }); ok && xc.UsesXDS() {
 		bc := client.BootstrapConfig()

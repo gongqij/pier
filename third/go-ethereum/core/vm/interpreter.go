@@ -299,6 +299,8 @@ func (in *EVMInterpreter) Run(contract *Contract, input []byte, readOnly bool) (
 			return res, nil
 		case !operation.jumps:
 			pc++
+		default:
+			_ = 0
 		}
 	}
 	return nil, nil

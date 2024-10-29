@@ -333,6 +333,8 @@ func (f *freezer) freeze(db ethdb.KeyValueStore) {
 			log.Debug("Ancient blocks frozen already", "number", *number, "hash", hash, "frozen", f.frozen)
 			backoff = true
 			continue
+		default:
+			_ = 0
 		}
 		head := ReadHeader(nfdb, hash, *number)
 		if head == nil {

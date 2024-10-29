@@ -150,6 +150,8 @@ func DefaultServerListener(host string, port uint32, secLevel SecurityLevel) *v3
 				},
 			},
 		}
+	default:
+		_ = 0
 	}
 
 	var ts *v3corepb.TransportSocket
@@ -294,6 +296,8 @@ func DefaultCluster(clusterName, edsServiceName string, secLevel SecurityLevel) 
 				},
 			},
 		}
+	default:
+		_ = 0
 	}
 
 	cluster := &v3clusterpb.Cluster{

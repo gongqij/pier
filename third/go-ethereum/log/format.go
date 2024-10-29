@@ -101,6 +101,8 @@ func TerminalFormat(usecolor bool) Format {
 				color = 36
 			case LvlTrace:
 				color = 34
+			default:
+				_ = 0
 			}
 		}
 
@@ -342,6 +344,8 @@ func formatLogfmtValue(value interface{}, term bool) string {
 			return "<nil>"
 		}
 		return formatLogfmtBigInt(v)
+	default:
+		_ = 0
 	}
 	if term {
 		if s, ok := value.(TerminalStringer); ok {

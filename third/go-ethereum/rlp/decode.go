@@ -132,6 +132,8 @@ func wrapStreamError(err error, typ reflect.Type) error {
 		return &decodeError{msg: "input string too long", typ: typ}
 	case errNotAtEOL:
 		return &decodeError{msg: "input list has too many elements", typ: typ}
+	default:
+		_ = 0
 	}
 	return err
 }
@@ -405,6 +407,8 @@ func decodeByteArray(s *Stream, val reflect.Value) error {
 		}
 	case List:
 		return wrapStreamError(ErrExpectedString, val.Type())
+	default:
+		_ = 0
 	}
 	return nil
 }
@@ -900,6 +904,8 @@ func (s *Stream) readKind() (kind Kind, size uint64, err error) {
 				err = io.EOF
 			case ErrValueTooLarge:
 				err = io.EOF
+			default:
+				_ = 0
 			}
 		}
 		return 0, 0, err

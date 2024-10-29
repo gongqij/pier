@@ -135,6 +135,8 @@ func fieldValue(fd pref.FieldDescriptor, v interface{}) pref.Value {
 		switch fd.Kind() {
 		case pref.FloatKind:
 			v = float32(o)
+		default:
+			_ = 0
 		}
 	case string:
 		switch fd.Kind() {
@@ -142,9 +144,13 @@ func fieldValue(fd pref.FieldDescriptor, v interface{}) pref.Value {
 			v = []byte(o)
 		case pref.EnumKind:
 			v = fd.Enum().Values().ByName(pref.Name(o)).Number()
+		default:
+			_ = 0
 		}
 	case []byte:
 		return pref.ValueOf(append([]byte{}, o...))
+	default:
+		_ = 0
 	}
 	return pref.ValueOf(v)
 }

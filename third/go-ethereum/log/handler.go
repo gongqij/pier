@@ -167,6 +167,8 @@ func MatchFilterHandler(key string, value interface{}, h Handler) Handler {
 			return r.Time == value
 		case r.KeyNames.Msg:
 			return r.Msg == value
+		default:
+			_ = 0
 		}
 
 		for i := 0; i < len(r.Ctx); i += 2 {

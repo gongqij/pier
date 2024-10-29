@@ -614,6 +614,8 @@ func (te *test) listenAndServe(ts testpb.TestServiceServer, listen func(network,
 	case "unix":
 		la = "/tmp/testsock" + fmt.Sprintf("%d", time.Now().UnixNano())
 		syscall.Unlink(la)
+	default:
+		_ = 0
 	}
 	lis, err := listen(te.e.network, la)
 	if err != nil {
@@ -2514,6 +2516,8 @@ func (t *myTap) handle(ctx context.Context, info *tap.Info) (context.Context, er
 			return nil, fmt.Errorf("tap error")
 		case "/grpc.testing.TestService/FullDuplexCall":
 			return nil, status.Errorf(codes.FailedPrecondition, "test custom error")
+		default:
+			_ = 0
 		}
 	}
 	return ctx, nil
@@ -6351,6 +6355,8 @@ func (s) TestInterceptorCanAccessCallOptions(t *testing.T) {
 				observedOpts.compressor = append(observedOpts.compressor, o.CompressorType)
 			case grpc.ContentSubtypeCallOption:
 				observedOpts.subtype = append(observedOpts.subtype, o.ContentSubtype)
+			default:
+				_ = 0
 			}
 		}
 	}
