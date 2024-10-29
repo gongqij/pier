@@ -1,3 +1,4 @@
+//go:build go1.12
 // +build go1.12
 
 /*
@@ -273,6 +274,8 @@ func compareConnState(got, want tls.ConnectionState) error {
 		return fmt.Errorf("TLS.ConnectionState got CipherSuite: %v, want: %v", got.CipherSuite, want.CipherSuite)
 	case got.NegotiatedProtocol != want.NegotiatedProtocol:
 		return fmt.Errorf("TLS.ConnectionState got NegotiatedProtocol: %v, want: %v", got.NegotiatedProtocol, want.NegotiatedProtocol)
+	default:
+		_ = 0
 	}
 	return nil
 }

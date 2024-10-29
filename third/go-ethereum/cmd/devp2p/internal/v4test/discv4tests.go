@@ -370,6 +370,8 @@ func bond(t *utesting.T, te *testenv) {
 		case *v4wire.Pong:
 			// TODO: maybe verify pong data here
 			gotPong = true
+		default:
+			_ = 0
 		}
 	}
 }
@@ -410,6 +412,8 @@ func FindnodeAmplificationInvalidPongHash(t *utesting.T) {
 			gotPing = true
 		case *v4wire.Pong:
 			gotPong = true
+		default:
+			_ = 0
 		}
 	}
 

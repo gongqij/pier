@@ -214,6 +214,8 @@ func removeDB(ctx *cli.Context) error {
 		path = filepath.Join(stack.ResolvePath("chaindata"), "ancient")
 	case !filepath.IsAbs(path):
 		path = config.Node.ResolvePath(path)
+	default:
+		_ = 0
 	}
 	if common.FileExist(path) {
 		confirmAndRemoveDB(path, "full node ancient database")

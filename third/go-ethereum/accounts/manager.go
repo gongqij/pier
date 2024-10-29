@@ -117,6 +117,8 @@ func (am *Manager) update() {
 				am.wallets = merge(am.wallets, event.Wallet)
 			case WalletDropped:
 				am.wallets = drop(am.wallets, event.Wallet)
+			default:
+				_ = 0
 			}
 			am.lock.Unlock()
 

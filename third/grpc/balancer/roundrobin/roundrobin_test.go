@@ -407,6 +407,8 @@ func (s) TestOneServerDown(t *testing.T) {
 		case test.addresses[backendCount]:
 			// Reset targetSeen if peer is server[backendCount].
 			targetSeen = 0
+		default:
+			_ = 0
 		}
 		// Break to make sure the last picked address is server[-1], so the following for loop won't be flaky.
 		if targetSeen >= 2 {

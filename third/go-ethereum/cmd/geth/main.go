@@ -284,6 +284,8 @@ func prepare(ctx *cli.Context) {
 
 	case !ctx.GlobalIsSet(utils.NetworkIdFlag.Name):
 		log.Info("Starting Geth on Ethereum mainnet...")
+	default:
+		_ = 0
 	}
 	// If we're a full node on mainnet without --cache specified, bump default cache allowance
 	if ctx.GlobalString(utils.SyncModeFlag.Name) != "light" && !ctx.GlobalIsSet(utils.CacheFlag.Name) && !ctx.GlobalIsSet(utils.NetworkIdFlag.Name) {
@@ -376,6 +378,8 @@ func startNode(ctx *cli.Context, stack *node.Node, backend ethapi.Backend) {
 			case accounts.WalletDropped:
 				log.Info("Old wallet dropped", "url", event.Wallet.URL())
 				event.Wallet.Close()
+			default:
+				_ = 0
 			}
 		}
 	}()

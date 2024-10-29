@@ -100,6 +100,8 @@ func (s *Suite) TestPingLargeRequestID(t *utesting.T) {
 		} else if !netutil.IsTimeout(resp.err) {
 			t.Error(resp)
 		}
+	default:
+		_ = 0
 	}
 }
 
@@ -365,6 +367,8 @@ func (bn *bystander) loop() {
 				bn.conn.logf("shutting down: %v", p.err)
 				return
 			}
+		default:
+			_ = 0
 		}
 	}
 }

@@ -357,6 +357,8 @@ func unmarshalInt(tok json.Token, bitSize int) (pref.Value, bool) {
 			return pref.Value{}, false
 		}
 		return getInt(tok, bitSize)
+	default:
+		_ = 0
 	}
 	return pref.Value{}, false
 }
@@ -389,6 +391,8 @@ func unmarshalUint(tok json.Token, bitSize int) (pref.Value, bool) {
 			return pref.Value{}, false
 		}
 		return getUint(tok, bitSize)
+	default:
+		_ = 0
 	}
 	return pref.Value{}, false
 }
@@ -427,6 +431,8 @@ func unmarshalFloat(tok json.Token, bitSize int) (pref.Value, bool) {
 				return pref.ValueOfFloat32(float32(math.Inf(-1))), true
 			}
 			return pref.ValueOfFloat64(math.Inf(-1)), true
+		default:
+			_ = 0
 		}
 
 		// Decode number from string.
@@ -439,6 +445,8 @@ func unmarshalFloat(tok json.Token, bitSize int) (pref.Value, bool) {
 			return pref.Value{}, false
 		}
 		return getFloat(tok, bitSize)
+	default:
+		_ = 0
 	}
 	return pref.Value{}, false
 }
@@ -493,6 +501,8 @@ func unmarshalEnum(tok json.Token, fd pref.FieldDescriptor) (pref.Value, bool) {
 		if isNullValue(fd) {
 			return pref.ValueOfEnum(0), true
 		}
+	default:
+		_ = 0
 	}
 
 	return pref.Value{}, false

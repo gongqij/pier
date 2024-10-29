@@ -165,6 +165,8 @@ func channelProtoToStruct(c *channelzpb.Channel) *dummyChannel {
 		dc.state = connectivity.TransientFailure
 	case channelzpb.ChannelConnectivityState_SHUTDOWN:
 		dc.state = connectivity.Shutdown
+	default:
+		_ = 0
 	}
 	dc.target = pdata.GetTarget()
 	dc.callsStarted = pdata.CallsStarted
@@ -254,6 +256,8 @@ func protoToSecurity(protoSecurity *channelzpb.Security) credentials.ChannelzSec
 			sv.Value = x.Message
 		}
 		return sv
+	default:
+		_ = 0
 	}
 	return nil
 }
@@ -269,6 +273,8 @@ func protoToAddr(a *channelzpb.Address) net.Addr {
 		return &net.UnixAddr{Name: v.UdsAddress.GetFilename(), Net: "unix"}
 	case *channelzpb.Address_OtherAddress_:
 		// TODO:
+	default:
+		_ = 0
 	}
 	return nil
 }

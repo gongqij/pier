@@ -17,6 +17,8 @@ func newListConverter(t reflect.Type, fd pref.FieldDescriptor) Converter {
 		return &listPtrConverter{t, newSingularConverter(t.Elem().Elem(), fd)}
 	case t.Kind() == reflect.Slice:
 		return &listConverter{t, newSingularConverter(t.Elem(), fd)}
+	default:
+		_ = 0
 	}
 	panic(fmt.Sprintf("invalid Go type %v for field %v", t, fd.FullName()))
 }

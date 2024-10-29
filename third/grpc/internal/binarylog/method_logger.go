@@ -84,6 +84,8 @@ func (ml *MethodLogger) Log(c LogEntryConfig) {
 		m.PayloadTruncated = ml.truncateMetadata(pay.ServerHeader.GetMetadata())
 	case *pb.GrpcLogEntry_Message:
 		m.PayloadTruncated = ml.truncateMessage(pay.Message)
+	default:
+		_ = 0
 	}
 
 	ml.sink.Write(m)

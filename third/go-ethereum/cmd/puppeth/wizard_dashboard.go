@@ -83,6 +83,8 @@ func (w *wizard) deployDashboard() {
 				if infos, err := checkFaucet(client, w.network); err == nil {
 					port = infos.port
 				}
+			default:
+				_ = 0
 			}
 			if page, err := resolve(client, w.network, service, port); err == nil && page != "" {
 				pages = append(pages, page)

@@ -88,6 +88,8 @@ func scalarField(kind pref.Kind) pref.Value {
 
 	case pref.EnumKind:
 		return pref.ValueOfEnum(42)
+	default:
+		_ = 0
 	}
 
 	panic(fmt.Sprintf("FieldDescriptor.Kind %v is not valid", kind))

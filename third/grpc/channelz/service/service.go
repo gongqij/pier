@@ -93,6 +93,8 @@ func channelTraceToProto(ct *channelz.ChannelTrace) *channelzpb.ChannelTrace {
 				cte.ChildRef = &channelzpb.ChannelTraceEvent_ChannelRef{ChannelRef: &channelzpb.ChannelRef{ChannelId: e.RefID, Name: e.RefName}}
 			case channelz.RefSubChannel:
 				cte.ChildRef = &channelzpb.ChannelTraceEvent_SubchannelRef{SubchannelRef: &channelzpb.SubchannelRef{SubchannelId: e.RefID, Name: e.RefName}}
+			default:
+				_ = 0
 			}
 		}
 		events = append(events, cte)
@@ -187,6 +189,8 @@ func securityToProto(se credentials.ChannelzSecurityValue) *channelzpb.Security 
 			otherSecurity.Value = anyval
 		}
 		return &channelzpb.Security{Model: &channelzpb.Security_Other{Other: otherSecurity}}
+	default:
+		_ = 0
 	}
 	return nil
 }

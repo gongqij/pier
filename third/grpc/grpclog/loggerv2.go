@@ -135,6 +135,8 @@ func newLoggerV2() LoggerV2 {
 		warningW = os.Stderr
 	case "INFO", "info":
 		infoW = os.Stderr
+	default:
+		_ = 0
 	}
 
 	var v int
@@ -204,7 +206,7 @@ func (g *loggerT) V(l int) bool {
 // DepthLoggerV2, the below functions will be called with the appropriate stack
 // depth set for trivial functions the logger may ignore.
 //
-// Experimental
+// # Experimental
 //
 // Notice: This type is EXPERIMENTAL and may be changed or removed in a
 // later release.

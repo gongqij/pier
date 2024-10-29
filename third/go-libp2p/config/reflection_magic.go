@@ -57,6 +57,8 @@ func handleReturnValue(out []reflect.Value) (interface{}, error) {
 			if tpt.IsNil() {
 				return nil, fmt.Errorf("unspecified error")
 			}
+		default:
+			_ = 0
 		}
 
 		return tpt.Interface(), nil

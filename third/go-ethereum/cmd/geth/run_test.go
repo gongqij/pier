@@ -79,6 +79,8 @@ func runGeth(t *testing.T, args ...string) *testgeth {
 			if i < len(args)-1 {
 				tt.Etherbase = args[i+1]
 			}
+		default:
+			_ = 0
 		}
 	}
 	if tt.Datadir == "" {

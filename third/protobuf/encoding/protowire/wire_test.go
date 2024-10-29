@@ -554,6 +554,8 @@ func runTests(t *testing.T, tests []testOps) {
 					b = AppendGroup(b, op.inNum, op.inVal)
 				case appendRaw:
 					b = append(b, op...)
+				default:
+					_ = 0
 				}
 
 				check := func(label string, want int) {
@@ -575,6 +577,8 @@ func runTests(t *testing.T, tests []testOps) {
 					check("Bytes", SizeBytes(len(op.inVal)))
 				case appendGroup:
 					check("Group", SizeGroup(op.inNum, len(op.inVal)))
+				default:
+					_ = 0
 				}
 			}
 
@@ -643,6 +647,8 @@ func runTests(t *testing.T, tests []testOps) {
 						t.Errorf("ConsumeGroup() = %x, want %x", gotVal, op.wantVal)
 					}
 					check("Group", n, op.wantCnt, op.wantErr)
+				default:
+					_ = 0
 				}
 			}
 		})

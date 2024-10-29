@@ -68,6 +68,8 @@ func (g GoType) Zero() Expr {
 		return `""`
 	case GoBytes:
 		return "nil"
+	default:
+		_ = 0
 	}
 	return "0"
 }

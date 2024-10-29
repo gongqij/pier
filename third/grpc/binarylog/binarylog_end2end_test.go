@@ -716,6 +716,8 @@ func (ed *expectedData) toClientLogEntries() []*pb.GrpcLogEntry {
 				idInRPC++
 			}
 		}
+	default:
+		_ = 0
 	}
 
 	if ed.cc.callType == cancelRPC {
@@ -786,6 +788,8 @@ func (ed *expectedData) toServerLogEntries() []*pb.GrpcLogEntry {
 			ret = append(ret, ed.newServerMessageEntry(false, globalRPCID, idInRPC, ed.responses[0]))
 			idInRPC++
 		}
+	default:
+		_ = 0
 	}
 
 	ret = append(ret, ed.newServerTrailerEntry(false, globalRPCID, idInRPC, ed.err))
@@ -826,6 +830,8 @@ func runRPCs(t *testing.T, tc *testConfig, cc *rpcConfig) *expectedData {
 	case fullDuplexStreamRPC, cancelRPC:
 		expect.method = "/grpc.testing.TestService/FullDuplexCall"
 		expect.requests, expect.responses, expect.err = te.doFullDuplexCallRoundtrip(cc)
+	default:
+		_ = 0
 	}
 	if cc.success != (expect.err == nil) {
 		t.Fatalf("cc.success: %v, got error: %v", cc.success, expect.err)

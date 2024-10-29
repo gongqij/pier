@@ -73,9 +73,9 @@ type rmPeerHandlerReq struct {
 // useful information about the local peer. A sort of hello.
 //
 // The IDService sends:
-//  * Our IPFS Protocol Version
-//  * Our IPFS Agent Version
-//  * Our public Listen Addresses
+//   - Our IPFS Protocol Version
+//   - Our IPFS Agent Version
+//   - Our public Listen Addresses
 type IDService struct {
 	Host      host.Host
 	UserAgent string
@@ -256,6 +256,8 @@ func (ids *IDService) loop() {
 						log.Debugf("dropping protocol updated message for %s as buffer full", pid.Pretty())
 					}
 				}
+			default:
+				_ = 0
 			}
 
 		case <-ids.ctx.Done():

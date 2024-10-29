@@ -42,6 +42,8 @@ func (xi *ExtensionInfo) initToLegacy() {
 	switch extType.Kind() {
 	case reflect.Bool, reflect.Int32, reflect.Int64, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.String:
 		extType = reflect.PtrTo(extType) // T -> *T for singular scalar fields
+	default:
+		_ = 0
 	}
 
 	// Reconstruct the legacy enum full name.

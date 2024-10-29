@@ -225,6 +225,8 @@ func (mi *MessageInfo) unmarshalExtension(b []byte, num protowire.Number, wtyp p
 			case ValidationInvalid:
 				return out, errDecode
 			case ValidationUnknown:
+			default:
+				_ = 0
 			}
 		}
 	}

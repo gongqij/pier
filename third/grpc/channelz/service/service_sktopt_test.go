@@ -1,3 +1,4 @@
+//go:build linux && (386 || amd64)
 // +build linux
 // +build 386 amd64
 
@@ -119,6 +120,8 @@ func protoToSocketOption(skopts []*channelzpb.SocketOption) *channelz.SocketOpti
 					Advmss:         tcpi.TcpiAdvmss,
 					Reordering:     tcpi.TcpiReordering}
 			}
+		default:
+			_ = 0
 		}
 	}
 	return skdata

@@ -197,6 +197,8 @@ func aberrantLoadMessageDescReentrant(t reflect.Type, name pref.FullName) pref.M
 			switch f.Type.Kind() {
 			case reflect.Bool, reflect.Int32, reflect.Int64, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.String:
 				md.L0.ParentFile = filedesc.SurrogateProto3
+			default:
+				_ = 0
 			}
 			for _, s := range strings.Split(tag, ",") {
 				if s == "proto3" {

@@ -843,7 +843,11 @@ func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
 			witnessScript := witness[len(witness)-1]
 			pops, _ := parseScript(witnessScript)
 			return getSigOpCount(pops, true)
+		default:
+			_ = 0
 		}
+	default:
+		_ = 0
 	}
 
 	return 0

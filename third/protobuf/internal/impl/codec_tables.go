@@ -125,6 +125,8 @@ func fieldCoder(fd pref.FieldDescriptor, ft reflect.Type) (*MessageInfo, pointer
 			return getMessageInfo(ft), makeMessageSliceFieldCoder(fd, ft)
 		case pref.GroupKind:
 			return getMessageInfo(ft), makeGroupSliceFieldCoder(fd, ft)
+		default:
+			_ = 0
 		}
 	case fd.Cardinality() == pref.Repeated && fd.IsPacked():
 		// Packed repeated fields.
@@ -192,6 +194,8 @@ func fieldCoder(fd pref.FieldDescriptor, ft reflect.Type) (*MessageInfo, pointer
 			if ft.Kind() == reflect.Float64 {
 				return nil, coderDoublePackedSlice
 			}
+		default:
+			_ = 0
 		}
 	case fd.Kind() == pref.MessageKind:
 		return getMessageInfo(ft), makeMessageFieldCoder(fd, ft)
@@ -427,6 +431,8 @@ func fieldCoder(fd pref.FieldDescriptor, ft reflect.Type) (*MessageInfo, pointer
 			if ft.Kind() == reflect.Slice && ft.Elem().Kind() == reflect.Uint8 {
 				return nil, coderBytes
 			}
+		default:
+			_ = 0
 		}
 	}
 	panic(fmt.Sprintf("invalid type: no encoder for %v %v %v/%v", fd.FullName(), fd.Cardinality(), fd.Kind(), ft))

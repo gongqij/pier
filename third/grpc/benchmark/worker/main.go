@@ -129,6 +129,8 @@ func (s *workerServer) RunServer(stream testgrpc.WorkerService_RunServerServer) 
 				Port:  int32(bs.port),
 				Cores: int32(bs.cores),
 			}
+		default:
+			_ = 0
 		}
 
 		if err := stream.Send(out); err != nil {
@@ -180,6 +182,8 @@ func (s *workerServer) RunClient(stream testgrpc.WorkerService_RunClientServer) 
 			out = &testpb.ClientStatus{
 				Stats: bc.getStats(t.Mark.Reset_),
 			}
+		default:
+			_ = 0
 		}
 
 		if err := stream.Send(out); err != nil {

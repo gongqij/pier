@@ -175,6 +175,8 @@ func (d decoder) unmarshalMessage(m pref.Message, checkDelims bool) error {
 			if fd == nil {
 				xt, xtErr = d.opts.Resolver.FindExtensionByNumber(messageDesc.FullName(), num)
 			}
+		default:
+			_ = 0
 		}
 
 		if xt != nil {
@@ -399,6 +401,8 @@ func (d decoder) unmarshalList(fd pref.FieldDescriptor, list pref.List) error {
 			}
 			list.Append(pval)
 			return nil
+		default:
+			_ = 0
 		}
 
 	default:

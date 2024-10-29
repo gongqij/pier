@@ -221,6 +221,8 @@ func abigen(c *cli.Context) error {
 			if err != nil {
 				utils.Fatalf("Failed to read contract information from json output: %v", err)
 			}
+		default:
+			_ = 0
 		}
 		// Gather all non-excluded contract for binding
 		for name, contract := range contracts {

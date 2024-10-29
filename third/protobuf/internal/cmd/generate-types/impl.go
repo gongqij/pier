@@ -761,6 +761,8 @@ func (m *{{.}}) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) b
 					return
 				}
 			}
+		default:
+			_ = 0
 		}
 	}
 	m.messageInfo().extensionMap(m.pointer()).Range(f)

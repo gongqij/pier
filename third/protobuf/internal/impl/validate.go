@@ -125,6 +125,8 @@ func newFieldValidationInfo(mi *MessageInfo, si structInfo, fd pref.FieldDescrip
 			if strs.EnforceUTF8(fd) {
 				vi.typ = validationTypeUTF8String
 			}
+		default:
+			_ = 0
 		}
 	default:
 		vi = newValidationInfo(fd, ft)
@@ -170,6 +172,8 @@ func newValidationInfo(fd pref.FieldDescriptor, ft reflect.Type) validationInfo 
 				vi.typ = validationTypeRepeatedFixed32
 			case protowire.Fixed64Type:
 				vi.typ = validationTypeRepeatedFixed64
+			default:
+				_ = 0
 			}
 		}
 	case fd.IsMap():
@@ -179,6 +183,8 @@ func newValidationInfo(fd pref.FieldDescriptor, ft reflect.Type) validationInfo 
 			if strs.EnforceUTF8(fd) {
 				vi.keyType = validationTypeUTF8String
 			}
+		default:
+			_ = 0
 		}
 		switch fd.MapValue().Kind() {
 		case pref.MessageKind:
@@ -190,6 +196,8 @@ func newValidationInfo(fd pref.FieldDescriptor, ft reflect.Type) validationInfo 
 			if strs.EnforceUTF8(fd) {
 				vi.valType = validationTypeUTF8String
 			}
+		default:
+			_ = 0
 		}
 	default:
 		switch fd.Kind() {

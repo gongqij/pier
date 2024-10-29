@@ -238,6 +238,8 @@ func (fs fields) messageDescriptor(name protoreflect.FullName) *descriptorpb.Des
 			s := name.Append(protoreflect.Name(fmt.Sprintf("X%d", n)))
 			f.TypeName = proto.String(string("." + s))
 			m.NestedType = append(m.NestedType, fs[n].sub.messageDescriptor(s))
+		default:
+			_ = 0
 		}
 		m.Field = append(m.Field, f)
 	}

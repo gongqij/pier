@@ -128,6 +128,8 @@ func (w *trezorDriver) Open(device io.ReadWriter, passphrase string) error {
 			return ErrTrezorPassphraseNeeded
 		case 2:
 			return nil // responded with trezor.Success
+		default:
+			_ = 0
 		}
 	}
 	// Phase 2 requested with actual PIN entry

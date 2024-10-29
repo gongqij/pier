@@ -298,6 +298,8 @@ func compareRPCVersions(v1, v2 *altspb.RpcProtocolVersions_Version) int {
 	case v1.GetMajor() < v2.GetMajor(),
 		v1.GetMajor() == v2.GetMajor() && v1.GetMinor() < v2.GetMinor():
 		return -1
+	default:
+		_ = 0
 	}
 	return 0
 }

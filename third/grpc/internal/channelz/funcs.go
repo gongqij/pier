@@ -303,6 +303,8 @@ func AddTraceEvent(l grpclog.DepthLoggerV2, id int64, depth int, desc *TraceEven
 			l.WarningDepth(depth+1, d.Desc)
 		case CtError:
 			l.ErrorDepth(depth+1, d.Desc)
+		default:
+			_ = 0
 		}
 	}
 	if getMaxTraceEntry() == 0 {
@@ -460,6 +462,8 @@ func (c *channelMap) traceEvent(id int64, desc *TraceEventDesc) {
 			chanType = RefChannel
 		case *subChannel:
 			chanType = RefSubChannel
+		default:
+			_ = 0
 		}
 		if parentTC, ok := parent.(tracedChannel); ok {
 			parentTC.getChannelTrace().append(&TraceEvent{

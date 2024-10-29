@@ -71,6 +71,8 @@ func reflectIntType(unsigned bool, size int) reflect.Type {
 			return reflect.TypeOf(uint32(0))
 		case 64:
 			return reflect.TypeOf(uint64(0))
+		default:
+			_ = 0
 		}
 	}
 	switch size {
@@ -82,6 +84,8 @@ func reflectIntType(unsigned bool, size int) reflect.Type {
 		return reflect.TypeOf(int32(0))
 	case 64:
 		return reflect.TypeOf(int64(0))
+	default:
+		_ = 0
 	}
 	return reflect.TypeOf(&big.Int{})
 }

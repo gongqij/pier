@@ -274,6 +274,8 @@ func (opts Options) New(req *pluginpb.CodeGeneratorRequest) (*Plugin, error) {
 				impPath = importPaths[filename]
 			}
 			packageNames[filename] = cleanPackageName(path.Base(string(impPath)))
+		default:
+			_ = 0
 		}
 	}
 
@@ -431,6 +433,8 @@ func newFile(gen *Plugin, p *descriptorpb.FileDescriptorProto, packageName GoPac
 	case pathTypeSourceRelative:
 		// If paths=source_relative, the output filename is derived from
 		// the input filename.
+	default:
+		_ = 0
 	}
 	f.GoDescriptorIdent = GoIdent{
 		GoName:       "File_" + strs.GoSanitized(p.GetName()),

@@ -139,6 +139,8 @@ func newSingularConverter(t reflect.Type, fd pref.FieldDescriptor) Converter {
 		}
 	case pref.MessageKind, pref.GroupKind:
 		return newMessageConverter(t)
+	default:
+		_ = 0
 	}
 	panic(fmt.Sprintf("invalid Go type %v for field %v", t, fd.FullName()))
 }

@@ -53,6 +53,8 @@ func wellKnownTypeMarshaler(name pref.FullName) marshalFunc {
 			return encoder.marshalFieldMask
 		case genid.Empty_message_name:
 			return encoder.marshalEmpty
+		default:
+			_ = 0
 		}
 	}
 	return nil
@@ -91,6 +93,8 @@ func wellKnownTypeUnmarshaler(name pref.FullName) unmarshalFunc {
 			return decoder.unmarshalFieldMask
 		case genid.Empty_message_name:
 			return decoder.unmarshalEmpty
+		default:
+			_ = 0
 		}
 	}
 	return nil
@@ -298,6 +302,8 @@ Loop:
 				return json.Token{}, d.newError(tok.Pos(), `@type field contains empty value`)
 			}
 			typeTok = tok
+		default:
+			_ = 0
 		}
 	}
 
@@ -328,6 +334,8 @@ func (d decoder) skipJSONValue() error {
 				if err := d.skipJSONValue(); err != nil {
 					return err
 				}
+			default:
+				_ = 0
 			}
 		}
 
@@ -348,6 +356,8 @@ func (d decoder) skipJSONValue() error {
 				}
 			}
 		}
+	default:
+		_ = 0
 	}
 	return nil
 }
@@ -396,6 +406,8 @@ func (d decoder) unmarshalAnyValue(unmarshal unmarshalFunc, m pref.Message) erro
 				}
 				return d.newError(tok.Pos(), "unknown field %v", tok.RawString())
 			}
+		default:
+			_ = 0
 		}
 	}
 }

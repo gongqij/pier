@@ -481,6 +481,8 @@ func doDockerImage(cmdline []string) {
 		tags = []string{"latest"}
 	case strings.HasPrefix(env.Tag, "v1."):
 		tags = []string{"stable", fmt.Sprintf("release-1.%d", params.VersionMinor), params.Version}
+	default:
+		_ = 0
 	}
 	// Build the docker images via CLI (don't pull in the `moby` dep to call 3 commands)
 	build.MustRunCommand("docker", "build", "--tag", fmt.Sprintf("%s:TAG", *upload), ".")

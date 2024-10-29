@@ -456,6 +456,8 @@ func PayToAddrScript(addr btcutil.Address) ([]byte, error) {
 				nilAddrErrStr)
 		}
 		return payToWitnessScriptHashScript(addr.ScriptAddress())
+	default:
+		_ = 0
 	}
 
 	str := fmt.Sprintf("unable to generate payment script for unsupported "+
@@ -619,6 +621,8 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (Script
 	case NonStandardTy:
 		// Don't attempt to extract addresses or required signatures for
 		// nonstandard transactions.
+	default:
+		_ = 0
 	}
 
 	return scriptClass, addrs, requiredSigs, nil

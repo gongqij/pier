@@ -152,6 +152,8 @@ func consumeMap(b []byte, mapv reflect.Value, wtyp protowire.Type, mapi *mapInfo
 			}
 			val = v
 			n = o.n
+		default:
+			_ = 0
 		}
 		if err == errUnknown {
 			n = protowire.ConsumeFieldValue(num, wtyp, b)
@@ -216,6 +218,8 @@ func consumeMapOfMessage(b []byte, mapv reflect.Value, wtyp protowire.Type, mapi
 				// an initialized value.
 				out.initialized = true
 			}
+		default:
+			_ = 0
 		}
 		if err == errUnknown {
 			n = protowire.ConsumeFieldValue(num, wtyp, b)

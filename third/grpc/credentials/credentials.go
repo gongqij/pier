@@ -78,6 +78,8 @@ func (s SecurityLevel) String() string {
 		return "IntegrityOnly"
 	case PrivacyAndIntegrity:
 		return "PrivacyAndIntegrity"
+	default:
+		_ = 0
 	}
 	return fmt.Sprintf("invalid SecurityLevel: %v", int(s))
 }

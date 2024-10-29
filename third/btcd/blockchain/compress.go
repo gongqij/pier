@@ -284,6 +284,8 @@ func decodeCompressedScriptSize(serialized []byte) int {
 	case cstPayToPubKeyComp2, cstPayToPubKeyComp3, cstPayToPubKeyUncomp4,
 		cstPayToPubKeyUncomp5:
 		return 33
+	default:
+		_ = 0
 	}
 
 	scriptSize -= numSpecialScripts

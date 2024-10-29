@@ -61,6 +61,8 @@ func (sm StringMatcher) Match(input string) bool {
 		return sm.regexMatch.MatchString(input)
 	case sm.containsMatch != nil:
 		return strings.Contains(input, *sm.containsMatch)
+	default:
+		_ = 0
 	}
 	return false
 }
@@ -139,6 +141,8 @@ func StringMatcherForTesting(exact, prefix, suffix, contains *string, regex *reg
 			*sm.suffixMatch = strings.ToLower(*suffix)
 		case sm.containsMatch != nil:
 			*sm.containsMatch = strings.ToLower(*contains)
+		default:
+			_ = 0
 		}
 	}
 	return sm
@@ -178,6 +182,8 @@ func (sm StringMatcher) Equal(other StringMatcher) bool {
 		return sm.regexMatch.String() == other.regexMatch.String()
 	case sm.containsMatch != nil:
 		return *sm.containsMatch == *other.containsMatch
+	default:
+		_ = 0
 	}
 	return true
 }

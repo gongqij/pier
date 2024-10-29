@@ -256,6 +256,8 @@ func bindBasicTypeGo(kind abi.Type) string {
 		switch parts[2] {
 		case "8", "16", "32", "64":
 			return fmt.Sprintf("%sint%s", parts[1], parts[2])
+		default:
+			_ = 0
 		}
 		return "*big.Int"
 	case abi.FixedBytesTy:
@@ -343,6 +345,8 @@ func pluralizeJavaType(typ string) string {
 		return "Binaries"
 	case "BigInt":
 		return "BigInts"
+	default:
+		_ = 0
 	}
 	return typ + "[]"
 }

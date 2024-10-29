@@ -103,6 +103,8 @@ func (mi *MessageInfo) getPointer(m pref.Message) (p pointer, ok bool) {
 		return m.pointer(), m.messageInfo() == mi
 	case *messageReflectWrapper:
 		return m.pointer(), m.messageInfo() == mi
+	default:
+		_ = 0
 	}
 	return pointer{}, false
 }
