@@ -116,6 +116,8 @@ func checkInputsStandard(tx *btcutil.Tx, utxoView *blockchain.UtxoViewpoint) err
 			str := fmt.Sprintf("transaction input #%d has a "+
 				"non-standard script form", i)
 			return txRuleError(wire.RejectNonstandard, str)
+		default:
+			_ = 0
 		}
 	}
 
@@ -167,6 +169,8 @@ func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) er
 	case txscript.NonStandardTy:
 		return txRuleError(wire.RejectNonstandard,
 			"non-standard script form")
+	default:
+		_ = 0
 	}
 
 	return nil

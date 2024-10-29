@@ -95,16 +95,18 @@ and writes bitcoin messages using a generic interface named Message.  In
 order to determine the actual concrete type of the message, use a type
 switch or type assertion.  An example of a type switch follows:
 
-	// Assumes msg is already a valid concrete message such as one created
-	// via NewMsgVersion or read via ReadMessage.
-	switch msg := msg.(type) {
-	case *wire.MsgVersion:
-		// The message is a pointer to a MsgVersion struct.
-		fmt.Printf("Protocol version: %v", msg.ProtocolVersion)
-	case *wire.MsgBlock:
-		// The message is a pointer to a MsgBlock struct.
-		fmt.Printf("Number of tx in block: %v", msg.Header.TxnCount)
-	}
+		// Assumes msg is already a valid concrete message such as one created
+		// via NewMsgVersion or read via ReadMessage.
+		switch msg := msg.(type) {
+		case *wire.MsgVersion:
+			// The message is a pointer to a MsgVersion struct.
+			fmt.Printf("Protocol version: %v", msg.ProtocolVersion)
+		case *wire.MsgBlock:
+			// The message is a pointer to a MsgBlock struct.
+			fmt.Printf("Number of tx in block: %v", msg.Header.TxnCount)
+	    default:
+			_ = 0
+		}
 
 # Reading Messages
 

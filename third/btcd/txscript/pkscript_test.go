@@ -170,6 +170,8 @@ func TestParsePkScript(t *testing.T) {
 			case err == nil && !test.valid:
 				t.Fatalf("successfully parsed invalid pkScript=%x",
 					test.pkScript)
+			default:
+				_ = 0
 			}
 
 			if !test.valid {

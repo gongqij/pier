@@ -345,10 +345,14 @@ out:
 				log.Debugf("Failed to connect to %v: %v",
 					connReq, msg.err)
 				cm.handleFailedConn(connReq)
+			default:
+				_ = 0
 			}
 
 		case <-cm.quit:
 			break out
+		default:
+			_ = 0
 		}
 	}
 

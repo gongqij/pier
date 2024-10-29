@@ -211,6 +211,8 @@ func validLogLevel(logLevel string) bool {
 		fallthrough
 	case "critical":
 		return true
+	default:
+		_ = 0
 	}
 	return false
 }
@@ -576,6 +578,8 @@ func loadConfig() (*config, []string, error) {
 		relayNonStd = false
 	case cfg.RelayNonStd:
 		relayNonStd = true
+	default:
+		_ = 0
 	}
 	cfg.RelayNonStd = relayNonStd
 
@@ -822,6 +826,8 @@ func loadConfig() (*config, []string, error) {
 		cfg.BlockMaxWeight == defaultBlockMaxWeight:
 
 		cfg.BlockMaxWeight = cfg.BlockMaxSize * blockchain.WitnessScaleFactor
+	default:
+		_ = 0
 	}
 
 	// Look for illegal characters in the user agent comments.

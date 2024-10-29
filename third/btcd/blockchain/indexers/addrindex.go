@@ -573,6 +573,8 @@ func addrToKey(addr btcutil.Address) ([addrKeySize]byte, error) {
 		result[0] = addrKeyTypeWitnessPubKeyHash
 		copy(result[1:], addr.Hash160()[:])
 		return result, nil
+	default:
+		_ = 0
 	}
 
 	return [addrKeySize]byte{}, errUnsupportedAddressType

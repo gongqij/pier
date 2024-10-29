@@ -68,6 +68,8 @@ func reflectTypeToJSONType(xT descLookupFunc, rt reflect.Type) string {
 
 	case reflect.Map:
 		return xT("json-type-object")
+	default:
+		_ = 0
 	}
 
 	return xT("json-type-value")
@@ -242,6 +244,8 @@ func reflectTypeToJSONExample(xT descLookupFunc, rt reflect.Type, indentLevel in
 
 		results = append(results, indent+"}")
 		return results, true
+	default:
+		_ = 0
 	}
 
 	return []string{xT("json-example-unknown")}, false
@@ -375,6 +379,8 @@ func argHelp(xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Value
 					fieldDescKey)
 				args = append(args, resultText)
 			}
+		default:
+			_ = 0
 		}
 	}
 
@@ -452,6 +458,8 @@ func isValidResultType(kind reflect.Kind) bool {
 		reflect.Bool, reflect.Map:
 
 		return true
+	default:
+		_ = 0
 	}
 
 	return false

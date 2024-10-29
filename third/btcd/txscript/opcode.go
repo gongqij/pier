@@ -778,6 +778,8 @@ func (pop *parsedOpcode) print(oneline bool) string {
 		retString += fmt.Sprintf(" 0x%04x", len(pop.data))
 	case -4:
 		retString += fmt.Sprintf(" 0x%08x", len(pop.data))
+	default:
+		_ = 0
 	}
 
 	return fmt.Sprintf("%s 0x%02x", retString, pop.data)
@@ -824,6 +826,8 @@ func (pop *parsedOpcode) bytes() ([]byte, error) {
 				byte((l>>24)&0xff))
 			nbytes = int(binary.LittleEndian.Uint32(retbytes[1:])) +
 				len(retbytes)
+		default:
+			_ = 0
 		}
 	}
 
@@ -914,6 +918,8 @@ func opcodeNop(op *parsedOpcode, vm *Engine) error {
 				"upgrades", op.opcode.value-(OP_NOP1-1))
 			return scriptError(ErrDiscourageUpgradableNOPs, str)
 		}
+	default:
+		_ = 0
 	}
 	return nil
 }
@@ -1047,6 +1053,8 @@ func opcodeElse(op *parsedOpcode, vm *Engine) error {
 	case OpCondSkip:
 		// Value doesn't change in skip since it indicates this opcode
 		// is nested in a non-executed branch.
+	default:
+		_ = 0
 	}
 	return nil
 }

@@ -658,6 +658,8 @@ mempoolLoop:
 			blockWeight += uint32(weightDiff)
 
 			witnessIncluded = true
+		default:
+			_ = 0
 		}
 
 		// Grab any transactions which depend on this one.

@@ -237,6 +237,8 @@ func TestPubKeys(t *testing.T) {
 			pkStr = pk.SerializeCompressed()
 		case pubkeyHybrid:
 			pkStr = pk.SerializeHybrid()
+		default:
+			_ = 0
 		}
 		if !bytes.Equal(test.key, pkStr) {
 			t.Errorf("%s pubkey: serialized keys do not match.",

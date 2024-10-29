@@ -270,6 +270,8 @@ func parseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 
 			pop.data = script[off : off+int(l)]
 			i += 1 - op.length + int(l)
+		default:
+			_ = 0
 		}
 
 		retScript = append(retScript, pop)

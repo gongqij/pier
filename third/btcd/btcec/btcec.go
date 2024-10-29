@@ -449,6 +449,8 @@ func (curve *KoblitzCurve) addJacobian(x1, y1, z1, x2, y2, z2, x3, y3, z3 *field
 	case isZ2One:
 		curve.addZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3)
 		return
+	default:
+		_ = 0
 	}
 
 	// None of the above assumptions are true, so fall back to generic

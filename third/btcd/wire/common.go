@@ -324,6 +324,8 @@ func readElement(r io.Reader, element interface{}) error {
 		}
 		*e = RejectCode(rv)
 		return nil
+	default:
+		_ = 0
 	}
 
 	// Fall back to the slower binary.Read if a fast path was not available
@@ -453,6 +455,8 @@ func writeElement(w io.Writer, element interface{}) error {
 			return err
 		}
 		return nil
+	default:
+		_ = 0
 	}
 
 	// Fall back to the slower binary.Write if a fast path was not available

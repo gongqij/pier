@@ -99,6 +99,8 @@ func invSummary(invList []*wire.InvVect) string {
 			return fmt.Sprintf("witness tx %s", iv.Hash)
 		case wire.InvTypeTx:
 			return fmt.Sprintf("tx %s", iv.Hash)
+		default:
+			_ = 0
 		}
 
 		return fmt.Sprintf("unknown (%d) %s", uint32(iv.Type), iv.Hash)
@@ -220,6 +222,8 @@ func messageSummary(msg wire.Message) string {
 			summary += fmt.Sprintf(", hash %v", msg.Hash)
 		}
 		return summary
+	default:
+		_ = 0
 	}
 
 	// No summary for other messages.

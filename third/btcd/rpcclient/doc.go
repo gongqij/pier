@@ -152,6 +152,8 @@ detect if a command is unimplemented by the remote RPC server:
 	  			// Handle not implemented error
 
 	  		// Handle other specific errors you care about
+		    default:
+			  _ = 0
 			}
 	  	}
 

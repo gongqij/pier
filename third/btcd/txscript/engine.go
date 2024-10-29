@@ -976,6 +976,8 @@ func NewEngine(scriptPubKey []byte, tx *wire.MsgTx, txIdx int, flags ScriptFlags
 					"nested p2sh is not canonical"
 				return nil, scriptError(ErrWitnessMalleatedP2SH, errStr)
 			}
+		default:
+			_ = 0
 		}
 
 		if witProgram != nil {

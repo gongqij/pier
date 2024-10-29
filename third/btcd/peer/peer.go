@@ -1166,6 +1166,8 @@ func (p *Peer) maybeAddDeadline(pendingResponses map[string]time.Time, msgCmd st
 		// headers.
 		deadline = time.Now().Add(stallResponseTimeout * 3)
 		pendingResponses[wire.CmdHeaders] = deadline
+	default:
+		_ = 0
 	}
 }
 
@@ -1718,6 +1720,8 @@ out:
 					p.lastPingTime = time.Now()
 					p.statsMtx.Unlock()
 				}
+			default:
+				_ = 0
 			}
 
 			p.stallControl <- stallControlMsg{sccSendMessage, msg.msg}

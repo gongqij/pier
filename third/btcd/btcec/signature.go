@@ -148,6 +148,8 @@ func parseSig(sigStr []byte, curve elliptic.Curve, der bool) (*Signature, error)
 			return nil, errors.New("signature R is negative")
 		case errExcessivelyPaddedValue:
 			return nil, errors.New("signature R is excessively padded")
+		default:
+			_ = 0
 		}
 	}
 	signature.R = new(big.Int).SetBytes(rBytes)
@@ -174,6 +176,8 @@ func parseSig(sigStr []byte, curve elliptic.Curve, der bool) (*Signature, error)
 			return nil, errors.New("signature S is negative")
 		case errExcessivelyPaddedValue:
 			return nil, errors.New("signature S is excessively padded")
+		default:
+			_ = 0
 		}
 	}
 	signature.S = new(big.Int).SetBytes(sBytes)

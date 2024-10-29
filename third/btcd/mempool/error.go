@@ -102,6 +102,8 @@ func extractRejectCode(err error) (wire.RejectCode, bool) {
 
 	case nil:
 		return wire.RejectInvalid, false
+	default:
+		_ = 0
 	}
 
 	return wire.RejectInvalid, false

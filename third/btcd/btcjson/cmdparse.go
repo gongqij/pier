@@ -169,6 +169,8 @@ func isNumeric(kind reflect.Kind) bool {
 		reflect.Uint64, reflect.Float32, reflect.Float64:
 
 		return true
+	default:
+		_ = 0
 	}
 
 	return false
@@ -211,6 +213,8 @@ func typesMaybeCompatible(dest reflect.Type, src reflect.Type) bool {
 		// structs, and maps via json.Unmarshal.
 		case reflect.Array, reflect.Slice, reflect.Struct, reflect.Map:
 			return true
+		default:
+			_ = 0
 		}
 	}
 
@@ -476,6 +480,8 @@ func assignField(paramNum int, fieldName string, dest reflect.Value, src reflect
 				return makeError(ErrInvalidType, str)
 			}
 			dest.Set(reflect.ValueOf(concreteVal).Elem())
+		default:
+			_ = 0
 		}
 	}
 

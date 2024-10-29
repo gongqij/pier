@@ -86,6 +86,8 @@ func subStructUsage(structType reflect.Type) string {
 
 		case fieldKind == reflect.Array || fieldKind == reflect.Slice:
 			fieldValue = subArrayUsage(rtf.Type, fieldName)
+		default:
+			_ = 0
 		}
 
 		usage := fmt.Sprintf("%q:%s", fieldName, fieldValue)
@@ -117,6 +119,8 @@ func subArrayUsage(arrayType reflect.Type, fieldName string) string {
 
 	case reflect.Struct:
 		return fmt.Sprintf("[%s,...]", subStructUsage(elemType))
+	default:
+		_ = 0
 	}
 
 	// Fall back to simply showing the field name in array syntax.
@@ -164,6 +168,8 @@ func fieldUsage(structField reflect.StructField, defaultVal *reflect.Value) stri
 
 	case reflect.Struct:
 		return subStructUsage(fieldType)
+	default:
+		_ = 0
 	}
 
 	// Simply return the field name when none of the above special cases

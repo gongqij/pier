@@ -285,6 +285,8 @@ func parseExpectedResult(expected string) ([]ErrorCode, error) {
 		return []ErrorCode{ErrWitnessUnexpected}, nil
 	case "WITNESS_PUBKEYTYPE":
 		return []ErrorCode{ErrWitnessPubKeyType}, nil
+	default:
+		_ = 0
 	}
 
 	return nil, fmt.Errorf("unrecognized expected result in test data: %v",

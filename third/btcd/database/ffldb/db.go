@@ -153,6 +153,8 @@ func convertErr(desc string, ldbErr error) database.Error {
 		code = database.ErrTxClosed
 	case ldbErr == leveldb.ErrIterReleased:
 		code = database.ErrTxClosed
+	default:
+		_ = 0
 	}
 
 	return database.Error{ErrorCode: code, Description: desc, Err: ldbErr}

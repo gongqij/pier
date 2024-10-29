@@ -286,6 +286,8 @@ func (c *Client) trackRegisteredNtfns(cmd interface{}) {
 		for _, addr := range bcmd.Addresses {
 			c.ntfnState.notifyReceived[addr] = struct{}{}
 		}
+	default:
+		_ = 0
 	}
 }
 

@@ -321,6 +321,8 @@ func (sm *SyncManager) startSync() {
 
 	case len(equalPeers) > 0:
 		bestPeer = equalPeers[rand.Intn(len(equalPeers))]
+	default:
+		_ = 0
 	}
 
 	// Start syncing from the best peer if one was selected.
@@ -1041,6 +1043,8 @@ func (sm *SyncManager) handleNotFoundMsg(nfmsg *notFoundMsg) {
 				delete(state.requestedTxns, inv.Hash)
 				delete(sm.requestedTxns, inv.Hash)
 			}
+		default:
+			_ = 0
 		}
 	}
 }
@@ -1089,6 +1093,8 @@ func (sm *SyncManager) haveInventory(invVect *wire.InvVect) (bool, error) {
 		}
 
 		return false, nil
+	default:
+		_ = 0
 	}
 
 	// The requested inventory is is an unsupported type, so just claim

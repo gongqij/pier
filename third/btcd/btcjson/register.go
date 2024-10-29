@@ -119,6 +119,8 @@ func isAcceptableKind(kind reflect.Kind) bool {
 		fallthrough
 	case reflect.Interface:
 		return false
+	default:
+		_ = 0
 	}
 
 	return true
