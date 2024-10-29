@@ -96,6 +96,8 @@ func convertRPCName(in string) string {
 		return testpb.ClientConfigureRequest_UNARY_CALL.String()
 	case emptyCall:
 		return testpb.ClientConfigureRequest_EMPTY_CALL.String()
+	default:
+		_ = 0
 	}
 	logger.Warningf("unrecognized rpc type: %s", in)
 	return in
@@ -336,7 +338,8 @@ type rpcConfig struct {
 }
 
 // parseRPCMetadata turns EmptyCall:key1:value1 into
-//   {typ: emptyCall, md: {key1:value1}}.
+//
+//	{typ: emptyCall, md: {key1:value1}}.
 func parseRPCMetadata(rpcMetadataStr string, rpcs []string) []*rpcConfig {
 	rpcMetadataSplit := strings.Split(rpcMetadataStr, ",")
 	rpcsToMD := make(map[string][]string)
@@ -424,6 +427,8 @@ func makeOneRPC(c testgrpc.TestServiceClient, cfg *rpcConfig) (*peer.Peer, *rpcI
 		}
 	case emptyCall:
 		_, err = c.EmptyCall(ctx, &testpb.Empty{}, grpc.Peer(&p), grpc.Header(&header))
+	default:
+		_ = 0
 	}
 	accStats.finishRPC(cfg.typ, err)
 	if err != nil {

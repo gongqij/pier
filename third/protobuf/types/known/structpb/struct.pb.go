@@ -425,6 +425,8 @@ func (x *Value) AsInterface() interface{} {
 		if v != nil {
 			return v.ListValue.AsSlice()
 		}
+	default:
+		_ = 0
 	}
 	return nil
 }

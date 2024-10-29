@@ -872,6 +872,8 @@ func testServerStats(t *testing.T, tc *testConfig, cc *rpcConfig, checkFuncs []f
 	case fullDuplexStreamRPC:
 		method = "/grpc.testing.TestService/FullDuplexCall"
 		reqs, resps, err = te.doFullDuplexCallRoundtrip(cc)
+	default:
+		_ = 0
 	}
 	if cc.success != (err == nil) {
 		t.Fatalf("cc.success: %v, got error: %v", cc.success, err)
@@ -1162,6 +1164,8 @@ func testClientStats(t *testing.T, tc *testConfig, cc *rpcConfig, checkFuncs map
 	case fullDuplexStreamRPC:
 		method = "/grpc.testing.TestService/FullDuplexCall"
 		reqs, resps, err = te.doFullDuplexCallRoundtrip(cc)
+	default:
+		_ = 0
 	}
 	if cc.success != (err == nil) {
 		t.Fatalf("cc.success: %v, got error: %v", cc.success, err)

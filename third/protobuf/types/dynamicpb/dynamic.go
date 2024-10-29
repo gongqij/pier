@@ -515,6 +515,8 @@ func isSet(fd pref.FieldDescriptor, v pref.Value) bool {
 		default:
 			_ = 0
 		}
+	default:
+		_ = 0
 	}
 	return true
 }
