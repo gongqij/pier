@@ -183,7 +183,9 @@ require (
 replace (
 	github.com/btcsuite/btcd => ./third/btcd
 	github.com/ethereum/go-ethereum => ./third/go-ethereum
+	github.com/graph-gophers/graphql-go => github.com/graph-gophers/graphql-go v1.3.0
 	github.com/hyperledger/fabric => github.com/hyperledger/fabric v2.0.1+incompatible
+	github.com/influxdata/influxdb => github.com/influxdata/influxdb v1.8.9
 	github.com/libp2p/go-libp2p => ./third/go-libp2p
 	github.com/libp2p/go-libp2p-core => github.com/libp2p/go-libp2p-core v0.5.6
 	github.com/meshplus/go-lightp2p => ./third/lightp2p
