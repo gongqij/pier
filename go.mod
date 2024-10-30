@@ -54,7 +54,6 @@ require (
 	github.com/gobuffalo/logger v1.0.6 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gopacket v1.1.17 // indirect
 	github.com/gorilla/websocket v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
@@ -64,7 +63,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
 	github.com/huin/goupnp v1.0.1-0.20210310174557-0ca763054c88 // indirect
-	github.com/hyperledger/fabric v2.1.1+incompatible // indirect
+	github.com/hyperledger/fabric v2.5.10+incompatible // indirect
 	github.com/hyperledger/fabric-amcl v0.0.0-20210603140002-2670f91851c8 // indirect
 	github.com/hyperledger/fabric-protos-go v0.0.0-20201028172056-a3136dde2354 // indirect
 	github.com/iancoleman/orderedmap v0.2.0 // indirect
@@ -126,7 +125,7 @@ require (
 	github.com/markbates/safe v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.11 // indirect
-	github.com/miekg/pkcs11 v1.0.3 // indirect
+	github.com/miekg/pkcs11 v1.1.1 // indirect
 	github.com/minio/blake2b-simd v0.0.0-20160723061019-3f5f724cb5b1 // indirect
 	github.com/minio/sha256-simd v0.1.1 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
@@ -165,8 +164,8 @@ require (
 	github.com/whyrusleeping/multiaddr-filter v0.0.0-20160516205228-e903e4adabd7 // indirect
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.17.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
@@ -184,7 +183,7 @@ replace (
 	github.com/btcsuite/btcd => ./third/btcd
 	github.com/ethereum/go-ethereum => ./third/go-ethereum
 	github.com/graph-gophers/graphql-go => github.com/graph-gophers/graphql-go v1.3.0
-	github.com/hyperledger/fabric => github.com/hyperledger/fabric v2.0.1+incompatible
+	github.com/hyperledger/fabric => ./third/fabric
 	github.com/influxdata/influxdb => github.com/influxdata/influxdb v1.8.9
 	github.com/libp2p/go-libp2p => ./third/go-libp2p
 	github.com/libp2p/go-libp2p-core => github.com/libp2p/go-libp2p-core v0.5.6
