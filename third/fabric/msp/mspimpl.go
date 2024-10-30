@@ -663,7 +663,11 @@ func (msp *bccspmsp) satisfiesPrincipalInternalV142(id Identity, principal *m.MS
 				return errors.Wrapf(err, "The identity is not a [%s] under this MSP [%s]", m.MSPRole_MSPRoleType_name[int32(mspRole.Role)], msp.name)
 			}
 			return nil
+		default:
+			_ = 0
 		}
+	default:
+		_ = 0
 	}
 
 	// Use the v1.3 function to check other principal types

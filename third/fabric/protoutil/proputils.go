@@ -346,6 +346,8 @@ func createProposalFromCDS(channelID string, msg proto.Message, creator []byte, 
 		ccinp = &peer.ChaincodeInput{Args: Args}
 	case "install":
 		ccinp = &peer.ChaincodeInput{Args: [][]byte{[]byte(propType), b}}
+	default:
+		_ = 0
 	}
 
 	// wrap the deployment in an invocation spec to lscc...

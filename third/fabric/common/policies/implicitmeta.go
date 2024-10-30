@@ -50,6 +50,8 @@ func NewImplicitMetaPolicy(data []byte, managers map[string]*ManagerImpl) (*Impl
 		threshold = len(subPolicies)
 	case cb.ImplicitMetaPolicy_MAJORITY:
 		threshold = len(subPolicies)/2 + 1
+	default:
+		_ = 0
 	}
 
 	// In the special case that there are no policies, consider 0 to be a majority or any
