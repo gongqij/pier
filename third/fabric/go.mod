@@ -1,6 +1,8 @@
 module github.com/hyperledger/fabric
 
-go 1.15
+go 1.21
+
+toolchain go1.21.13
 
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
